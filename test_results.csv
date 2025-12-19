@@ -1,0 +1,12 @@
+Status,Question
+PASS,What is the total spend across all campaigns?
+PASS,Which campaign had the highest ROAS?
+PASS,Show me the top 5 campaigns by conversions
+PASS,Compare campaign performance between the last 2 weeks vs. the previous 2 weeks
+PASS,Show me the week-over-week trend for conversions over the last 2 months
+PASS,How did our CTR in the last month compare to the month before?
+PASS,Identify performance anomalies in the last 2 months using statistical outliers
+PASS,Identify top 20% of campaigns driving 80% of results (Pareto analysis)
+PASS,Calculate performance volatility (CPA standard deviation) for each campaign
+WARN,What's the underlying story behind our campaign performance in the last 2 months?
+WARN,How should we reallocate our budget next month to maximize conversions?

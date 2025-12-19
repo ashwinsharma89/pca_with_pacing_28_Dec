@@ -1,0 +1,112 @@
+question_id,question,category,difficulty,success,execution_time,sql_generated,error
+1,What is the total spend across all campaigns?,basic_aggregation,easy,True,7.493679761886597,SELECT SUM(Spend) AS Total_Spend FROM linkedin_campaigns;,
+2,Which job function has the highest conversion rate?,demographic_analysis,medium,True,7.308847427368164,"SELECT Job_Function, AVG(Conversion_Rate) as Average_Conversion_Rate
+FROM linkedin_campaigns
+GROUP BY Job_Function
+ORDER BY Average_Conversion_Rate DESC
+LIMIT 1;",
+3,Show average CPC by seniority level,dimensional_analysis,easy,True,9.154722452163696,"SELECT Seniority, AVG(CPC) as Average_CPC
+FROM linkedin_campaigns
+GROUP BY Seniority",
+4,Compare performance across industries by ROAS,comparative_analysis,medium,True,7.396304130554199,"SELECT Industry, AVG(ROAS) as Average_ROAS
+FROM linkedin_campaigns
+GROUP BY Industry;",
+5,Which campaign group generates the most leads?,performance_ranking,easy,True,5.424655914306641,"SELECT Campaign_Group, SUM(Leads) as Total_Leads
+FROM linkedin_campaigns
+GROUP BY Campaign_Group
+ORDER BY Total_Leads DESC
+LIMIT 1;",
+6,What is the lead form completion rate by ad format?,efficiency_metrics,medium,True,6.5545494556427,"SELECT Ad_Format, AVG(Lead_Form_Completion_Rate) as Average_Lead_Form_Completion_Rate
+FROM linkedin_campaigns
+GROUP BY Ad_Format",
+7,Show top 5 campaigns by total revenue,performance_ranking,easy,True,10.138046503067017,"SELECT Campaign_Name, SUM(Revenue) as Total_Revenue
+FROM linkedin_campaigns
+GROUP BY Campaign_Name
+ORDER BY Total_Revenue DESC
+LIMIT 5",
+8,Which company size segment has the best ROAS?,demographic_analysis,medium,True,6.962779760360718,"SELECT Company_Size, AVG(ROAS) as Average_ROAS
+FROM linkedin_campaigns
+GROUP BY Company_Size
+ORDER BY Average_ROAS DESC
+LIMIT 1;",
+9,What is the cost per lead by job function?,efficiency_metrics,medium,False,4.094380617141724,,"Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4 in organization org-voYyxsXqwkJ7iAkDEN0DXNxP on tokens per min (TPM): Limit 10000, Used 9882, Requested 131. Please try again in 78ms. Visit https://platform.openai.com/account/rate-limits to learn more.', 'type': 'tokens', 'param': None, 'code': 'rate_limit_exceeded'}}"
+10,Show daily leads trend for the last 30 days,time_series,medium,True,6.458241701126099,"SELECT Date, SUM(Leads) as Daily_Leads
+FROM linkedin_campaigns
+WHERE CAST(Date AS DATE) >= DATE_TRUNC('DAY', CURRENT_DATE - INTERVAL '30' DAY)
+GROUP BY Date
+ORDER BY Date ASC",
+11,Compare Sponsored Content vs Video ads by CTR,comparative_analysis,medium,True,9.042404651641846,"SELECT Ad_Format, AVG(CTR) as Average_CTR
+FROM linkedin_campaigns
+WHERE Ad_Format IN ('Sponsored_Content', 'Video')
+GROUP BY Ad_Format",
+12,Which seniority level has the highest engagement rate?,demographic_analysis,medium,True,5.824313402175903,"SELECT Seniority, AVG(Engagement_Rate) as Average_Engagement_Rate
+FROM linkedin_campaigns
+GROUP BY Seniority
+ORDER BY Average_Engagement_Rate DESC
+LIMIT 1;",
+13,What is the total number of conversions by objective?,dimensional_analysis,easy,True,8.774775505065918,"SELECT Objective, SUM(Conversions) as Total_Conversions
+FROM linkedin_campaigns
+GROUP BY Objective;",
+14,Show campaigns with ROAS greater than 5,performance_filtering,easy,True,15.666955947875977,SELECT * FROM linkedin_campaigns WHERE ROAS > 5;,
+15,Compare mobile vs desktop performance by conversion rate,comparative_analysis,medium,True,4.094977855682373,"SELECT Device, AVG(Conversion_Rate) AS Avg_Conversion_Rate
+FROM linkedin_campaigns
+GROUP BY Device;",
+16,Which ad format has the lowest cost per conversion?,efficiency_metrics,medium,True,6.582651376724243,"SELECT Ad_Format, MIN(Spend/Conversions) AS Cost_Per_Conversion
+FROM linkedin_campaigns
+WHERE Conversions > 0
+GROUP BY Ad_Format
+ORDER BY Cost_Per_Conversion ASC
+LIMIT 1;",
+17,Show weekly spend trend,time_series,medium,True,11.543869495391846,"SELECT DATE_TRUNC('week', CAST(Date AS DATE)) AS Week, SUM(Spend) AS Weekly_Spend
+FROM linkedin_campaigns
+GROUP BY Week
+ORDER BY Week;",
+18,What is the average CTR by industry?,dimensional_analysis,easy,True,4.506448745727539,"SELECT Industry, AVG(CTR) as Average_CTR
+FROM linkedin_campaigns
+GROUP BY Industry",
+19,Which campaigns target C-Level executives?,performance_filtering,easy,True,10.135152578353882,"SELECT DISTINCT Campaign_Name 
+FROM linkedin_campaigns 
+WHERE Seniority LIKE '%C-Level%';",
+20,Show total impressions by job function and seniority,dimensional_analysis,medium,True,9.718862771987915,"SELECT Job_Function, Seniority, SUM(Impressions) as Total_Impressions
+FROM linkedin_campaigns
+GROUP BY Job_Function, Seniority",
+21,What is the lead generation efficiency by company size?,efficiency_metrics,medium,True,4.91599440574646,"SELECT Company_Size, SUM(Leads) / SUM(Spend) AS Lead_Generation_Efficiency
+FROM linkedin_campaigns
+WHERE Objective = 'Lead_Generation'
+GROUP BY Company_Size;",
+22,Compare IT vs Marketing job functions by ROAS,comparative_analysis,medium,True,6.604172468185425,"SELECT Job_Function, AVG(ROAS) as Average_ROAS
+FROM linkedin_campaigns
+WHERE Job_Function IN ('IT', 'Marketing')
+GROUP BY Job_Function;",
+23,Which campaigns have CTR above 3%?,performance_filtering,easy,True,8.036707878112793,"SELECT Campaign_Name 
+FROM linkedin_campaigns 
+WHERE CTR > 3;",
+24,Show month-over-month revenue growth,time_series,hard,True,12.800320625305176,"SELECT 
+    DATE_TRUNC('MONTH', CAST(Date AS DATE)) AS Month, 
+    SUM(Revenue) AS Monthly_Revenue, 
+    (SUM(Revenue) - LAG(SUM(Revenue)) OVER (ORDER BY DATE_TRUNC('MONTH', CAST(Date AS DATE)))) / LAG(SUM(Revenue)) OVER (ORDER BY DATE_TRUNC('MONTH', CAST(Date AS DATE))) * 100 AS Revenue_Growth_Percentage
+FROM 
+    linkedin_campaigns
+GROUP BY 
+    DATE_TRUNC('MONTH', CAST(Date AS DATE))
+ORDER BY 
+    DATE_TRUNC('MONTH', CAST(Date AS DATE));",
+25,What is the average engagement rate by ad format?,dimensional_analysis,medium,True,4.505719423294067,"SELECT Ad_Format, AVG(Engagement_Rate) as Average_Engagement_Rate
+FROM linkedin_campaigns
+GROUP BY Ad_Format;",
+26,Which objective drives the most conversions?,performance_ranking,easy,True,4.811003923416138,"SELECT Objective, SUM(Conversions) as Total_Conversions
+FROM linkedin_campaigns
+GROUP BY Objective
+ORDER BY Total_Conversions DESC
+LIMIT 1;",
+27,Show campaigns targeting Technology industry with ROAS > 5,performance_filtering,medium,True,15.898647546768188,SELECT * FROM linkedin_campaigns WHERE Industry = 'Technology' AND ROAS > 5,
+28,What is the total clicks by device?,dimensional_analysis,easy,True,3.1493539810180664,"SELECT Device, SUM(Clicks) as Total_Clicks
+FROM linkedin_campaigns
+GROUP BY Device;",
+29,Compare Director vs VP level by conversion rate,comparative_analysis,medium,True,6.4505698680877686,"SELECT Seniority, AVG(Conversion_Rate) AS Average_Conversion_Rate
+FROM linkedin_campaigns
+WHERE Seniority IN ('Director', 'VP')
+GROUP BY Seniority;",
+30,"Which campaigns have spend exceeding $30,000?",performance_filtering,easy,True,9.209796667098999,"SELECT Campaign_Name 
+FROM linkedin_campaigns 
+WHERE Spend > 30000;",

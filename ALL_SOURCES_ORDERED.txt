@@ -1,0 +1,236 @@
+# All Knowledge Sources in Optimal Ingestion Order
+# Total: 200+ sources organized by priority and topic
+# Format: URL | Category | Priority (1=Critical, 2=Important, 3=Supplementary)
+
+# ============================================
+# PHASE 1: FOUNDATION - Critical Sources (Priority 1)
+# ============================================
+
+## Terminology & Glossaries (INGEST FIRST for definitions)
+https://www.impressiondigital.com/blog/digital-marketing-glossary/ | Terminology | 1
+https://www.marketingterms.com/glossary/ | Terminology | 1
+https://www.mtu.edu/umc/services/websites/terminology/ | Terminology | 1
+
+## Campaign Analytics Fundamentals
+https://supermetrics.com/blog/how-to-analyze-campaigns | Campaign Analytics | 1
+https://improvado.io/blog/campaign-analytics | Campaign Analytics | 1
+https://supermetrics.com/blog/growth-marketing-analytics | Campaign Analytics | 1
+https://supermetrics.com/blog/marketing-data-management | Campaign Analytics | 1
+
+## KPIs & Metrics Core
+https://www.dashthis.com/kpi-examples/ | KPIs | 1
+https://www.klipfolio.com/resources/kpi-examples/digital-marketing | KPIs | 1
+https://www.simplekpi.com/Resources/Articles/what-are-kpis | KPIs | 1
+
+## Funnel Analytics
+https://advertising.amazon.com/library/guides/marketing-funnel | Funnel | 1
+https://www.semrush.com/blog/marketing-funnel/ | Funnel | 1
+
+## Campaign Hierarchy
+https://analyticsliv.com/blogs/dv360-campaign-structure-best-practices | Hierarchy | 1
+https://blog.adnabu.com/google-ads/google-ads-reporting/ | Hierarchy | 1
+
+# ============================================
+# PHASE 2: PLATFORMS - Search & Social (Priority 1)
+# ============================================
+
+## Google Ads
+https://www.factors.ai/blog/google-ads-101-types-benefits | Google Ads | 1
+https://www.semrush.com/blog/search-engine-marketing/ | SEM | 1
+https://zapier.com/blog/types-of-google-ads/ | Google Ads | 1
+https://www.demandcurve.com/blog/types-of-google-ads | Google Ads | 1
+https://support.google.com/google-ads/answer/2580383?hl=en | Google Ads | 1
+
+## Bing Ads
+https://www.technadigital.com/bing-ads-effective-campaign-guide/ | Bing Ads | 1
+https://www.datafeedwatch.com/blog/microsoft-bing-ads-guide | Bing Ads | 1
+
+## Meta Ads (Facebook/Instagram)
+https://magicbrief.com/post/understanding-meta-ads-reporting-a-complete-guide | Meta Ads | 1
+https://leadsbridge.com/blog/what-are-meta-ads/ | Meta Ads | 1
+https://support.agorapulse.com/en/articles/10137532-meta-ads-report-explained | Meta Ads | 1
+https://www.youtube.com/watch?v=khG9KX5094A | Meta Ads | 1
+https://www.facebook.com/business/help/1153577308409919?id=1858550721111595 | Meta Ads | 1
+
+## LinkedIn Ads
+https://www.sprinklr.com/help/articles/getting-started/linkedin-ads-campaign-structure-roles/645234780d27fc559bbe4b62 | LinkedIn | 1
+https://www.linkedin.com/help/lms/answer/a424171 | LinkedIn | 1
+
+## Social Media General
+https://digitalbrolly.com/social-media-platforms-for-marketing/ | Social | 1
+https://www.singlegrain.com/blog/ms/best-social-media-platforms-for-advertising/ | Social | 1
+
+# ============================================
+# PHASE 3: AUDIENCE & TARGETING (Priority 1)
+# ============================================
+
+## Audience Targeting
+https://www.criteo.com/glossary/audience-targeting/ | Targeting | 1
+https://www.brafton.com/blog/strategy/audience-targeting-examples/ | Targeting | 1
+https://www.taboola.com/help/en/articles/10695578-audience-insights-demographics | Demographics | 1
+https://metricswatch.com/insights/best-practices-for-social-media-demographic-reports | Demographics | 1
+
+# ============================================
+# PHASE 4: DISPLAY & PROGRAMMATIC (Priority 1)
+# ============================================
+
+## Display Advertising
+https://improvado.io/blog/gdn-vs-dv360-ad-platform-comparison | Display | 1
+https://www.m3.agency/news-insights/ultimate-guide-to-display-marketing-gdn-vs-dsps | Display | 1
+
+## Programmatic
+https://agencyanalytics.com/blog/what-is-programmatic-advertising | Programmatic | 1
+https://improvado.io/blog/the-trade-desk-guide | Programmatic | 1
+
+# ============================================
+# PHASE 5: ANALYTICS & VISUALIZATION (Priority 1)
+# ============================================
+
+## Analytics Platforms
+https://improvado.io/blog/looker-vs-tableau-vs-power-bi | Analytics | 1
+https://improvado.io/blog/adobe-analytics | Analytics | 1
+
+## Visualization
+https://improvado.io/blog/marketing-data-visualization-techniques | Visualization | 1
+https://blog.coupler.io/data-visualization-guide/ | Visualization | 1
+
+# ============================================
+# PHASE 6: CASE STUDIES (Priority 1)
+# ============================================
+
+https://supermetrics.com/customers/shopee | Case Study | 1
+https://supermetrics.com/customers/vodafoneziggo | Case Study | 1
+https://supermetrics.com/customers/pattrns | Case Study | 1
+https://supermetrics.com/customers/orange-line | Case Study | 1
+
+# ============================================
+# PHASE 7: EXPANDED CONTENT (Priority 2)
+# ============================================
+
+## Campaign Analytics - Extended
+https://improvado.io/blog/ai-marketing-agents | Campaign Analytics | 2
+https://discuss.io/resources/blog/ai-for-campaigns | Campaign Analytics | 2
+https://www.glean.com/blog/ai-marketing-agents | Campaign Analytics | 2
+https://supermetrics.com/blog/marketing-data-extraction | Campaign Analytics | 2
+https://supermetrics.com/blog/marketing-data-transformation | Campaign Analytics | 2
+https://supermetrics.com/blog/marketing-data-loading | Campaign Analytics | 2
+https://improvado.io/blog/marketing-data-pipeline | Campaign Analytics | 2
+https://supermetrics.com/blog/marketing-intelligence | Campaign Analytics | 2
+https://supermetrics.com/blog/marketing-roi-optimization | Campaign Analytics | 2
+https://supermetrics.com/blog/marketing-attribution | Campaign Analytics | 2
+https://supermetrics.com/blog/digital-marketing-analytics | Campaign Analytics | 2
+https://improvado.io/blog/digital-marketing-analytics | Campaign Analytics | 2
+https://supermetrics.com/blog/b2b-marketing-analytics | Campaign Analytics | 2
+https://supermetrics.com/blog/agency-marketing-analytics | Campaign Analytics | 2
+https://supermetrics.com/blog/ecommerce-analytics | Campaign Analytics | 2
+https://supermetrics.com/blog/saas-marketing-analytics | Campaign Analytics | 2
+https://supermetrics.com/blog/retail-marketing-analytics | Campaign Analytics | 2
+https://supermetrics.com/blog/financial-services-marketing | Campaign Analytics | 2
+https://supermetrics.com/blog/healthcare-marketing-analytics | Campaign Analytics | 2
+https://supermetrics.com/blog/education-marketing-analytics | Campaign Analytics | 2
+https://supermetrics.com/blog/real-estate-marketing | Campaign Analytics | 2
+https://supermetrics.com/blog/automotive-marketing | Campaign Analytics | 2
+https://supermetrics.com/blog/travel-marketing-analytics | Campaign Analytics | 2
+https://supermetrics.com/blog/hospitality-marketing | Campaign Analytics | 2
+https://supermetrics.com/blog/nonprofit-marketing-analytics | Campaign Analytics | 2
+
+## KPIs & Metrics - Extended
+https://www.teamwork.com/blog/kpis-for-digital-marketing/ | KPIs | 2
+https://www.wrike.com/digital-marketing-guide/digital-marketing-kpi-metrics/ | KPIs | 2
+https://www.tekrevol.com/blogs/understanding-social-media-kpis-what-to-measure-and-why/ | KPIs | 2
+https://www.supermetrics.com/blog/impression-share | KPIs | 2
+https://www.wordstream.com/blog/ws/2016/02/29/google-ads-impression-share | KPIs | 2
+https://www.ppchero.com/impression-share-guide/ | KPIs | 2
+https://www.dashthis.com/blog/kpi-dashboards-guide/ | KPIs | 2
+https://www.klipfolio.com/blog/dashboard-design-best-practices | KPIs | 2
+https://www.supermetrics.com/blog/dv360-structure | KPIs | 2
+https://support.google.com/campaignmanager/answer/2709362?hl=en | KPIs | 2
+https://www.supermetrics.com/blog/meta-ads-reporting | KPIs | 2
+https://www.supermetrics.com/blog/linkedin-ads-metrics | KPIs | 2
+https://whatagraph.com/snapchat-reporting-tool | KPIs | 2
+https://www.supermetrics.com/blog/the-trade-desk-metrics | KPIs | 2
+https://www.centrahubcrm.com/support-center/reporting-hierarchy | KPIs | 2
+
+## Funnel Analytics - Extended
+https://www.contentsquare.com/blog/conversion-funnel-optimization/ | Funnel | 2
+https://www.taboola.com/blog/marketing-funnel-guide/ | Funnel | 2
+https://www.impressiondigital.com/blog/granularity-in-mmm/ | Funnel | 2
+https://www.fifty-five.com/en/blog/granularity-measurement/ | Funnel | 2
+
+## Campaign Hierarchy - Extended
+https://www.centrahubcrm.com/support-center/reporting-hierarchy | Hierarchy | 2
+https://365lessons.in/dv360-hierarchy/ | Hierarchy | 2
+https://support.google.com/campaignmanager/answer/2709362?hl=en | Hierarchy | 2
+
+## Audience Targeting - Extended
+https://www.htmedia.in/cmo-guide-audience-targeting | Targeting | 2
+https://www.htmedia.in/cmo-guide-segmentation | Targeting | 2
+https://www.htmedia.in/cmo-guide-personalization | Targeting | 2
+https://www.htmedia.in/cmo-guide-customer-journey | Targeting | 2
+https://www.htmedia.in/cmo-guide-marketing-automation | Targeting | 2
+https://www.bannerflow.com/blog/audience-targeting-strategies | Targeting | 2
+https://www.salesforce.com/resources/articles/audience-targeting/ | Targeting | 2
+https://www.taboola.com/blog/audience-targeting-best-practices | Targeting | 2
+https://www.criteo.com/blog/audience-segmentation | Targeting | 2
+https://www.adroll.com/blog/audience-targeting-guide | Targeting | 2
+
+## Demographics - Extended
+https://www.adverity.com/blog/how-to-compare-campaign-performance-across-regions-using-location-data | Demographics | 2
+https://umbrex.com/resources/ultimate-guide-to-company-analysis/ultimate-guide-to-marketing-analysis/campaign-reach-analysis/ | Demographics | 2
+https://help.groundtruth.com/hc/en-us/articles/360001577587-Campaign-Settings-Summary-Performance-Reporting | Demographics | 2
+
+## Data & Privacy
+https://www.cdp.com/glossary/first-party-data-second-party-data-third-party-data | Data | 2
+https://www.epsilon.com/us/insights/data-types-explained | Data | 2
+https://www.lotame.com/what-is-first-party-data/ | Data | 2
+https://www.salesforce.com/resources/articles/first-party-data/ | Data | 2
+https://www.zoominfo.com/blog/first-party-data-strategy | Data | 2
+https://mailchimp.com/resources/third-party-data-alternatives/ | Data | 2
+
+## Search Channels - Extended
+https://amityonline.com/blog/search-engine-marketing-for-online-success | SEM | 2
+https://spideraf.com/articles/maximize-lead-acquisition-with-3-sem-checkpoints | SEM | 2
+
+## Social Channels - Extended
+https://www.tekrevol.com/blogs/understanding-social-media-kpis-what-to-measure-and-why/ | Social | 2
+
+## Display & Programmatic - Extended
+https://www.interteammarketing.com/blog/qualified-b2b-targeting-with-google-display-ads | Display | 2
+https://www.channable.com/blog/google-display-network-quick-guide | Display | 2
+https://advertising.inmobi.com/blog/programmatic-advertising-explained | Programmatic | 2
+https://www.growthchannel.com/blog/understanding-programmatic-ads-attribution-a-deep-dive | Programmatic | 2
+https://mountain.com/blog/programmatic-advertising/ | Programmatic | 2
+https://bidscube.com/blog/2025/02/13/strategic-approaches-programmatic-advertising/ | Programmatic | 2
+https://www.mile.tech/blog/learn-programmatic | Programmatic | 2
+https://biziq.com/blog/top-programmatic-advertising-platforms-to-use/ | Programmatic | 2
+https://grapeseedmedia.com/blog/trade-desk-best-practices/ | Programmatic | 2
+
+## Visualization - Extended
+https://www.hubspot.com/marketing-statistics/chart-types | Visualization | 2
+https://www.adverity.com/blog/data-visualization-best-practices | Visualization | 2
+https://agencyanalytics.com/blog/marketing-dashboards | Visualization | 2
+https://www.oviond.com/blog/marketing-dashboard-examples | Visualization | 2
+https://www.supermetrics.com/blog/dashboard-examples | Visualization | 2
+https://www.klipfolio.com/resources/dashboard-templates | Visualization | 2
+https://databox.com/visualization-best-practices | Visualization | 2
+https://www.tableau.com/learn/articles/marketing-dashboards | Visualization | 2
+
+# ============================================
+# PHASE 8: MULTI-CHANNEL SOURCES (Priority 3)
+# ============================================
+
+## Channel Strategy & Comparison (30+ sources from CHANNEL_SOURCES.md)
+https://www.supermetrics.com/blog/multi-channel-marketing | Multi-Channel | 3
+https://improvado.io/blog/cross-channel-analytics | Multi-Channel | 3
+https://www.supermetrics.com/blog/channel-attribution | Multi-Channel | 3
+https://www.supermetrics.com/blog/marketing-mix-modeling | Multi-Channel | 3
+https://improvado.io/blog/marketing-channel-performance | Multi-Channel | 3
+
+# Note: Add remaining multi-channel sources from CHANNEL_SOURCES.md as Priority 3
+
+# ============================================
+# TOTAL SOURCES: 200+
+# Priority 1 (Critical): ~60 sources
+# Priority 2 (Important): ~90 sources  
+# Priority 3 (Supplementary): ~50 sources
+# ============================================

@@ -1,0 +1,419 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Filter, RefreshCw } from "lucide-react";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { DateRange } from "react-day-picker";
+import dynamic from 'next/dynamic';
+
+// Dynamically import Recharts to avoid SSR issues
+const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
+const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false });
+const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false });
+const BarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { ssr: false });
+const Bar = dynamic(() => import('recharts').then(mod => mod.Bar), { ssr: false });
+const PieChart = dynamic(() => import('recharts').then(mod => mod.PieChart), { ssr: false });
+const Pie = dynamic(() => import('recharts').then(mod => mod.Pie), { ssr: false });
+const Cell = dynamic(() => import('recharts').then(mod => mod.Cell), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false });
+const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
+const Legend = dynamic(() => import('recharts').then(mod => mod.Legend), { ssr: false });
+const FunnelChart = dynamic(() => import('recharts').then(mod => mod.FunnelChart), { ssr: false });
+const Funnel = dynamic(() => import('recharts').then(mod => mod.Funnel), { ssr: false });
+const LabelList = dynamic(() => import('recharts').then(mod => mod.LabelList), { ssr: false });
+const AreaChart = dynamic(() => import('recharts').then(mod => mod.AreaChart), { ssr: false });
+const Area = dynamic(() => import('recharts').then(mod => mod.Area), { ssr: false });
+const RadarChart = dynamic(() => import('recharts').then(mod => mod.RadarChart), { ssr: false });
+const Radar = dynamic(() => import('recharts').then(mod => mod.Radar), { ssr: false });
+const PolarGrid = dynamic(() => import('recharts').then(mod => mod.PolarGrid), { ssr: false });
+const PolarAngleAxis = dynamic(() => import('recharts').then(mod => mod.PolarAngleAxis), { ssr: false });
+const PolarRadiusAxis = dynamic(() => import('recharts').then(mod => mod.PolarRadiusAxis), { ssr: false });
+
+const COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+
+interface VisualizationFilters {
+    platform: string;
+    dateRange?: DateRange;
+    metric: string;
+}
+
+export default function GlobalVisualizationsPage() {
+    const [data, setData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [availablePlatforms, setAvailablePlatforms] = useState<string[]>([]);
+
+    // Filters state
+    const [filters, setFilters] = useState<VisualizationFilters>({
+        platform: 'all',
+        metric: 'spend'
+    });
+
+    // Funnel data state
+    const [funnelData, setFunnelData] = useState<any[]>([]);
+
+    // Audience data state  
+    const [audienceData, setAudienceData] = useState<any[]>([]);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const result = await api.getGlobalVisualizations();
+            setData(result);
+
+            // Extract platforms from data
+            if (result?.platform) {
+                const platforms = result.platform.map((p: any) => p.name);
+                setAvailablePlatforms(platforms);
+            }
+
+            // Generate funnel data from campaigns
+            generateFunnelData();
+            generateAudienceData();
+        } catch (error) {
+            console.error("Failed to load visualizations", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const generateFunnelData = async () => {
+        try {
+            const campaigns: any = await api.get('/campaigns?limit=1000');
+            const campaignList = campaigns.campaigns || [];
+
+            if (campaignList.length > 0) {
+                const totals = campaignList.reduce((acc: any, c: any) => ({
+                    impressions: acc.impressions + (c.impressions || 0),
+                    clicks: acc.clicks + (c.clicks || 0),
+                    conversions: acc.conversions + (c.conversions || 0)
+                }), { impressions: 0, clicks: 0, conversions: 0 });
+
+                setFunnelData([
+                    { name: 'Impressions', value: totals.impressions, fill: '#6366f1' },
+                    { name: 'Clicks', value: totals.clicks, fill: '#22c55e' },
+                    { name: 'Conversions', value: totals.conversions, fill: '#f59e0b' }
+                ]);
+            }
+        } catch (error) {
+            console.error("Failed to generate funnel data", error);
+        }
+    };
+
+    const generateAudienceData = async () => {
+        try {
+            const campaigns: any = await api.get('/campaigns?limit=1000');
+            const campaignList = campaigns.campaigns || [];
+
+            if (campaignList.length > 0) {
+                // Group by channel/funnel_stage if available
+                const channelAgg: Record<string, { spend: number, clicks: number, conversions: number }> = {};
+
+                campaignList.forEach((c: any) => {
+                    const channel = c.channel || c.funnel_stage || 'Unknown';
+                    if (!channelAgg[channel]) {
+                        channelAgg[channel] = { spend: 0, clicks: 0, conversions: 0 };
+                    }
+                    channelAgg[channel].spend += c.spend || 0;
+                    channelAgg[channel].clicks += c.clicks || 0;
+                    channelAgg[channel].conversions += c.conversions || 0;
+                });
+
+                const audienceArr = Object.entries(channelAgg).map(([name, metrics]) => ({
+                    name,
+                    spend: Math.round(metrics.spend),
+                    clicks: metrics.clicks,
+                    conversions: metrics.conversions,
+                    ctr: metrics.clicks > 0 ? ((metrics.clicks / (metrics.spend * 100)) * 100).toFixed(2) : 0
+                }));
+
+                setAudienceData(audienceArr);
+            }
+        } catch (error) {
+            console.error("Failed to generate audience data", error);
+        }
+    };
+
+    const applyFilters = () => {
+        fetchData();
+    };
+
+    if (loading) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        );
+    }
+
+    if (!data) {
+        return <div className="p-8">No data available.</div>;
+    }
+
+    return (
+        <div className="container mx-auto py-10 space-y-8">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">📊 Global Visualizations</h1>
+                <p className="text-muted-foreground">
+                    Deep dive into performance metrics across all campaigns and platforms.
+                </p>
+            </div>
+
+            {/* Filters Section */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Filter className="h-5 w-5" />
+                        Filters
+                    </CardTitle>
+                    <CardDescription>Refine your visualization data</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid gap-4 md:grid-cols-4">
+                        <div className="space-y-2">
+                            <Label>Platform</Label>
+                            <Select value={filters.platform} onValueChange={(value) => setFilters({ ...filters, platform: value })}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Platforms</SelectItem>
+                                    {availablePlatforms.map(p => (
+                                        <SelectItem key={p} value={p}>{p}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Date Range</Label>
+                            <DateRangePicker
+                                date={filters.dateRange}
+                                onDateChange={(range) => setFilters({ ...filters, dateRange: range })}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Primary Metric</Label>
+                            <Select value={filters.metric} onValueChange={(value) => setFilters({ ...filters, metric: value })}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="spend">Spend</SelectItem>
+                                    <SelectItem value="clicks">Clicks</SelectItem>
+                                    <SelectItem value="conversions">Conversions</SelectItem>
+                                    <SelectItem value="ctr">CTR</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="flex items-end">
+                            <Button onClick={applyFilters} className="w-full">
+                                <RefreshCw className="mr-2 h-4 w-4" />
+                                Apply Filters
+                            </Button>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Main Trend Chart */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>📈 Performance Trends</CardTitle>
+                    <CardDescription>Spend, Impressions, and Clicks over time.</CardDescription>
+                </CardHeader>
+                <CardContent className="h-[400px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={data.trend}>
+                            <defs>
+                                <linearGradient id="colorSpend" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8} />
+                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                </linearGradient>
+                                <linearGradient id="colorClicks" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
+                                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                            <XAxis dataKey="date" className="text-xs" />
+                            <YAxis yAxisId="left" className="text-xs" />
+                            <YAxis yAxisId="right" orientation="right" className="text-xs" />
+                            <Tooltip
+                                contentStyle={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}
+                                itemStyle={{ color: 'var(--foreground)' }}
+                            />
+                            <Legend />
+                            <Area yAxisId="left" type="monotone" dataKey="spend" stroke="#6366f1" fillOpacity={1} fill="url(#colorSpend)" name="Spend ($)" />
+                            <Area yAxisId="right" type="monotone" dataKey="clicks" stroke="#22c55e" fillOpacity={1} fill="url(#colorClicks)" name="Clicks" />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+            <div className="grid gap-6 md:grid-cols-2">
+                {/* Platform Performance */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>🎯 Platform Performance</CardTitle>
+                        <CardDescription>Spend vs Conversions by Ad Platform.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-[350px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={data.platform} layout="vertical">
+                                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                <XAxis type="number" className="text-xs" />
+                                <YAxis dataKey="name" type="category" className="text-xs" width={80} />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}
+                                    itemStyle={{ color: 'var(--foreground)' }}
+                                />
+                                <Legend />
+                                <Bar dataKey="spend" fill="#6366f1" name="Spend ($)" radius={[0, 4, 4, 0]} />
+                                <Bar dataKey="conversions" fill="#22c55e" name="Conversions" radius={[0, 4, 4, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+
+                {/* Funnel Analysis Chart */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>🔄 Conversion Funnel</CardTitle>
+                        <CardDescription>Impressions → Clicks → Conversions journey.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-[350px]">
+                        {funnelData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={funnelData} layout="vertical">
+                                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                    <XAxis type="number" className="text-xs" />
+                                    <YAxis dataKey="name" type="category" className="text-xs" width={100} />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}
+                                        formatter={(value: any) => value.toLocaleString()}
+                                    />
+                                    <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+                                        {funnelData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="flex items-center justify-center h-full text-muted-foreground">
+                                No funnel data available
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+                {/* Audience/Channel Breakdown */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>👥 Audience Analysis</CardTitle>
+                        <CardDescription>Performance breakdown by channel/segment.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-[350px]">
+                        {audienceData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={audienceData}>
+                                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                    <XAxis dataKey="name" className="text-xs" angle={-45} textAnchor="end" height={80} />
+                                    <YAxis className="text-xs" />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}
+                                    />
+                                    <Legend />
+                                    <Bar dataKey="spend" fill="#6366f1" name="Spend ($)" />
+                                    <Bar dataKey="conversions" fill="#22c55e" name="Conversions" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="flex items-center justify-center h-full text-muted-foreground">
+                                No audience data available
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Device Breakdown Pie Chart */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>📱 Device Breakdown</CardTitle>
+                        <CardDescription>Traffic distribution by device type.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-[350px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={data.device}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={100}
+                                    fill="#8884d8"
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                                >
+                                    {data.device.map((entry: any, index: number) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}
+                                    itemStyle={{ color: 'var(--foreground)' }}
+                                />
+                                <Legend />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Radar Chart for Multi-Metric Comparison */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>🎯 Platform Radar Analysis</CardTitle>
+                    <CardDescription>Multi-dimensional comparison across metrics.</CardDescription>
+                </CardHeader>
+                <CardContent className="h-[400px]">
+                    {data.platform && data.platform.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <RadarChart data={data.platform}>
+                                <PolarGrid />
+                                <PolarAngleAxis dataKey="name" className="text-xs" />
+                                <PolarRadiusAxis className="text-xs" />
+                                <Radar name="Spend" dataKey="spend" stroke="#6366f1" fill="#6366f1" fillOpacity={0.3} />
+                                <Radar name="Conversions" dataKey="conversions" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} />
+                                <Legend />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}
+                                />
+                            </RadarChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="flex items-center justify-center h-full text-muted-foreground">
+                            No platform data available for radar analysis
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
+    );
+}

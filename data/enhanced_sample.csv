@@ -1,0 +1,17 @@
+Platform,Campaign,Date,Audience,Placement,Ad Type,Funnel Stage,Spend,Impressions,Clicks,Conversions
+Facebook,Summer Sale,2024-06-01,Young Adults,Feed,Video,Awareness,1200.50,50000,1200,30
+Instagram,Summer Sale,2024-06-01,Young Adults,Stories,Image,Awareness,800.00,35000,900,25
+Google,Search Gen,2024-06-02,Tech Enthusiasts,Search,Text,Consideration,500.00,15000,400,50
+LinkedIn,B2B Lead Gen,2024-06-02,Professionals,Feed,Carousel,Lead Gen,2000.00,10000,150,40
+Facebook,Retargeting,2024-06-03,Cart Abandoners,Right Column,Image_C,Conversion,300.00,8000,200,80
+TikTok,Viral Challenge,2024-06-03,Gen Z,Feed,Video_Native,Awareness,1500.00,100000,3000,15
+Google,Display Brand,2024-06-04,Broad,Display Network,Banner_X,Awareness,400.00,60000,500,10
+Facebook,Summer Sale,2024-06-04,Parents,Marketplace,Video,Consideration,900.00,40000,1000,35
+Instagram,Influencer Collab,2024-06-05,Beauty Interest,Reels,Video_Inf,Consideration,2500.00,85000,4000,90
+LinkedIn,Webinar Promo,2024-06-05,IT Managers,InMail,Text_Invite,Lead Gen,1800.00,5000,80,60
+Google,Search Gen,2024-06-06,Tech Enthusiasts,Search,Text_Ad_V2,Conversion,600.00,16000,450,55
+Facebook,Retargeting,2024-06-06,Site Visitors,Feed,Carousel_Dyn,Conversion,450.00,12000,300,95
+TikTok,Viral Challenge,2024-06-07,Gen Z,Feed,Video_Native,Awareness,1600.00,110000,3200,20
+YouTube,Brand Lift,2024-06-07,Broad,Pre-Roll,Video_Long,Awareness,3000.00,50000,500,5
+Google,PMax,2024-06-08,Auto-Target,Cross-Network,Asset_Group_1,Conversion,1000.00,25000,800,120
+Facebook,Summer Sale,2024-06-08,Lookalike 1%,Feed,Video,Consideration,1100.00,45000,1100,40

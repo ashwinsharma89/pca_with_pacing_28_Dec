@@ -1,0 +1,2063 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-7.4.0, pluggy-1.6.0 -- /Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13
+cachedir: .pytest_cache
+rootdir: /Users/ashwin/Desktop/pca_agent copy
+configfile: pytest.ini
+plugins: mock-3.15.1, anyio-4.12.0, asyncio-0.23.4, timeout-2.4.0, typeguard-4.4.4, cov-7.0.0
+asyncio: mode=Mode.STRICT
+collecting ... collected 1354 items
+
+tests/test_data_normalizer.py::TestColumnNameNormalization::test_normalize_basic PASSED [  0%]
+tests/test_data_normalizer.py::TestColumnNameNormalization::test_normalize_special_chars PASSED [  0%]
+tests/test_data_normalizer.py::TestColumnNameNormalization::test_normalize_whitespace PASSED [  0%]
+tests/test_data_normalizer.py::TestCanonicalNames::test_exact_canonical PASSED [  0%]
+tests/test_data_normalizer.py::TestCanonicalNames::test_alias_canonical PASSED [  0%]
+tests/test_data_normalizer.py::TestCanonicalNames::test_no_canonical PASSED [  0%]
+tests/test_data_normalizer.py::TestSimilarityScore::test_exact_match PASSED [  0%]
+tests/test_data_normalizer.py::TestSimilarityScore::test_partial_match PASSED [  0%]
+tests/test_data_normalizer.py::TestSimilarityScore::test_no_match PASSED [  0%]
+tests/test_data_normalizer.py::TestFuzzyMatching::test_exact_match PASSED [  0%]
+tests/test_data_normalizer.py::TestFuzzyMatching::test_case_insensitive_match PASSED [  0%]
+tests/test_data_normalizer.py::TestFuzzyMatching::test_alias_match PASSED [  0%]
+tests/test_data_normalizer.py::TestFuzzyMatching::test_typo_match PASSED [  0%]
+tests/test_data_normalizer.py::TestFuzzyMatching::test_abbreviation_match PASSED [  1%]
+tests/test_data_normalizer.py::TestFuzzyMatching::test_no_match_below_threshold PASSED [  1%]
+tests/test_data_normalizer.py::TestFuzzyMatching::test_underscore_vs_space PASSED [  1%]
+tests/test_data_normalizer.py::TestAutoMapColumns::test_auto_map_exact PASSED [  1%]
+tests/test_data_normalizer.py::TestAutoMapColumns::test_auto_map_aliases PASSED [  1%]
+tests/test_data_normalizer.py::TestAutoMapColumns::test_auto_map_partial PASSED [  1%]
+tests/test_data_normalizer.py::TestDataTypeDetection::test_detect_date_column PASSED [  1%]
+tests/test_data_normalizer.py::TestDataTypeDetection::test_detect_numeric_column PASSED [  1%]
+tests/test_data_normalizer.py::TestDataTypeDetection::test_detect_currency_column PASSED [  1%]
+tests/test_data_normalizer.py::TestDataTypeDetection::test_detect_percentage_column PASSED [  1%]
+tests/test_data_normalizer.py::TestDataTypeDetection::test_detect_text_column PASSED [  1%]
+tests/test_data_normalizer.py::TestDateParsing::test_parse_iso_format PASSED [  1%]
+tests/test_data_normalizer.py::TestDateParsing::test_parse_us_format PASSED [  1%]
+tests/test_data_normalizer.py::TestDateParsing::test_parse_european_format PASSED [  1%]
+tests/test_data_normalizer.py::TestDateParsing::test_parse_text_format PASSED [  2%]
+tests/test_data_normalizer.py::TestDateParsing::test_parse_compact_format PASSED [  2%]
+tests/test_data_normalizer.py::TestDateParsing::test_parse_null PASSED   [  2%]
+tests/test_data_normalizer.py::TestDateParsing::test_parse_datetime_passthrough PASSED [  2%]
+tests/test_data_normalizer.py::TestDateParsing::test_normalize_date_column PASSED [  2%]
+tests/test_data_normalizer.py::TestNumericCleaning::test_clean_plain_number PASSED [  2%]
+tests/test_data_normalizer.py::TestNumericCleaning::test_clean_currency_symbol PASSED [  2%]
+tests/test_data_normalizer.py::TestNumericCleaning::test_clean_thousand_separator PASSED [  2%]
+tests/test_data_normalizer.py::TestNumericCleaning::test_clean_percentage PASSED [  2%]
+tests/test_data_normalizer.py::TestNumericCleaning::test_clean_negative_parentheses PASSED [  2%]
+tests/test_data_normalizer.py::TestNumericCleaning::test_clean_whitespace PASSED [  2%]
+tests/test_data_normalizer.py::TestNumericCleaning::test_clean_null PASSED [  2%]
+tests/test_data_normalizer.py::TestNumericCleaning::test_normalize_numeric_column PASSED [  2%]
+tests/test_data_normalizer.py::TestDataFrameNormalization::test_normalize_mixed_dataframe PASSED [  3%]
+tests/test_data_normalizer.py::TestDataFrameNormalization::test_normalize_with_explicit_columns PASSED [  3%]
+tests/test_data_normalizer.py::TestDataQualityValidation::test_validate_clean_data PASSED [  3%]
+tests/test_data_normalizer.py::TestDataQualityValidation::test_validate_null_warning PASSED [  3%]
+tests/test_data_normalizer.py::TestDataQualityValidation::test_validate_all_null_issue PASSED [  3%]
+tests/test_data_normalizer.py::TestDataQualityValidation::test_validate_duplicates_warning PASSED [  3%]
+tests/test_data_normalizer.py::TestColumnMappingReport::test_generate_mapping_report PASSED [  3%]
+tests/test_data_normalizer.py::TestEdgeCases::test_empty_dataframe PASSED [  3%]
+tests/test_data_normalizer.py::TestEdgeCases::test_single_column PASSED  [  3%]
+tests/test_data_normalizer.py::TestEdgeCases::test_unicode_column_names PASSED [  3%]
+tests/test_data_normalizer.py::TestEdgeCases::test_very_long_column_name PASSED [  3%]
+tests/test_end_to_end.py::TestEndToEndWorkflow::test_full_campaign_analysis PASSED [  3%]
+tests/test_end_to_end.py::TestEndToEndWorkflow::test_workflow_with_filters PASSED [  3%]
+tests/test_end_to_end.py::TestEndToEndWorkflow::test_multi_channel_analysis PASSED [  3%]
+tests/test_end_to_end.py::TestEndToEndWorkflow::test_benchmark_comparison PASSED [  4%]
+tests/test_end_to_end.py::TestEndToEndWorkflow::test_error_handling PASSED [  4%]
+tests/test_end_to_end.py::TestEndToEndWorkflow::test_performance_metrics PASSED [  4%]
+tests/test_end_to_end.py::TestDataValidation::test_data_schema_validation PASSED [  4%]
+tests/test_end_to_end.py::TestDataValidation::test_data_quality_checks PASSED [  4%]
+tests/test_excel_upload.py::test_excel_multi_sheet_detection SKIPPED     [  4%]
+tests/test_intelligent_reporter.py::TestIntelligentDataReader::test_read_csv PASSED [  4%]
+tests/test_intelligent_reporter.py::TestIntelligentDataReader::test_read_excel PASSED [  4%]
+tests/test_intelligent_reporter.py::TestIntelligentDataReader::test_read_dataframe_passthrough PASSED [  4%]
+tests/test_intelligent_reporter.py::TestIntelligentDataReader::test_quality_report PASSED [  4%]
+tests/test_intelligent_reporter.py::TestFieldMappingEngine::test_exact_mapping PASSED [  4%]
+tests/test_intelligent_reporter.py::TestFieldMappingEngine::test_alias_mapping PASSED [  4%]
+tests/test_intelligent_reporter.py::TestFieldMappingEngine::test_fuzzy_mapping PASSED [  4%]
+tests/test_intelligent_reporter.py::TestFieldMappingEngine::test_manual_overrides PASSED [  5%]
+tests/test_intelligent_reporter.py::TestFieldMappingEngine::test_unmatched_columns PASSED [  5%]
+tests/test_intelligent_reporter.py::TestDataTransformationEngine::test_transform_basic PASSED [  5%]
+tests/test_intelligent_reporter.py::TestDataTransformationEngine::test_calculated_metrics PASSED [  5%]
+tests/test_intelligent_reporter.py::TestDataTransformationEngine::test_summary_generation PASSED [  5%]
+tests/test_intelligent_reporter.py::TestTemplateAnalyzer::test_analyze_template PASSED [  5%]
+tests/test_intelligent_reporter.py::TestTemplateAnalyzer::test_detect_header_row PASSED [  5%]
+tests/test_intelligent_reporter.py::TestTemplateAnalyzer::test_extract_columns PASSED [  5%]
+tests/test_intelligent_reporter.py::TestTemplateAnalyzer::test_detect_structure_type PASSED [  5%]
+tests/test_intelligent_reporter.py::TestTemplateAnalyzer::test_detect_aggregation_type PASSED [  5%]
+tests/test_intelligent_reporter.py::TestIntelligentReportSystem::test_generate_report_csv PASSED [  5%]
+tests/test_intelligent_reporter.py::TestIntelligentReportSystem::test_generate_report_dataframe PASSED [  5%]
+tests/test_intelligent_reporter.py::TestIntelligentReportSystem::test_generate_report_with_hints PASSED [  5%]
+tests/test_intelligent_reporter.py::TestIntelligentReportSystem::test_convenience_function PASSED [  5%]
+tests/test_intelligent_reporter.py::TestEdgeCases::test_empty_dataframe PASSED [  6%]
+tests/test_intelligent_reporter.py::TestEdgeCases::test_missing_columns PASSED [  6%]
+tests/test_intelligent_reporter.py::TestEdgeCases::test_weird_column_names PASSED [  6%]
+tests/test_intelligent_reporter.py::TestFileAdapter::test_validate_csv PASSED [  6%]
+tests/test_intelligent_reporter.py::TestFileAdapter::test_validate_nonexistent PASSED [  6%]
+tests/test_intelligent_reporter.py::TestFileAdapter::test_read_with_encoding PASSED [  6%]
+tests/test_rag_retrieval.py::TestBenchmarkRetrieval::test_b2b_benchmark_retrieval PASSED [  6%]
+tests/test_rag_retrieval.py::TestBenchmarkRetrieval::test_b2c_benchmark_retrieval PASSED [  6%]
+tests/test_rag_retrieval.py::TestBenchmarkRetrieval::test_channel_specific_benchmarks PASSED [  6%]
+tests/test_rag_retrieval.py::TestBenchmarkRetrieval::test_industry_specific_benchmarks PASSED [  6%]
+tests/test_rag_retrieval.py::TestBenchmarkRetrieval::test_benchmark_fallback PASSED [  6%]
+tests/test_rag_retrieval.py::TestRetrievalQuality::test_retrieval_relevance PASSED [  6%]
+tests/test_rag_retrieval.py::TestRetrievalQuality::test_retrieval_diversity PASSED [  6%]
+tests/test_rag_retrieval.py::TestRetrievalQuality::test_retrieval_completeness PASSED [  7%]
+tests/test_rag_retrieval.py::TestRetrievalQuality::test_retrieval_accuracy PASSED [  7%]
+tests/test_rag_retrieval.py::TestContextualRetrieval::test_context_filtering PASSED [  7%]
+tests/test_rag_retrieval.py::TestContextualRetrieval::test_temporal_context PASSED [  7%]
+tests/test_rag_retrieval.py::TestContextualRetrieval::test_multi_dimensional_context PASSED [  7%]
+tests/test_rag_retrieval.py::TestRetrievalPerformance::test_retrieval_speed PASSED [  7%]
+tests/test_rag_retrieval.py::TestRetrievalPerformance::test_batch_retrieval PASSED [  7%]
+tests/test_rag_retrieval.py::TestRetrievalPerformance::test_caching_effectiveness PASSED [  7%]
+tests/test_reporting_module.py::TestSchemaInference::test_detect_date_columns PASSED [  7%]
+tests/test_reporting_module.py::TestSchemaInference::test_detect_numeric_columns PASSED [  7%]
+tests/test_reporting_module.py::TestSchemaInference::test_detect_text_columns PASSED [  7%]
+tests/test_reporting_module.py::TestSchemaInference::test_infer_aggregation_type PASSED [  7%]
+tests/test_reporting_module.py::TestSchemaInference::test_detect_currency_columns PASSED [  7%]
+tests/test_reporting_module.py::TestSchemaInference::test_detect_rate_columns PASSED [  7%]
+tests/test_reporting_module.py::TestAggregation::test_daily_aggregation PASSED [  8%]
+tests/test_reporting_module.py::TestAggregation::test_weekly_aggregation PASSED [  8%]
+tests/test_reporting_module.py::TestAggregation::test_platform_aggregation PASSED [  8%]
+tests/test_reporting_module.py::TestAggregation::test_calculated_metrics PASSED [  8%]
+tests/test_reporting_module.py::TestAggregation::test_handle_zero_division PASSED [  8%]
+tests/test_reporting_module.py::TestTemplateAnalysis::test_analyze_column_mode_template PASSED [  8%]
+tests/test_reporting_module.py::TestTemplateAnalysis::test_analyze_placeholder_template PASSED [  8%]
+tests/test_reporting_module.py::TestTemplateAnalysis::test_detect_template_mode PASSED [  8%]
+tests/test_reporting_module.py::TestTemplateAnalysis::test_multi_sheet_template PASSED [  8%]
+tests/test_reporting_module.py::TestExcelReportGeneration::test_generate_column_mode_report PASSED [  8%]
+tests/test_reporting_module.py::TestExcelReportGeneration::test_generate_placeholder_report PASSED [  8%]
+tests/test_reporting_module.py::TestExcelReportGeneration::test_formula_generation PASSED [  8%]
+tests/test_reporting_module.py::TestExcelReportGeneration::test_preserve_formatting PASSED [  8%]
+tests/test_reporting_module.py::TestCSVReportGeneration::test_generate_csv_report PASSED [  9%]
+tests/test_reporting_module.py::TestCSVReportGeneration::test_csv_with_aggregation PASSED [  9%]
+tests/test_reporting_module.py::TestCacheFunctionality::test_save_to_cache PASSED [  9%]
+tests/test_reporting_module.py::TestCacheFunctionality::test_load_from_cache PASSED [  9%]
+tests/test_reporting_module.py::TestCacheFunctionality::test_cache_template_bytes PASSED [  9%]
+tests/test_reporting_module.py::TestCacheFunctionality::test_clear_cache PASSED [  9%]
+tests/test_reporting_module.py::TestUpdatePacingTracker::test_update_pacing_tracker_import PASSED [  9%]
+tests/test_reporting_module.py::TestUpdatePacingTracker::test_update_pacing_tracker_missing_csv PASSED [  9%]
+tests/test_reporting_module.py::TestUpdatePacingTracker::test_update_pacing_tracker_missing_template PASSED [  9%]
+tests/test_reporting_module.py::TestUpdatePacingTracker::test_update_pacing_tracker_missing_columns PASSED [  9%]
+tests/test_reporting_module.py::TestUpdatePacingTracker::test_update_pacing_tracker_success PASSED [  9%]
+tests/test_reporting_module.py::TestStreamlitReportingIntegration::test_streamlit_reporting_exists PASSED [  9%]
+tests/test_reporting_module.py::TestStreamlitReportingIntegration::test_analyze_template_function_exists PASSED [  9%]
+tests/test_reporting_module.py::TestStreamlitReportingIntegration::test_cache_functions_exist PASSED [  9%]
+tests/test_reporting_module.py::TestStreamlitReportingIntegration::test_column_mode_support PASSED [ 10%]
+tests/test_reporting_module.py::TestStreamlitReportingIntegration::test_placeholder_mode_support PASSED [ 10%]
+tests/test_reporting_module.py::TestStreamlitReportingIntegration::test_template_structure_keys PASSED [ 10%]
+tests/test_reporting_module.py::TestColumnMatching::test_exact_match PASSED [ 10%]
+tests/test_reporting_module.py::TestColumnMatching::test_partial_match PASSED [ 10%]
+tests/test_reporting_module.py::TestColumnMatching::test_no_match PASSED [ 10%]
+tests/test_reporting_module.py::TestDataValidation::test_validate_required_columns PASSED [ 10%]
+tests/test_reporting_module.py::TestDataValidation::test_validate_numeric_values PASSED [ 10%]
+tests/test_reporting_module.py::TestDataValidation::test_validate_date_range PASSED [ 10%]
+tests/test_reporting_module.py::TestDataValidation::test_handle_null_values PASSED [ 10%]
+tests/test_reporting_module.py::TestEdgeCases::test_empty_dataframe PASSED [ 10%]
+tests/test_reporting_module.py::TestEdgeCases::test_single_row_dataframe PASSED [ 10%]
+tests/test_reporting_module.py::TestEdgeCases::test_large_numbers PASSED [ 10%]
+tests/test_reporting_module.py::TestEdgeCases::test_special_characters_in_names PASSED [ 11%]
+tests/test_reporting_module.py::TestEdgeCases::test_unicode_characters PASSED [ 11%]
+tests/test_reporting_module.py::TestPerformance::test_large_dataset_aggregation PASSED [ 11%]
+tests/test_smart_visualization.py::TestChartSelectionLogic::test_trend_chart_selection PASSED [ 11%]
+tests/test_smart_visualization.py::TestChartSelectionLogic::test_comparison_chart_selection PASSED [ 11%]
+tests/test_smart_visualization.py::TestChartSelectionLogic::test_composition_chart_selection PASSED [ 11%]
+tests/test_smart_visualization.py::TestChartSelectionLogic::test_attribution_chart_selection PASSED [ 11%]
+tests/test_smart_visualization.py::TestChartSelectionLogic::test_audience_based_selection PASSED [ 11%]
+tests/test_smart_visualization.py::TestMarketingVisualizationRules::test_channel_performance_rules PASSED [ 11%]
+tests/test_smart_visualization.py::TestMarketingVisualizationRules::test_budget_optimization_rules PASSED [ 11%]
+tests/test_smart_visualization.py::TestMarketingVisualizationRules::test_creative_performance_rules PASSED [ 11%]
+tests/test_smart_visualization.py::TestMarketingVisualizationRules::test_color_scheme_application PASSED [ 11%]
+tests/test_smart_visualization.py::TestSmartChartGenerator::test_channel_comparison_chart PASSED [ 11%]
+tests/test_smart_visualization.py::TestSmartChartGenerator::test_performance_trend_chart PASSED [ 11%]
+tests/test_smart_visualization.py::TestSmartChartGenerator::test_conversion_funnel_chart PASSED [ 12%]
+tests/test_smart_visualization.py::TestSmartChartGenerator::test_device_breakdown_chart PASSED [ 12%]
+tests/test_smart_visualization.py::TestEnhancedVisualizationAgent::test_executive_dashboard_generation PASSED [ 12%]
+tests/test_smart_visualization.py::TestEnhancedVisualizationAgent::test_analyst_dashboard_generation PASSED [ 12%]
+tests/test_smart_visualization.py::TestEnhancedVisualizationAgent::test_insight_to_visualization_mapping PASSED [ 12%]
+tests/test_smart_visualization.py::TestVisualizationQuality::test_chart_has_title PASSED [ 12%]
+tests/test_smart_visualization.py::TestVisualizationQuality::test_chart_has_axis_labels PASSED [ 12%]
+tests/test_smart_visualization.py::TestVisualizationQuality::test_chart_color_consistency PASSED [ 12%]
+tests/test_smart_visualization.py::TestVisualizationQuality::test_chart_responsiveness PASSED [ 12%]
+tests/integration/test_agent_integration.py::TestAgentPipelineIntegration::test_vision_to_extraction_flow PASSED [ 12%]
+tests/integration/test_agent_integration.py::TestAgentPipelineIntegration::test_extraction_to_reasoning_flow PASSED [ 12%]
+tests/integration/test_agent_integration.py::TestAgentPipelineIntegration::test_reasoning_to_visualization_flow PASSED [ 12%]
+tests/integration/test_agent_integration.py::TestAgentPipelineIntegration::test_full_pipeline_execution PASSED [ 12%]
+tests/integration/test_agent_integration.py::TestChannelSpecialistIntegration::test_channel_routing PASSED [ 12%]
+tests/integration/test_agent_integration.py::TestChannelSpecialistIntegration::test_channel_specific_analysis PASSED [ 13%]
+tests/integration/test_agent_integration.py::TestChannelSpecialistIntegration::test_cross_channel_comparison PASSED [ 13%]
+tests/integration/test_agent_integration.py::TestErrorHandlingIntegration::test_handles_missing_data PASSED [ 13%]
+tests/integration/test_agent_integration.py::TestErrorHandlingIntegration::test_handles_null_values PASSED [ 13%]
+tests/integration/test_agent_integration.py::TestErrorHandlingIntegration::test_handles_division_by_zero PASSED [ 13%]
+tests/integration/test_agent_integration.py::TestErrorHandlingIntegration::test_handles_agent_timeout PASSED [ 13%]
+tests/integration/test_agent_integration.py::TestStateManagementIntegration::test_state_persistence PASSED [ 13%]
+tests/integration/test_agent_integration.py::TestStateManagementIntegration::test_state_rollback_on_error PASSED [ 13%]
+tests/integration/test_agent_integration.py::TestStateManagementIntegration::test_concurrent_state_updates PASSED [ 13%]
+tests/integration/test_api_integration.py::TestHealthIntegration::test_health_returns_status PASSED [ 13%]
+tests/integration/test_api_integration.py::TestHealthIntegration::test_health_includes_version PASSED [ 13%]
+tests/integration/test_api_integration.py::TestCampaignIntegration::test_campaign_crud_flow PASSED [ 13%]
+tests/integration/test_api_integration.py::TestAnalysisIntegration::test_analysis_endpoint PASSED [ 13%]
+tests/integration/test_api_integration.py::TestQueryIntegration::test_query_flow PASSED [ 14%]
+tests/integration/test_api_integration.py::TestQueryIntegration::test_query_with_filters PASSED [ 14%]
+tests/integration/test_api_integration.py::TestAuthIntegration::test_login_flow PASSED [ 14%]
+tests/integration/test_api_integration.py::TestAuthIntegration::test_protected_endpoint_requires_auth PASSED [ 14%]
+tests/integration/test_api_integration.py::TestMetricsIntegration::test_metrics_endpoint PASSED [ 14%]
+tests/integration/test_api_integration.py::TestMetricsIntegration::test_prometheus_format PASSED [ 14%]
+tests/integration/test_rag_integration.py::TestRAGPipelineIntegration::test_document_ingestion_flow PASSED [ 14%]
+tests/integration/test_rag_integration.py::TestRAGPipelineIntegration::test_semantic_search_flow PASSED [ 14%]
+tests/integration/test_rag_integration.py::TestRAGPipelineIntegration::test_hybrid_search_flow PASSED [ 14%]
+tests/integration/test_rag_integration.py::TestRAGPipelineIntegration::test_context_augmentation_flow PASSED [ 14%]
+tests/integration/test_rag_integration.py::TestRAGPipelineIntegration::test_answer_generation_flow PASSED [ 14%]
+tests/integration/test_rag_integration.py::TestKnowledgeBaseIntegration::test_chunk_storage_and_retrieval PASSED [ 14%]
+tests/integration/test_rag_integration.py::TestKnowledgeBaseIntegration::test_metadata_filtering PASSED [ 14%]
+tests/integration/test_rag_integration.py::TestKnowledgeBaseIntegration::test_freshness_scoring PASSED [ 14%]
+tests/integration/test_rag_integration.py::TestQueryEnhancementIntegration::test_query_expansion PASSED [ 15%]
+tests/integration/test_rag_integration.py::TestQueryEnhancementIntegration::test_query_rewriting PASSED [ 15%]
+tests/integration/test_rag_integration.py::TestQueryEnhancementIntegration::test_intent_classification PASSED [ 15%]
+tests/integration/test_rag_integration.py::TestRetrievalQualityIntegration::test_precision_at_k PASSED [ 15%]
+tests/integration/test_rag_integration.py::TestRetrievalQualityIntegration::test_recall_at_k PASSED [ 15%]
+tests/integration/test_rag_integration.py::TestRetrievalQualityIntegration::test_mrr_metric PASSED [ 15%]
+tests/integration/test_rag_integration.py::TestCachingIntegration::test_embedding_cache PASSED [ 15%]
+tests/integration/test_rag_integration.py::TestCachingIntegration::test_query_result_cache PASSED [ 15%]
+tests/integration/test_rag_integration.py::TestCachingIntegration::test_cache_invalidation PASSED [ 15%]
+tests/integration/test_streamlit_pages.py::TestSessionState::test_init_session_state_creates_keys PASSED [ 15%]
+tests/integration/test_streamlit_pages.py::TestSessionState::test_df_initially_none PASSED [ 15%]
+tests/integration/test_streamlit_pages.py::TestSessionState::test_analysis_history_is_list PASSED [ 15%]
+tests/integration/test_streamlit_pages.py::TestDataUploadPage::test_upload_valid_csv PASSED [ 15%]
+tests/integration/test_streamlit_pages.py::TestDataUploadPage::test_data_validation_on_upload PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestDataUploadPage::test_column_normalization_applied PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestAnalysisPage::test_analysis_requires_data PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestAnalysisPage::test_run_analysis_updates_history PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestAnalysisPage::test_analysis_calculates_metrics PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestDeepDivePage::test_platform_filter PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestDeepDivePage::test_date_range_filter PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestDeepDivePage::test_spend_range_filter PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestDeepDivePage::test_funnel_stage_filter PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestDeepDivePage::test_combined_filters PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestVisualizationsPage::test_performance_overview_metrics PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestVisualizationsPage::test_trend_analysis_grouping PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestVisualizationsPage::test_platform_comparison PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestVisualizationsPage::test_funnel_analysis PASSED [ 16%]
+tests/integration/test_streamlit_pages.py::TestVisualizationsPage::test_correlation_matrix PASSED [ 17%]
+tests/integration/test_streamlit_pages.py::TestQAPage::test_query_requires_data PASSED [ 17%]
+tests/integration/test_streamlit_pages.py::TestQAPage::test_natural_language_query_parsing PASSED [ 17%]
+tests/integration/test_streamlit_pages.py::TestSettingsPage::test_cache_stats_available PASSED [ 17%]
+tests/integration/test_streamlit_pages.py::TestSettingsPage::test_debug_info_available PASSED [ 17%]
+tests/integration/test_streamlit_pages.py::TestNavigation::test_all_pages_defined PASSED [ 17%]
+tests/integration/test_streamlit_pages.py::TestNavigation::test_page_routing PASSED [ 17%]
+tests/integration/test_streamlit_pages.py::TestErrorHandling::test_handles_empty_dataframe PASSED [ 17%]
+tests/integration/test_streamlit_pages.py::TestErrorHandling::test_handles_missing_columns PASSED [ 17%]
+tests/integration/test_streamlit_pages.py::TestErrorHandling::test_handles_null_values PASSED [ 17%]
+tests/unit/test_agent_monitor.py::TestAgentMetrics::test_metrics_initialization PASSED [ 17%]
+tests/unit/test_agent_monitor.py::TestAgentMetrics::test_success_rate_calculation PASSED [ 17%]
+tests/unit/test_agent_monitor.py::TestAgentMetrics::test_success_rate_zero_calls PASSED [ 17%]
+tests/unit/test_agent_monitor.py::TestAgentMetrics::test_avg_execution_time PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMetrics::test_recent_avg_execution_time PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMetrics::test_avg_accuracy PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMetrics::test_status_healthy PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMetrics::test_status_degraded PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMetrics::test_status_unhealthy PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMetrics::test_status_unknown PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMonitor::test_monitor_initialization PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMonitor::test_record_successful_execution PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMonitor::test_record_failed_execution PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMonitor::test_record_with_accuracy PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMonitor::test_min_max_execution_time PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMonitor::test_get_all_metrics PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMonitor::test_get_dashboard PASSED [ 18%]
+tests/unit/test_agent_monitor.py::TestAgentMonitor::test_get_dashboard_empty PASSED [ 19%]
+tests/unit/test_agent_monitor.py::TestAgentMonitor::test_reset_specific_agent PASSED [ 19%]
+tests/unit/test_agent_monitor.py::TestAgentMonitor::test_reset_all_agents PASSED [ 19%]
+tests/unit/test_agent_monitor.py::TestGlobalMonitor::test_get_agent_monitor PASSED [ 19%]
+tests/unit/test_agent_monitor.py::TestGlobalMonitor::test_record_agent_accuracy PASSED [ 19%]
+tests/unit/test_agent_monitor.py::TestMonitorDecorator::test_decorator_tracks_success PASSED [ 19%]
+tests/unit/test_agent_monitor.py::TestMonitorDecorator::test_decorator_tracks_failure PASSED [ 19%]
+tests/unit/test_agent_monitor.py::TestMonitorDecorator::test_decorator_uses_function_name PASSED [ 19%]
+tests/unit/test_agent_registry.py::TestAgentCapability::test_capability_values PASSED [ 19%]
+tests/unit/test_agent_registry.py::TestAgentCapability::test_all_capabilities_defined PASSED [ 19%]
+tests/unit/test_agent_registry.py::TestAgentRegistration::test_create_registration PASSED [ 19%]
+tests/unit/test_agent_registry.py::TestAgentRegistration::test_registration_requires_capabilities PASSED [ 19%]
+tests/unit/test_agent_registry.py::TestAgentRegistration::test_registration_defaults PASSED [ 19%]
+tests/unit/test_agent_registry.py::TestAgentRegistry::test_registry_initialization PASSED [ 20%]
+tests/unit/test_agent_registry.py::TestAgentRegistry::test_register_agent PASSED [ 20%]
+tests/unit/test_agent_registry.py::TestAgentRegistry::test_get_agent_by_name PASSED [ 20%]
+tests/unit/test_agent_registry.py::TestAgentRegistry::test_get_agents_by_capability PASSED [ 20%]
+tests/unit/test_agent_registry.py::TestAgentRegistry::test_unregister_agent PASSED [ 20%]
+tests/unit/test_agent_registry.py::TestAgentRegistry::test_list_all_agents PASSED [ 20%]
+tests/unit/test_agent_registry.py::TestAgentRegistry::test_agent_priority_ordering PASSED [ 20%]
+tests/unit/test_agent_registry.py::TestAgentRegistryHealthCheck::test_update_agent_status PASSED [ 20%]
+tests/unit/test_agent_registry.py::TestAgentRegistryHealthCheck::test_get_healthy_agents PASSED [ 20%]
+tests/unit/test_agents_channel_specialists.py::TestBaseChannelSpecialist::test_base_is_abstract PASSED [ 20%]
+tests/unit/test_agents_channel_specialists.py::TestBaseChannelSpecialist::test_retrieve_knowledge_without_rag PASSED [ 20%]
+tests/unit/test_agents_channel_specialists.py::TestSearchChannelAgent::test_initialization PASSED [ 20%]
+tests/unit/test_agents_channel_specialists.py::TestSearchChannelAgent::test_analyze PASSED [ 20%]
+tests/unit/test_agents_channel_specialists.py::TestSearchChannelAgent::test_get_benchmarks PASSED [ 20%]
+tests/unit/test_agents_channel_specialists.py::TestSocialChannelAgent::test_initialization PASSED [ 21%]
+tests/unit/test_agents_channel_specialists.py::TestSocialChannelAgent::test_analyze PASSED [ 21%]
+tests/unit/test_agents_channel_specialists.py::TestSocialChannelAgent::test_get_benchmarks PASSED [ 21%]
+tests/unit/test_agents_channel_specialists.py::TestProgrammaticChannelAgent::test_initialization SKIPPED [ 21%]
+tests/unit/test_agents_channel_specialists.py::TestProgrammaticChannelAgent::test_analyze SKIPPED [ 21%]
+tests/unit/test_agents_channel_specialists.py::TestChannelRouter::test_initialization PASSED [ 21%]
+tests/unit/test_agents_channel_specialists.py::TestChannelRouter::test_route_to_specialist PASSED [ 21%]
+tests/unit/test_agents_channel_specialists.py::TestChannelRouter::test_get_available_channels PASSED [ 21%]
+tests/unit/test_agents_extraction.py::TestExtractionAgentInit::test_initialization PASSED [ 21%]
+tests/unit/test_agents_extraction.py::TestExtractionAgentNormalization::test_normalize_campaign_data_empty PASSED [ 21%]
+tests/unit/test_agents_extraction.py::TestExtractionAgentNormalization::test_normalize_campaign_data_with_snapshots PASSED [ 21%]
+tests/unit/test_agents_extraction.py::TestExtractionAgentNormalization::test_skip_incomplete_snapshots PASSED [ 21%]
+tests/unit/test_agents_extraction.py::TestExtractionAgentValidation::test_validate_metrics_empty PASSED [ 21%]
+tests/unit/test_agents_extraction.py::TestExtractionAgentValidation::test_validate_metrics_with_data PASSED [ 22%]
+tests/unit/test_agents_extraction.py::TestExtractionAgentMetricConversion::test_convert_currency PASSED [ 22%]
+tests/unit/test_agents_extraction.py::TestExtractionAgentMetricConversion::test_normalize_metric_name PASSED [ 22%]
+tests/unit/test_agents_extraction.py::TestExtractionAgentMetricConversion::test_calculate_derived_metrics PASSED [ 22%]
+tests/unit/test_agents_integration.py::TestAgentCommunication::test_vision_to_extraction_data_format PASSED [ 22%]
+tests/unit/test_agents_integration.py::TestAgentCommunication::test_extraction_to_reasoning_data_format PASSED [ 22%]
+tests/unit/test_agents_integration.py::TestAgentCommunication::test_reasoning_output_format PASSED [ 22%]
+tests/unit/test_agents_integration.py::TestAgentPipeline::test_pipeline_execution_order PASSED [ 22%]
+tests/unit/test_agents_integration.py::TestAgentPipeline::test_pipeline_error_handling PASSED [ 22%]
+tests/unit/test_agents_integration.py::TestAgentPipeline::test_pipeline_data_flow PASSED [ 22%]
+tests/unit/test_agents_integration.py::TestAgentState::test_agent_state_initialization PASSED [ 22%]
+tests/unit/test_agents_integration.py::TestAgentState::test_agent_state_update PASSED [ 22%]
+tests/unit/test_agents_integration.py::TestAgentState::test_agent_state_persistence PASSED [ 22%]
+tests/unit/test_agents_integration.py::TestAgentConfiguration::test_agent_config_defaults PASSED [ 22%]
+tests/unit/test_agents_integration.py::TestAgentConfiguration::test_agent_config_override PASSED [ 23%]
+tests/unit/test_agents_integration.py::TestAgentRetry::test_retry_on_failure PASSED [ 23%]
+tests/unit/test_agents_integration.py::TestAgentRetry::test_max_retries_exceeded PASSED [ 23%]
+tests/unit/test_agents_integration.py::TestAgentMetrics::test_execution_time_tracking PASSED [ 23%]
+tests/unit/test_agents_integration.py::TestAgentMetrics::test_token_usage_tracking PASSED [ 23%]
+tests/unit/test_agents_integration.py::TestAgentMetrics::test_cost_calculation PASSED [ 23%]
+tests/unit/test_agents_reasoning.py::TestReasoningAgentInit::test_init_openai_provider PASSED [ 23%]
+tests/unit/test_agents_reasoning.py::TestReasoningAgentInit::test_init_anthropic_provider PASSED [ 23%]
+tests/unit/test_agents_reasoning.py::TestReasoningAgentInit::test_init_invalid_provider PASSED [ 23%]
+tests/unit/test_agents_reasoning.py::TestReasoningAgentAnalysis::test_analyze_campaign SKIPPED [ 23%]
+tests/unit/test_agents_reasoning.py::TestReasoningAgentAnalysis::test_generate_channel_insights SKIPPED [ 23%]
+tests/unit/test_agents_reasoning.py::TestReasoningAgentInsights::test_detect_achievements SKIPPED [ 23%]
+tests/unit/test_agents_reasoning.py::TestReasoningAgentInsights::test_generate_recommendations SKIPPED [ 23%]
+tests/unit/test_agents_reasoning.py::TestReasoningAgentPrompts::test_build_analysis_prompt PASSED [ 24%]
+tests/unit/test_agents_vision.py::TestVisionAgentInit::test_init_openai_provider PASSED [ 24%]
+tests/unit/test_agents_vision.py::TestVisionAgentInit::test_init_anthropic_provider PASSED [ 24%]
+tests/unit/test_agents_vision.py::TestVisionAgentInit::test_init_invalid_provider PASSED [ 24%]
+tests/unit/test_agents_vision.py::TestVisionAgentAnalysis::test_analyze_snapshot PASSED [ 24%]
+tests/unit/test_agents_vision.py::TestVisionAgentAnalysis::test_encode_image PASSED [ 24%]
+tests/unit/test_agents_vision.py::TestVisionAgentPrompts::test_build_extraction_prompt PASSED [ 24%]
+tests/unit/test_agents_visualization.py::TestVisualizationAgent::test_initialization PASSED [ 24%]
+tests/unit/test_agents_visualization.py::TestVisualizationAgent::test_generate_chart PASSED [ 24%]
+tests/unit/test_agents_visualization.py::TestVisualizationAgent::test_select_chart_type PASSED [ 24%]
+tests/unit/test_agents_visualization.py::TestEnhancedVisualizationAgent::test_initialization PASSED [ 24%]
+tests/unit/test_agents_visualization.py::TestEnhancedVisualizationAgent::test_create_dashboard PASSED [ 24%]
+tests/unit/test_agents_visualization.py::TestSmartVisualizationEngine::test_initialization PASSED [ 24%]
+tests/unit/test_agents_visualization.py::TestSmartVisualizationEngine::test_recommend_visualization PASSED [ 24%]
+tests/unit/test_agents_visualization.py::TestSmartVisualizationEngine::test_auto_generate PASSED [ 25%]
+tests/unit/test_agents_visualization.py::TestChartGenerator::test_initialization SKIPPED [ 25%]
+tests/unit/test_agents_visualization.py::TestChartGenerator::test_line_chart SKIPPED [ 25%]
+tests/unit/test_agents_visualization.py::TestChartGenerator::test_bar_chart SKIPPED [ 25%]
+tests/unit/test_agents_visualization.py::TestChartGenerator::test_pie_chart SKIPPED [ 25%]
+tests/unit/test_api_auth.py::TestPasswordHashing::test_verify_password_correct PASSED [ 25%]
+tests/unit/test_api_auth.py::TestPasswordHashing::test_verify_password_incorrect PASSED [ 25%]
+tests/unit/test_api_auth.py::TestJWTTokens::test_create_access_token PASSED [ 25%]
+tests/unit/test_api_auth.py::TestJWTTokens::test_create_token_with_expiration PASSED [ 25%]
+tests/unit/test_api_auth.py::TestJWTTokens::test_verify_valid_token PASSED [ 25%]
+tests/unit/test_api_auth.py::TestJWTTokens::test_verify_invalid_token PASSED [ 25%]
+tests/unit/test_api_auth.py::TestUserAuthentication::test_get_existing_user PASSED [ 25%]
+tests/unit/test_api_auth.py::TestUserAuthentication::test_get_nonexistent_user PASSED [ 25%]
+tests/unit/test_api_auth.py::TestUserAuthentication::test_authenticate_valid_credentials PASSED [ 25%]
+tests/unit/test_api_auth.py::TestUserAuthentication::test_authenticate_invalid_password PASSED [ 26%]
+tests/unit/test_api_auth.py::TestUserAuthentication::test_authenticate_nonexistent_user PASSED [ 26%]
+tests/unit/test_api_auth.py::TestAuthExceptions::test_invalid_credentials_error PASSED [ 26%]
+tests/unit/test_api_auth.py::TestAuthExceptions::test_token_expired_error PASSED [ 26%]
+tests/unit/test_api_auth.py::TestAuthExceptions::test_token_invalid_error PASSED [ 26%]
+tests/unit/test_api_endpoints.py::TestHealthEndpoints::test_health_check PASSED [ 26%]
+tests/unit/test_api_endpoints.py::TestHealthEndpoints::test_health_detailed PASSED [ 26%]
+tests/unit/test_api_endpoints.py::TestHealthEndpoints::test_root_endpoint PASSED [ 26%]
+tests/unit/test_api_endpoints.py::TestCampaignEndpoints::test_list_campaigns PASSED [ 26%]
+tests/unit/test_api_endpoints.py::TestCampaignEndpoints::test_create_campaign_validation PASSED [ 26%]
+tests/unit/test_api_endpoints.py::TestCampaignEndpoints::test_get_campaign_not_found PASSED [ 26%]
+tests/unit/test_api_endpoints.py::TestAnalysisEndpoints::test_analysis_requires_data PASSED [ 26%]
+tests/unit/test_api_endpoints.py::TestQueryEndpoints::test_query_endpoint PASSED [ 26%]
+tests/unit/test_api_endpoints.py::TestQueryEndpoints::test_query_requires_text PASSED [ 27%]
+tests/unit/test_api_endpoints.py::TestAuthEndpoints::test_login_endpoint_exists PASSED [ 27%]
+tests/unit/test_api_endpoints.py::TestAuthEndpoints::test_register_endpoint PASSED [ 27%]
+tests/unit/test_api_endpoints.py::TestMetricsEndpoints::test_metrics_endpoint PASSED [ 27%]
+tests/unit/test_api_endpoints.py::TestMetricsEndpoints::test_prometheus_metrics PASSED [ 27%]
+tests/unit/test_api_endpoints.py::TestErrorHandling::test_404_response PASSED [ 27%]
+tests/unit/test_api_endpoints.py::TestErrorHandling::test_method_not_allowed PASSED [ 27%]
+tests/unit/test_api_endpoints.py::TestErrorHandling::test_invalid_json PASSED [ 27%]
+tests/unit/test_api_endpoints.py::TestResponseFormats::test_json_response PASSED [ 27%]
+tests/unit/test_api_endpoints.py::TestResponseFormats::test_cors_headers PASSED [ 27%]
+tests/unit/test_api_extended.py::TestAPIExceptions::test_campaign_not_found_error SKIPPED [ 27%]
+tests/unit/test_api_extended.py::TestAPIExceptions::test_campaign_invalid_status_error SKIPPED [ 27%]
+tests/unit/test_api_extended.py::TestAPIExceptions::test_rate_limit_exceeded_error SKIPPED [ 27%]
+tests/unit/test_api_extended.py::TestAPIExceptions::test_authentication_error SKIPPED [ 27%]
+tests/unit/test_api_extended.py::TestRateLimiting::test_limiter_exists PASSED [ 28%]
+tests/unit/test_api_extended.py::TestRateLimiting::test_rate_limit_enabled_flag PASSED [ 28%]
+tests/unit/test_api_extended.py::TestAPIEndpoints::test_health_endpoint_structure PASSED [ 28%]
+tests/unit/test_api_extended.py::TestAPIEndpoints::test_campaign_response_structure PASSED [ 28%]
+tests/unit/test_api_extended.py::TestAPIEndpoints::test_error_response_structure PASSED [ 28%]
+tests/unit/test_api_extended.py::TestAPIMiddleware::test_cors_headers PASSED [ 28%]
+tests/unit/test_api_extended.py::TestAPIMiddleware::test_auth_middleware_structure PASSED [ 28%]
+tests/unit/test_api_extended.py::TestAPIValidation::test_campaign_create_validation PASSED [ 28%]
+tests/unit/test_api_extended.py::TestAPIValidation::test_invalid_campaign_data PASSED [ 28%]
+tests/unit/test_auth.py::TestUserCreation::test_create_user PASSED       [ 28%]
+tests/unit/test_auth.py::TestUserCreation::test_create_duplicate_user_fails PASSED [ 28%]
+tests/unit/test_auth.py::TestUserCreation::test_password_is_hashed PASSED [ 28%]
+tests/unit/test_auth.py::TestUserCreation::test_default_admin_created PASSED [ 28%]
+tests/unit/test_auth.py::TestAuthentication::test_authenticate_valid_credentials PASSED [ 29%]
+tests/unit/test_auth.py::TestAuthentication::test_authenticate_wrong_password PASSED [ 29%]
+tests/unit/test_auth.py::TestAuthentication::test_authenticate_nonexistent_user PASSED [ 29%]
+tests/unit/test_auth.py::TestAuthentication::test_authenticate_inactive_user PASSED [ 29%]
+tests/unit/test_auth.py::TestAuthorization::test_admin_has_all_permissions PASSED [ 29%]
+tests/unit/test_auth.py::TestAuthorization::test_analyst_limited_permissions PASSED [ 29%]
+tests/unit/test_auth.py::TestAuthorization::test_viewer_read_only PASSED [ 29%]
+tests/unit/test_auth.py::TestSessionManagement::test_create_session PASSED [ 29%]
+tests/unit/test_auth.py::TestSessionManagement::test_validate_session PASSED [ 29%]
+tests/unit/test_auth.py::TestSessionManagement::test_logout_invalidates_session PASSED [ 29%]
+tests/unit/test_auth.py::TestPasswordSecurity::test_password_hashing PASSED [ 29%]
+tests/unit/test_auth.py::TestPasswordSecurity::test_password_verification PASSED [ 29%]
+tests/unit/test_auth.py::TestPasswordSecurity::test_weak_password_rejected PASSED [ 29%]
+tests/unit/test_auth.py::TestUserManagement::test_update_user_email PASSED [ 29%]
+tests/unit/test_auth.py::TestUserManagement::test_change_password PASSED [ 30%]
+tests/unit/test_auth.py::TestUserManagement::test_deactivate_user PASSED [ 30%]
+tests/unit/test_auth.py::TestUserManagement::test_list_users PASSED      [ 30%]
+tests/unit/test_auto_insights.py::TestMediaAnalyticsExpertInit::test_expert_initializes PASSED [ 30%]
+tests/unit/test_auto_insights.py::TestMediaAnalyticsExpertInit::test_expert_has_required_methods PASSED [ 30%]
+tests/unit/test_auto_insights.py::TestAnalyzeAll::test_analyze_all_returns_dict PASSED [ 30%]
+tests/unit/test_auto_insights.py::TestAnalyzeAll::test_analyze_all_handles_empty_df PASSED [ 30%]
+tests/unit/test_auto_insights.py::TestAnalyzeAll::test_analyze_all_handles_missing_columns PASSED [ 30%]
+tests/unit/test_auto_insights.py::TestMetricsCalculation::test_calculate_ctr PASSED [ 30%]
+tests/unit/test_auto_insights.py::TestMetricsCalculation::test_calculate_cpa PASSED [ 30%]
+tests/unit/test_auto_insights.py::TestMetricsCalculation::test_calculate_roas PASSED [ 30%]
+tests/unit/test_auto_insights.py::TestMetricsCalculation::test_handles_zero_division PASSED [ 30%]
+tests/unit/test_auto_insights.py::TestRAGSummary::test_rag_summary_returns_string PASSED [ 30%]
+tests/unit/test_auto_insights.py::TestRAGSummary::test_rag_summary_includes_metrics PASSED [ 31%]
+tests/unit/test_auto_insights.py::TestErrorHandling::test_handles_llm_timeout PASSED [ 31%]
+tests/unit/test_auto_insights.py::TestErrorHandling::test_handles_invalid_data_types PASSED [ 31%]
+tests/unit/test_auto_insights.py::TestPlatformAnalysis::test_groups_by_platform PASSED [ 31%]
+tests/unit/test_auto_insights.py::TestPlatformAnalysis::test_platform_cpa_calculation PASSED [ 31%]
+tests/unit/test_backup_manager.py::TestBackupManager::test_initialization PASSED [ 31%]
+tests/unit/test_backup_manager.py::TestBackupManager::test_backup_dir_created PASSED [ 31%]
+tests/unit/test_backup_manager.py::TestBackupManager::test_create_backup_sqlite PASSED [ 31%]
+tests/unit/test_backup_manager.py::TestBackupManager::test_create_backup_failure PASSED [ 31%]
+tests/unit/test_backup_manager.py::TestBackupManager::test_cleanup_old_backups PASSED [ 31%]
+tests/unit/test_backup_manager.py::TestBackupManager::test_list_backups PASSED [ 31%]
+tests/unit/test_backup_manager.py::TestBackupManagerPostgreSQL::test_postgresql_backup PASSED [ 31%]
+tests/unit/test_backup_manager.py::TestBackupCompression::test_compress_backup PASSED [ 31%]
+tests/unit/test_backup_manager.py::TestBackupCompression::test_no_compression PASSED [ 31%]
+tests/unit/test_budget_optimizer.py::TestOptimizerInit::test_init_with_valid_data PASSED [ 32%]
+tests/unit/test_budget_optimizer.py::TestOptimizerInit::test_channel_performance_calculated PASSED [ 32%]
+tests/unit/test_budget_optimizer.py::TestOptimizerInit::test_saturation_curves_calculated PASSED [ 32%]
+tests/unit/test_budget_optimizer.py::TestChannelPerformance::test_avg_roas_calculated PASSED [ 32%]
+tests/unit/test_budget_optimizer.py::TestChannelPerformance::test_std_roas_calculated PASSED [ 32%]
+tests/unit/test_budget_optimizer.py::TestChannelPerformance::test_campaign_count_tracked PASSED [ 32%]
+tests/unit/test_budget_optimizer.py::TestChannelPerformance::test_total_conversions_summed PASSED [ 32%]
+tests/unit/test_budget_optimizer.py::TestSaturationCurves::test_saturation_point_positive PASSED [ 32%]
+tests/unit/test_budget_optimizer.py::TestSaturationCurves::test_peak_roas_positive PASSED [ 32%]
+tests/unit/test_budget_optimizer.py::TestSaturationCurves::test_optimal_range_valid PASSED [ 32%]
+tests/unit/test_budget_optimizer.py::TestSaturationCurves::test_insufficient_data_uses_defaults PASSED [ 32%]
+tests/unit/test_budget_optimizer.py::TestBudgetOptimization::test_optimize_allocation_returns_dict SKIPPED [ 32%]
+tests/unit/test_budget_optimizer.py::TestBudgetOptimization::test_allocation_sums_to_budget SKIPPED [ 32%]
+tests/unit/test_budget_optimizer.py::TestBudgetOptimization::test_optimize_for_roas SKIPPED [ 33%]
+tests/unit/test_budget_optimizer.py::TestBudgetOptimization::test_optimize_for_conversions SKIPPED [ 33%]
+tests/unit/test_budget_optimizer.py::TestBudgetOptimization::test_respects_channel_constraints SKIPPED [ 33%]
+tests/unit/test_budget_optimizer.py::TestRecommendations::test_get_recommendations PASSED [ 33%]
+tests/unit/test_budget_optimizer.py::TestRecommendations::test_recommendations_include_rationale PASSED [ 33%]
+tests/unit/test_budget_optimizer.py::TestEdgeCases::test_zero_budget SKIPPED [ 33%]
+tests/unit/test_budget_optimizer.py::TestEdgeCases::test_very_large_budget SKIPPED [ 33%]
+tests/unit/test_budget_optimizer.py::TestEdgeCases::test_single_channel_data SKIPPED [ 33%]
+tests/unit/test_budget_optimizer.py::TestEdgeCases::test_negative_roas_handled PASSED [ 33%]
+tests/unit/test_campaign_ingestion.py::TestValidateCampaignDataframe::test_valid_dataframe PASSED [ 33%]
+tests/unit/test_campaign_ingestion.py::TestValidateCampaignDataframe::test_missing_required_columns PASSED [ 33%]
+tests/unit/test_campaign_ingestion.py::TestValidateCampaignDataframe::test_missing_recommended_columns PASSED [ 33%]
+tests/unit/test_campaign_ingestion.py::TestValidateCampaignDataframe::test_negative_spend_alert PASSED [ 33%]
+tests/unit/test_campaign_ingestion.py::TestValidateCampaignDataframe::test_negative_conversions_alert PASSED [ 33%]
+tests/unit/test_campaign_ingestion.py::TestValidateCampaignDataframe::test_duplicate_rows_alert PASSED [ 34%]
+tests/unit/test_campaign_ingestion.py::TestProcessCampaignDataframe::test_process_adds_metadata PASSED [ 34%]
+tests/unit/test_campaign_ingestion.py::TestProcessCampaignDataframe::test_process_returns_validation_status_ok PASSED [ 34%]
+tests/unit/test_campaign_ingestion.py::TestProcessCampaignDataframe::test_process_returns_validation_status_warn PASSED [ 34%]
+tests/unit/test_campaign_ingestion.py::TestProcessCampaignDataframe::test_process_returns_validation_status_error PASSED [ 34%]
+tests/unit/test_campaign_ingestion.py::TestProcessCampaignDataframe::test_process_preserves_custom_metadata PASSED [ 34%]
+tests/unit/test_campaign_ingestion.py::TestIngestCampaignData::test_ingest_success PASSED [ 34%]
+tests/unit/test_campaign_ingestion.py::TestIngestCampaignData::test_ingest_failure PASSED [ 34%]
+tests/unit/test_campaign_ingestion.py::TestIngestCampaignData::test_ingest_with_source PASSED [ 34%]
+tests/unit/test_campaign_ingestion.py::TestLoadSampleCampaignData::test_load_sample_not_found PASSED [ 34%]
+tests/unit/test_campaign_ingestion.py::TestLoadSampleCampaignData::test_load_sample_success PASSED [ 34%]
+tests/unit/test_campaign_ingestion.py::TestLoadSampleCampaignData::test_load_sample_error PASSED [ 34%]
+tests/unit/test_campaign_ingestion.py::TestConstants::test_required_columns PASSED [ 34%]
+tests/unit/test_campaign_ingestion.py::TestConstants::test_recommended_columns PASSED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignServiceInit::test_init_with_session SKIPPED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignCreation::test_create_campaign SKIPPED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignCreation::test_create_campaign_with_dates SKIPPED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignRetrieval::test_get_campaign_by_id SKIPPED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignRetrieval::test_get_nonexistent_campaign SKIPPED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignRetrieval::test_get_all_campaigns SKIPPED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignRetrieval::test_get_campaigns_by_platform SKIPPED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignRetrieval::test_get_active_campaigns SKIPPED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignUpdate::test_update_campaign_budget SKIPPED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignUpdate::test_update_campaign_status SKIPPED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignUpdate::test_update_campaign_metrics SKIPPED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignDeletion::test_delete_campaign SKIPPED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignDeletion::test_soft_delete_campaign SKIPPED [ 35%]
+tests/unit/test_campaign_service.py::TestCampaignAnalytics::test_calculate_ctr PASSED [ 36%]
+tests/unit/test_campaign_service.py::TestCampaignAnalytics::test_calculate_cpa PASSED [ 36%]
+tests/unit/test_campaign_service.py::TestCampaignAnalytics::test_calculate_roas PASSED [ 36%]
+tests/unit/test_campaign_service.py::TestCampaignAnalytics::test_get_campaign_performance SKIPPED [ 36%]
+tests/unit/test_campaign_service.py::TestCampaignAnalytics::test_get_platform_summary SKIPPED [ 36%]
+tests/unit/test_campaign_service.py::TestCampaignSearch::test_search_by_name SKIPPED [ 36%]
+tests/unit/test_campaign_service.py::TestCampaignSearch::test_search_by_date_range SKIPPED [ 36%]
+tests/unit/test_campaign_service.py::TestBulkOperations::test_bulk_create SKIPPED [ 36%]
+tests/unit/test_campaign_service.py::TestBulkOperations::test_bulk_update_status SKIPPED [ 36%]
+tests/unit/test_campaign_service.py::TestEdgeCases::test_campaign_with_zero_spend SKIPPED [ 36%]
+tests/unit/test_campaign_service.py::TestEdgeCases::test_campaign_with_null_dates SKIPPED [ 36%]
+tests/unit/test_channel_specialists.py::TestChannelRouter::test_router_initialization PASSED [ 36%]
+tests/unit/test_channel_specialists.py::TestChannelRouter::test_detect_google_ads_as_search PASSED [ 36%]
+tests/unit/test_channel_specialists.py::TestChannelRouter::test_detect_meta_as_social PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestChannelRouter::test_detect_dv360_as_programmatic PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestChannelRouter::test_get_specialist_search PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestChannelRouter::test_get_specialist_social PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestChannelRouter::test_get_specialist_programmatic PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestChannelRouter::test_get_available_specialists PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestChannelRouter::test_route_and_analyze_empty_data PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestChannelRouter::test_infer_channel_from_metrics PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestSearchChannelAgent::test_agent_initialization PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestSearchChannelAgent::test_analyze_returns_dict PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestSearchChannelAgent::test_analyze_includes_metrics PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestSocialChannelAgent::test_agent_initialization PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestSocialChannelAgent::test_analyze_returns_dict PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestProgrammaticAgent::test_agent_initialization PASSED [ 37%]
+tests/unit/test_channel_specialists.py::TestProgrammaticAgent::test_analyze_returns_dict PASSED [ 38%]
+tests/unit/test_channel_specialists.py::TestMultiChannelAnalysis::test_analyze_multi_channel PASSED [ 38%]
+tests/unit/test_channel_specialists.py::TestMultiChannelAnalysis::test_cross_channel_insights_structure PASSED [ 38%]
+tests/unit/test_channel_specialists.py::TestPlatformDetection::test_detect_linkedin PASSED [ 38%]
+tests/unit/test_channel_specialists.py::TestPlatformDetection::test_detect_tiktok PASSED [ 38%]
+tests/unit/test_channel_specialists.py::TestPlatformDetection::test_detect_bing PASSED [ 38%]
+tests/unit/test_channel_specialists.py::TestPlatformDetection::test_detect_amazon_dsp PASSED [ 38%]
+tests/unit/test_channel_specialists.py::TestPlatformDetection::test_unknown_platform_fallback PASSED [ 38%]
+tests/unit/test_chart_generator_extended.py::TestChartGeneratorInit::test_init_creates_instance PASSED [ 38%]
+tests/unit/test_chart_generator_extended.py::TestChartGeneratorInit::test_has_generate_method PASSED [ 38%]
+tests/unit/test_chart_generator_extended.py::TestBarCharts::test_generate_bar_chart PASSED [ 38%]
+tests/unit/test_chart_generator_extended.py::TestBarCharts::test_generate_grouped_bar_chart PASSED [ 38%]
+tests/unit/test_chart_generator_extended.py::TestBarCharts::test_generate_stacked_bar_chart PASSED [ 38%]
+tests/unit/test_chart_generator_extended.py::TestLineCharts::test_generate_line_chart PASSED [ 38%]
+tests/unit/test_chart_generator_extended.py::TestLineCharts::test_generate_multi_line_chart PASSED [ 39%]
+tests/unit/test_chart_generator_extended.py::TestPieCharts::test_generate_pie_chart PASSED [ 39%]
+tests/unit/test_chart_generator_extended.py::TestPieCharts::test_generate_donut_chart PASSED [ 39%]
+tests/unit/test_chart_generator_extended.py::TestScatterPlots::test_generate_scatter_plot PASSED [ 39%]
+tests/unit/test_chart_generator_extended.py::TestScatterPlots::test_generate_scatter_with_size PASSED [ 39%]
+tests/unit/test_chart_generator_extended.py::TestHeatmaps::test_generate_heatmap PASSED [ 39%]
+tests/unit/test_chart_generator_extended.py::TestSmartChartSelection::test_select_chart_for_comparison PASSED [ 39%]
+tests/unit/test_chart_generator_extended.py::TestSmartChartSelection::test_select_chart_for_trend PASSED [ 39%]
+tests/unit/test_chart_generator_extended.py::TestSmartChartSelection::test_select_chart_for_distribution PASSED [ 39%]
+tests/unit/test_chart_generator_extended.py::TestChartCustomization::test_set_chart_title PASSED [ 39%]
+tests/unit/test_chart_generator_extended.py::TestChartCustomization::test_set_axis_labels PASSED [ 39%]
+tests/unit/test_chart_generator_extended.py::TestEdgeCases::test_empty_dataframe PASSED [ 39%]
+tests/unit/test_chart_generator_extended.py::TestEdgeCases::test_single_row_dataframe PASSED [ 39%]
+tests/unit/test_chart_generator_extended.py::TestEdgeCases::test_null_values PASSED [ 40%]
+tests/unit/test_chart_generator_extended.py::TestEdgeCases::test_large_dataset PASSED [ 40%]
+tests/unit/test_comparison_logger.py::TestComparisonLoggerInit::test_logger_creates_directories PASSED [ 40%]
+tests/unit/test_comparison_logger.py::TestComparisonLoggerInit::test_logger_creates_csv_files PASSED [ 40%]
+tests/unit/test_comparison_logger.py::TestLogComparison::test_log_comparison_creates_json PASSED [ 40%]
+tests/unit/test_comparison_logger.py::TestLogComparison::test_log_comparison_calculates_increases PASSED [ 40%]
+tests/unit/test_comparison_logger.py::TestLogComparison::test_log_comparison_appends_to_csv PASSED [ 40%]
+tests/unit/test_comparison_logger.py::TestLogFeedback::test_log_feedback PASSED [ 40%]
+tests/unit/test_comparison_logger.py::TestSummaryStats::test_summary_stats_empty PASSED [ 40%]
+tests/unit/test_comparison_logger.py::TestSummaryStats::test_summary_stats_with_data PASSED [ 40%]
+tests/unit/test_comparison_logger.py::TestExportReport::test_export_report PASSED [ 40%]
+tests/unit/test_comparison_logger.py::TestPercentageIncrease::test_percentage_increase_normal PASSED [ 40%]
+tests/unit/test_comparison_logger.py::TestPercentageIncrease::test_percentage_increase_zero_baseline PASSED [ 40%]
+tests/unit/test_comparison_logger.py::TestPercentageIncrease::test_percentage_decrease PASSED [ 40%]
+tests/unit/test_data_connector_extended.py::TestDatabaseConnectorInit::test_initialization PASSED [ 41%]
+tests/unit/test_data_connector_extended.py::TestDatabaseConnectorInit::test_supported_databases PASSED [ 41%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_sqlite_connection_string PASSED [ 41%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_sqlite_requires_file_path PASSED [ 41%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_postgresql_connection_string PASSED [ 41%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_postgresql_default_port PASSED [ 41%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_mysql_connection_string PASSED [ 41%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_mssql_connection_string PASSED [ 41%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_oracle_connection_string PASSED [ 41%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_snowflake_connection_string PASSED [ 41%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_snowflake_requires_account PASSED [ 41%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_bigquery_connection_string PASSED [ 41%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_redshift_connection_string PASSED [ 41%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_databricks_connection_string PASSED [ 42%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_databricks_requires_http_path PASSED [ 42%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_unsupported_database PASSED [ 42%]
+tests/unit/test_data_connector_extended.py::TestConnectionStringBuilding::test_password_encoding PASSED [ 42%]
+tests/unit/test_data_connector_extended.py::TestDatabaseConnection::test_connect_with_string PASSED [ 42%]
+tests/unit/test_data_connector_extended.py::TestDatabaseConnection::test_connect_with_db_type PASSED [ 42%]
+tests/unit/test_data_connector_extended.py::TestDatabaseConnection::test_connect_requires_params PASSED [ 42%]
+tests/unit/test_data_connector_extended.py::TestDatabaseConnection::test_connect_failure PASSED [ 42%]
+tests/unit/test_data_connector_extended.py::TestDatabaseQueries::test_execute_query SKIPPED [ 42%]
+tests/unit/test_data_connector_extended.py::TestDatabaseQueries::test_query_to_dataframe PASSED [ 42%]
+tests/unit/test_data_connector_extended.py::TestDatabaseQueries::test_load_table SKIPPED [ 42%]
+tests/unit/test_data_connector_extended.py::TestDatabaseDisconnect::test_disconnect PASSED [ 42%]
+tests/unit/test_data_connector_extended.py::TestDatabaseDisconnect::test_disconnect_clears_engine PASSED [ 42%]
+tests/unit/test_data_loader.py::TestDataLoaderCSV::test_load_valid_csv PASSED [ 42%]
+tests/unit/test_data_loader.py::TestDataLoaderCSV::test_load_csv_fixes_column_names PASSED [ 43%]
+tests/unit/test_data_loader.py::TestDataLoaderCSV::test_load_csv_handles_duplicates PASSED [ 43%]
+tests/unit/test_data_loader.py::TestDataLoaderCSV::test_load_empty_csv_returns_error PASSED [ 43%]
+tests/unit/test_data_loader.py::TestDataLoaderCSV::test_load_csv_all_nulls_returns_error PASSED [ 43%]
+tests/unit/test_data_loader.py::TestDataLoaderCSV::test_load_csv_skip_validation PASSED [ 43%]
+tests/unit/test_data_loader.py::TestNormalizeCampaignDataframe::test_maps_common_column_variations PASSED [ 43%]
+tests/unit/test_data_loader.py::TestNormalizeCampaignDataframe::test_spend_converted_to_numeric PASSED [ 43%]
+tests/unit/test_data_loader.py::TestNormalizeCampaignDataframe::test_preserves_unmapped_columns PASSED [ 43%]
+tests/unit/test_data_loader.py::TestNormalizeCampaignDataframe::test_no_duplicate_target_columns PASSED [ 43%]
+tests/unit/test_data_loader.py::TestErrorHandling::test_file_not_found PASSED [ 43%]
+tests/unit/test_data_loader.py::TestErrorHandling::test_unsupported_extension PASSED [ 43%]
+tests/unit/test_data_loader.py::TestErrorHandling::test_safe_load_csv_returns_none_on_error PASSED [ 43%]
+tests/unit/test_data_loader.py::TestFetchData::test_fetch_csv PASSED     [ 43%]
+tests/unit/test_data_loader_extended.py::TestExcelLoading::test_load_valid_excel PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestExcelLoading::test_load_excel_specific_sheet PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestExcelLoading::test_load_excel_nonexistent_file PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestExcelLoading::test_load_excel_skip_validation PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestJSONLoading::test_load_valid_json PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestJSONLoading::test_load_json_from_bytes PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestJSONLoading::test_load_invalid_json PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestParquetLoading::test_load_valid_parquet PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestParquetLoading::test_load_parquet_nonexistent PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestStreamlitUpload::test_load_none_file PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestStreamlitUpload::test_load_csv_upload PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestStreamlitUpload::test_load_file_too_large PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestStreamlitUpload::test_load_unsupported_extension PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestColumnNameFixing::test_fix_spaces_in_column_names PASSED [ 44%]
+tests/unit/test_data_loader_extended.py::TestColumnNameFixing::test_fix_special_characters PASSED [ 45%]
+tests/unit/test_data_loader_extended.py::TestColumnNameFixing::test_fix_duplicate_columns PASSED [ 45%]
+tests/unit/test_data_loader_extended.py::TestDataValidation::test_validate_empty_dataframe PASSED [ 45%]
+tests/unit/test_data_loader_extended.py::TestDataValidation::test_validate_all_null_dataframe PASSED [ 45%]
+tests/unit/test_data_loader_extended.py::TestDataValidation::test_validate_valid_dataframe PASSED [ 45%]
+tests/unit/test_data_loader_extended.py::TestConvenienceFunctions::test_fetch_data_csv PASSED [ 45%]
+tests/unit/test_data_loader_extended.py::TestConvenienceFunctions::test_safe_load_csv_returns_none_on_error PASSED [ 45%]
+tests/unit/test_data_loader_extended.py::TestConvenienceFunctions::test_safe_load_csv_valid_file PASSED [ 45%]
+tests/unit/test_data_loader_extended.py::TestCampaignNormalization::test_normalize_spend_column SKIPPED [ 45%]
+tests/unit/test_data_loader_extended.py::TestCampaignNormalization::test_normalize_preserves_data SKIPPED [ 45%]
+tests/unit/test_data_validator.py::test_column_normalization_and_numeric_cast PASSED [ 45%]
+tests/unit/test_data_validator.py::test_funnel_stage_normalization PASSED [ 45%]
+tests/unit/test_data_validator.py::test_date_parsing_success PASSED      [ 45%]
+tests/unit/test_data_validator.py::test_partial_missing_data PASSED      [ 46%]
+tests/unit/test_database_connector.py::TestDatabaseConnector::test_initialization PASSED [ 46%]
+tests/unit/test_database_connector.py::TestDatabaseConnector::test_supported_databases PASSED [ 46%]
+tests/unit/test_database_connector.py::TestDatabaseConnector::test_build_postgresql_connection_string PASSED [ 46%]
+tests/unit/test_database_connector.py::TestDatabaseConnector::test_build_mysql_connection_string PASSED [ 46%]
+tests/unit/test_database_connector.py::TestDatabaseConnector::test_build_sqlite_connection_string PASSED [ 46%]
+tests/unit/test_database_connector.py::TestDatabaseConnector::test_connect_sqlite PASSED [ 46%]
+tests/unit/test_database_connector.py::TestDatabaseConnector::test_execute_query SKIPPED [ 46%]
+tests/unit/test_database_connector.py::TestDatabaseConnector::test_load_dataframe PASSED [ 46%]
+tests/unit/test_database_connector.py::TestDatabaseConnector::test_disconnect PASSED [ 46%]
+tests/unit/test_database_connector.py::TestDatabaseConnectorCloudStorage::test_s3_supported PASSED [ 46%]
+tests/unit/test_database_connector.py::TestDatabaseConnectorCloudStorage::test_bigquery_supported PASSED [ 46%]
+tests/unit/test_database_connector.py::TestDatabaseConnectorCloudStorage::test_snowflake_supported PASSED [ 46%]
+tests/unit/test_database_models.py::TestCampaignModel::test_create_campaign PASSED [ 46%]
+tests/unit/test_database_models.py::TestCampaignModel::test_campaign_default_values PASSED [ 47%]
+tests/unit/test_database_models.py::TestCampaignModel::test_campaign_with_metrics PASSED [ 47%]
+tests/unit/test_database_models.py::TestCampaignModel::test_campaign_additional_data PASSED [ 47%]
+tests/unit/test_database_models.py::TestCampaignModel::test_campaign_timestamps PASSED [ 47%]
+tests/unit/test_database_models.py::TestCampaignModel::test_campaign_unique_id PASSED [ 47%]
+tests/unit/test_database_models.py::TestCampaignModel::test_campaign_repr PASSED [ 47%]
+tests/unit/test_database_models.py::TestAnalysisModel::test_create_analysis PASSED [ 47%]
+tests/unit/test_database_models.py::TestAnalysisModel::test_analysis_default_status PASSED [ 47%]
+tests/unit/test_database_models.py::TestAnalysisModel::test_analysis_json_fields PASSED [ 47%]
+tests/unit/test_database_models.py::TestAnalysisModel::test_analysis_campaign_relationship PASSED [ 47%]
+tests/unit/test_database_models.py::TestQueryHistoryModel::test_create_query_history PASSED [ 47%]
+tests/unit/test_database_models.py::TestQueryHistoryModel::test_query_with_results PASSED [ 47%]
+tests/unit/test_database_models.py::TestLLMUsageModel::test_create_llm_usage PASSED [ 47%]
+tests/unit/test_database_models.py::TestLLMUsageModel::test_llm_usage_cost_tracking PASSED [ 48%]
+tests/unit/test_database_models.py::TestDatabaseQueries::test_query_campaigns_by_platform PASSED [ 48%]
+tests/unit/test_database_models.py::TestDatabaseQueries::test_query_campaigns_by_date_range PASSED [ 48%]
+tests/unit/test_database_models.py::TestDatabaseQueries::test_aggregate_metrics PASSED [ 48%]
+tests/unit/test_di_containers.py::TestDatabaseContainer::test_container_creation PASSED [ 48%]
+tests/unit/test_di_containers.py::TestDatabaseContainer::test_db_config_provider PASSED [ 48%]
+tests/unit/test_di_containers.py::TestDatabaseContainer::test_db_manager_provider PASSED [ 48%]
+tests/unit/test_di_containers.py::TestRepositoryContainer::test_container_creation PASSED [ 48%]
+tests/unit/test_di_containers.py::TestRepositoryContainer::test_campaign_repository_provider PASSED [ 48%]
+tests/unit/test_di_containers.py::TestRepositoryContainer::test_analysis_repository_provider PASSED [ 48%]
+tests/unit/test_enhanced_reasoning.py::TestEnhancedReasoningInit::test_init_creates_instance PASSED [ 48%]
+tests/unit/test_enhanced_reasoning.py::TestEnhancedReasoningInit::test_init_with_custom_config PASSED [ 48%]
+tests/unit/test_enhanced_reasoning.py::TestContextRetrieval::test_retrieve_context PASSED [ 48%]
+tests/unit/test_enhanced_reasoning.py::TestContextRetrieval::test_retrieve_context_with_filters PASSED [ 48%]
+tests/unit/test_enhanced_reasoning.py::TestContextRetrieval::test_retrieve_context_limit PASSED [ 49%]
+tests/unit/test_enhanced_reasoning.py::TestReasoning::test_analyze_query PASSED [ 49%]
+tests/unit/test_enhanced_reasoning.py::TestReasoning::test_generate_insights PASSED [ 49%]
+tests/unit/test_enhanced_reasoning.py::TestReasoning::test_answer_question PASSED [ 49%]
+tests/unit/test_enhanced_reasoning.py::TestRAGIntegration::test_rag_enhanced_response PASSED [ 49%]
+tests/unit/test_enhanced_reasoning.py::TestRAGIntegration::test_rag_with_no_context PASSED [ 49%]
+tests/unit/test_enhanced_reasoning.py::TestChainOfThought::test_step_by_step_reasoning PASSED [ 49%]
+tests/unit/test_enhanced_reasoning.py::TestChainOfThought::test_reasoning_trace PASSED [ 49%]
+tests/unit/test_enhanced_reasoning.py::TestPromptEngineering::test_build_prompt PASSED [ 49%]
+tests/unit/test_enhanced_reasoning.py::TestPromptEngineering::test_prompt_includes_context PASSED [ 49%]
+tests/unit/test_enhanced_reasoning.py::TestErrorHandling::test_handles_llm_error PASSED [ 49%]
+tests/unit/test_enhanced_reasoning.py::TestErrorHandling::test_handles_empty_dataframe PASSED [ 49%]
+tests/unit/test_enhanced_reasoning.py::TestErrorHandling::test_handles_invalid_query PASSED [ 49%]
+tests/unit/test_enhanced_reasoning.py::TestCaching::test_cache_hit PASSED [ 50%]
+tests/unit/test_enhanced_reasoning.py::TestCaching::test_cache_invalidation PASSED [ 50%]
+tests/unit/test_enhanced_reasoning.py::TestPerformance::test_response_time_tracking PASSED [ 50%]
+tests/unit/test_feedback_system.py::TestFeedbackSystem::test_initialization PASSED [ 50%]
+tests/unit/test_feedback_system.py::TestFeedbackSystem::test_record_insight_feedback PASSED [ 50%]
+tests/unit/test_feedback_system.py::TestFeedbackSystem::test_record_recommendation_feedback SKIPPED [ 50%]
+tests/unit/test_feedback_system.py::TestFeedbackSystem::test_get_feedback_summary PASSED [ 50%]
+tests/unit/test_feedback_system.py::TestFeedbackSystem::test_get_feedback_by_category PASSED [ 50%]
+tests/unit/test_feedback_system.py::TestFeedbackSystem::test_calculate_average_rating PASSED [ 50%]
+tests/unit/test_feedback_system.py::TestFeedbackSystem::test_export_feedback PASSED [ 50%]
+tests/unit/test_feedback_system.py::TestFeedbackAnalytics::test_trend_analysis PASSED [ 50%]
+tests/unit/test_feedback_system.py::TestFeedbackAnalytics::test_category_performance PASSED [ 50%]
+tests/unit/test_knowledge_benchmark.py::TestDynamicBenchmarkEngineInit::test_initialization_without_rag PASSED [ 50%]
+tests/unit/test_knowledge_benchmark.py::TestDynamicBenchmarkEngineInit::test_initialization_with_rag PASSED [ 50%]
+tests/unit/test_knowledge_benchmark.py::TestDynamicBenchmarkEngineInit::test_benchmark_db_loaded PASSED [ 51%]
+tests/unit/test_knowledge_benchmark.py::TestContextualBenchmarks::test_get_contextual_benchmarks_basic PASSED [ 51%]
+tests/unit/test_knowledge_benchmark.py::TestContextualBenchmarks::test_get_contextual_benchmarks_with_objective PASSED [ 51%]
+tests/unit/test_knowledge_benchmark.py::TestContextualBenchmarks::test_get_contextual_benchmarks_with_region PASSED [ 51%]
+tests/unit/test_knowledge_benchmark.py::TestContextualBenchmarks::test_get_contextual_benchmarks_full_context PASSED [ 51%]
+tests/unit/test_knowledge_benchmark.py::TestBenchmarkAdjustments::test_apply_objective_adjustments SKIPPED [ 51%]
+tests/unit/test_knowledge_benchmark.py::TestBenchmarkAdjustments::test_apply_regional_adjustments PASSED [ 51%]
+tests/unit/test_knowledge_benchmark.py::TestBenchmarkAdjustments::test_get_base_benchmarks PASSED [ 51%]
+tests/unit/test_knowledge_benchmark.py::TestBenchmarkComparison::test_compare_to_benchmark PASSED [ 51%]
+tests/unit/test_knowledge_benchmark.py::TestBenchmarkComparison::test_get_performance_rating PASSED [ 51%]
+tests/unit/test_knowledge_benchmark.py::TestBenchmarkDatabase::test_load_benchmarks PASSED [ 51%]
+tests/unit/test_knowledge_benchmark.py::TestBenchmarkDatabase::test_load_regional_multipliers PASSED [ 51%]
+tests/unit/test_knowledge_benchmark.py::TestBenchmarkDatabase::test_load_objective_adjustments PASSED [ 51%]
+tests/unit/test_knowledge_benchmark.py::TestRAGIntegration::test_retrieve_industry_benchmarks PASSED [ 51%]
+tests/unit/test_knowledge_comprehensive.py::TestChunkOptimizer::test_initialization PASSED [ 52%]
+tests/unit/test_knowledge_comprehensive.py::TestChunkOptimizer::test_chunk_strategy_enum PASSED [ 52%]
+tests/unit/test_knowledge_comprehensive.py::TestChunkOptimizer::test_chunk_config_defaults PASSED [ 52%]
+tests/unit/test_knowledge_comprehensive.py::TestChunkOptimizer::test_optimize_chunks PASSED [ 52%]
+tests/unit/test_knowledge_comprehensive.py::TestChunkOptimizer::test_fixed_size_chunking PASSED [ 52%]
+tests/unit/test_knowledge_comprehensive.py::TestChunkOptimizer::test_sentence_boundary_chunking PASSED [ 52%]
+tests/unit/test_knowledge_comprehensive.py::TestChunkOptimizer::test_semantic_chunking PASSED [ 52%]
+tests/unit/test_knowledge_comprehensive.py::TestChunkOptimizer::test_get_optimal_config PASSED [ 52%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeBaseRefresher::test_initialization PASSED [ 52%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeBaseRefresher::test_refresh_config PASSED [ 52%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeBaseRefresher::test_register_source PASSED [ 52%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeBaseRefresher::test_check_for_changes SKIPPED [ 52%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeBaseRefresher::test_refresh_source PASSED [ 52%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeBaseRefresher::test_get_source_metadata PASSED [ 53%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeBaseRefresher::test_content_hash PASSED [ 53%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeBaseRefresher::test_different_content_different_hash PASSED [ 53%]
+tests/unit/test_knowledge_comprehensive.py::TestVectorStoreOperations::test_embedding_dimension PASSED [ 53%]
+tests/unit/test_knowledge_comprehensive.py::TestVectorStoreOperations::test_cosine_similarity PASSED [ 53%]
+tests/unit/test_knowledge_comprehensive.py::TestVectorStoreOperations::test_batch_embedding_structure PASSED [ 53%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeIngestionPatterns::test_url_pattern_detection PASSED [ 53%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeIngestionPatterns::test_youtube_id_extraction PASSED [ 53%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeIngestionPatterns::test_text_cleaning PASSED [ 53%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeRetrieval::test_top_k_selection PASSED [ 53%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeRetrieval::test_score_threshold_filtering PASSED [ 53%]
+tests/unit/test_knowledge_comprehensive.py::TestKnowledgeRetrieval::test_metadata_filtering PASSED [ 53%]
+tests/unit/test_knowledge_extended.py::TestChunkingStrategy::test_initialization SKIPPED [ 53%]
+tests/unit/test_knowledge_extended.py::TestChunkingStrategy::test_chunk_text SKIPPED [ 53%]
+tests/unit/test_knowledge_extended.py::TestChunkingStrategy::test_chunk_with_overlap SKIPPED [ 54%]
+tests/unit/test_knowledge_extended.py::TestChunkingStrategy::test_semantic_chunking SKIPPED [ 54%]
+tests/unit/test_knowledge_extended.py::TestFreshnessValidator::test_initialization PASSED [ 54%]
+tests/unit/test_knowledge_extended.py::TestFreshnessValidator::test_check_freshness SKIPPED [ 54%]
+tests/unit/test_knowledge_extended.py::TestFreshnessValidator::test_is_stale PASSED [ 54%]
+tests/unit/test_knowledge_extended.py::TestFreshnessValidator::test_get_refresh_priority PASSED [ 54%]
+tests/unit/test_knowledge_extended.py::TestEnhancedReasoning::test_initialization SKIPPED [ 54%]
+tests/unit/test_knowledge_extended.py::TestEnhancedReasoning::test_reason_with_context SKIPPED [ 54%]
+tests/unit/test_knowledge_extended.py::TestEnhancedReasoning::test_multi_step_reasoning SKIPPED [ 54%]
+tests/unit/test_knowledge_extended.py::TestPersistentVectorStore::test_initialization SKIPPED [ 54%]
+tests/unit/test_knowledge_extended.py::TestPersistentVectorStore::test_add_documents SKIPPED [ 54%]
+tests/unit/test_knowledge_extended.py::TestPersistentVectorStore::test_search SKIPPED [ 54%]
+tests/unit/test_knowledge_extended.py::TestPersistentVectorStore::test_persist SKIPPED [ 54%]
+tests/unit/test_knowledge_extended.py::TestPersistentVectorStore::test_load SKIPPED [ 55%]
+tests/unit/test_knowledge_extended.py::TestEnhancedAutoRefresh::test_initialization SKIPPED [ 55%]
+tests/unit/test_knowledge_extended.py::TestEnhancedAutoRefresh::test_schedule_refresh SKIPPED [ 55%]
+tests/unit/test_knowledge_extended.py::TestEnhancedAutoRefresh::test_check_for_updates SKIPPED [ 55%]
+tests/unit/test_knowledge_extended.py::TestEnhancedAutoRefresh::test_refresh_source SKIPPED [ 55%]
+tests/unit/test_knowledge_extended.py::TestKnowledgeIntegration::test_chunk_and_store_workflow PASSED [ 55%]
+tests/unit/test_knowledge_extended.py::TestKnowledgeIntegration::test_freshness_and_refresh_workflow PASSED [ 55%]
+tests/unit/test_knowledge_ingestion.py::TestKnowledgeIngestionInit::test_default_initialization PASSED [ 55%]
+tests/unit/test_knowledge_ingestion.py::TestKnowledgeIngestionInit::test_custom_initialization PASSED [ 55%]
+tests/unit/test_knowledge_ingestion.py::TestURLIngestion::test_ingest_url_success PASSED [ 55%]
+tests/unit/test_knowledge_ingestion.py::TestURLIngestion::test_ingest_url_failure PASSED [ 55%]
+tests/unit/test_knowledge_ingestion.py::TestURLIngestion::test_extract_text_from_html PASSED [ 55%]
+tests/unit/test_knowledge_ingestion.py::TestYouTubeIngestion::test_extract_video_id PASSED [ 55%]
+tests/unit/test_knowledge_ingestion.py::TestYouTubeIngestion::test_ingest_youtube PASSED [ 55%]
+tests/unit/test_knowledge_ingestion.py::TestPDFIngestion::test_ingest_pdf PASSED [ 56%]
+tests/unit/test_knowledge_ingestion.py::TestTextChunking::test_chunk_text PASSED [ 56%]
+tests/unit/test_knowledge_ingestion.py::TestTextChunking::test_chunk_overlap PASSED [ 56%]
+tests/unit/test_knowledge_ingestion.py::TestKnowledgeBaseManagement::test_add_to_knowledge_base PASSED [ 56%]
+tests/unit/test_knowledge_ingestion.py::TestKnowledgeBaseManagement::test_get_knowledge_base PASSED [ 56%]
+tests/unit/test_knowledge_ingestion.py::TestKnowledgeBaseManagement::test_clear_knowledge_base PASSED [ 56%]
+tests/unit/test_knowledge_refresh.py::TestRefreshConfig::test_default_config PASSED [ 56%]
+tests/unit/test_knowledge_refresh.py::TestRefreshConfig::test_custom_config PASSED [ 56%]
+tests/unit/test_knowledge_refresh.py::TestSourceMetadata::test_create_metadata PASSED [ 56%]
+tests/unit/test_knowledge_refresh.py::TestKnowledgeBaseRefresher::test_initialization PASSED [ 56%]
+tests/unit/test_knowledge_refresh.py::TestKnowledgeBaseRefresher::test_add_source PASSED [ 56%]
+tests/unit/test_knowledge_refresh.py::TestKnowledgeBaseRefresher::test_check_for_changes SKIPPED [ 56%]
+tests/unit/test_knowledge_refresh.py::TestKnowledgeBaseRefresher::test_refresh_source PASSED [ 56%]
+tests/unit/test_knowledge_refresh.py::TestKnowledgeBaseRefresher::test_get_refresh_status PASSED [ 57%]
+tests/unit/test_knowledge_refresh.py::TestChunkStrategy::test_strategy_values PASSED [ 57%]
+tests/unit/test_knowledge_refresh.py::TestChunkConfig::test_create_config PASSED [ 57%]
+tests/unit/test_knowledge_refresh.py::TestChunkOptimizer::test_initialization PASSED [ 57%]
+tests/unit/test_knowledge_refresh.py::TestChunkOptimizer::test_get_config_for_content_type PASSED [ 57%]
+tests/unit/test_knowledge_refresh.py::TestChunkOptimizer::test_chunk_text_fixed_size PASSED [ 57%]
+tests/unit/test_knowledge_refresh.py::TestChunkOptimizer::test_chunk_text_sentence_boundary PASSED [ 57%]
+tests/unit/test_knowledge_refresh.py::TestChunkOptimizer::test_optimal_configs_exist PASSED [ 57%]
+tests/unit/test_knowledge_refresh.py::TestChunkOptimizer::test_count_tokens PASSED [ 57%]
+tests/unit/test_knowledge_refresh.py::TestChunkOptimizer::test_quality_score PASSED [ 57%]
+tests/unit/test_knowledge_vector_retriever.py::TestVectorStoreBuilder::test_initialization PASSED [ 57%]
+tests/unit/test_knowledge_vector_retriever.py::TestVectorStoreBuilder::test_build_from_documents PASSED [ 57%]
+tests/unit/test_knowledge_vector_retriever.py::TestVectorStoreBuilder::test_build_from_documents_no_chunks PASSED [ 57%]
+tests/unit/test_knowledge_vector_retriever.py::TestVectorStoreBuilder::test_embed_texts PASSED [ 57%]
+tests/unit/test_knowledge_vector_retriever.py::TestVectorStoreBuilder::test_embed_texts_batching PASSED [ 58%]
+tests/unit/test_knowledge_vector_retriever.py::TestVectorStoreBuilder::test_persist_metadata PASSED [ 58%]
+tests/unit/test_knowledge_vector_retriever.py::TestVectorStoreBuilder::test_load_metadata PASSED [ 58%]
+tests/unit/test_knowledge_vector_retriever.py::TestVectorStoreBuilder::test_load_metadata_not_found PASSED [ 58%]
+tests/unit/test_knowledge_vector_retriever.py::TestVectorRetriever::test_initialization SKIPPED [ 58%]
+tests/unit/test_knowledge_vector_retriever.py::TestVectorRetriever::test_retrieve SKIPPED [ 58%]
+tests/unit/test_knowledge_vector_retriever.py::TestVectorRetriever::test_retrieve_with_filters SKIPPED [ 58%]
+tests/unit/test_knowledge_vector_retriever.py::TestHybridSearch::test_bm25_scoring PASSED [ 58%]
+tests/unit/test_knowledge_vector_retriever.py::TestHybridSearch::test_hybrid_score_combination PASSED [ 58%]
+tests/unit/test_knowledge_vector_retriever.py::TestReranking::test_score_based_reranking PASSED [ 58%]
+tests/unit/test_knowledge_vector_retriever.py::TestReranking::test_diversity_reranking PASSED [ 58%]
+tests/unit/test_knowledge_vector_store.py::TestMatchesFilters::test_no_filters PASSED [ 58%]
+tests/unit/test_knowledge_vector_store.py::TestMatchesFilters::test_single_filter_match PASSED [ 58%]
+tests/unit/test_knowledge_vector_store.py::TestMatchesFilters::test_multiple_filters PASSED [ 59%]
+tests/unit/test_knowledge_vector_store.py::TestMatchesFilters::test_list_filter PASSED [ 59%]
+tests/unit/test_knowledge_vector_store.py::TestVectorStoreConfig::test_default_config PASSED [ 59%]
+tests/unit/test_knowledge_vector_store.py::TestVectorStoreConfig::test_custom_config PASSED [ 59%]
+tests/unit/test_knowledge_vector_store.py::TestVectorStoreBuilder::test_initialization PASSED [ 59%]
+tests/unit/test_knowledge_vector_store.py::TestVectorStoreBuilder::test_get_embeddings PASSED [ 59%]
+tests/unit/test_knowledge_vector_store.py::TestVectorStoreBuilder::test_build_index PASSED [ 59%]
+tests/unit/test_knowledge_vector_store.py::TestVectorStoreRetrieval::test_search_returns_results PASSED [ 59%]
+tests/unit/test_knowledge_vector_store.py::TestVectorStoreRetrieval::test_search_with_filters PASSED [ 59%]
+tests/unit/test_knowledge_vector_store.py::TestHybridSearch::test_bm25_available PASSED [ 59%]
+tests/unit/test_knowledge_vector_store.py::TestHybridSearch::test_cohere_reranking_available PASSED [ 59%]
+tests/unit/test_llm_rate_limit.py::TestWithLLMRateLimit::test_decorator_calls_function PASSED [ 59%]
+tests/unit/test_llm_rate_limit.py::TestWithLLMRateLimit::test_decorator_checks_rate_limit PASSED [ 59%]
+tests/unit/test_llm_rate_limit.py::TestWithLLMRateLimit::test_decorator_tracks_call PASSED [ 59%]
+tests/unit/test_llm_rate_limit.py::TestWithLLMRateLimit::test_decorator_handles_exception PASSED [ 60%]
+tests/unit/test_llm_rate_limit.py::TestTrackLLMCall::test_track_openai_call PASSED [ 60%]
+tests/unit/test_llm_rate_limit.py::TestTrackLLMCall::test_track_anthropic_call PASSED [ 60%]
+tests/unit/test_llm_rate_limit.py::TestTrackLLMCall::test_track_handles_missing_usage PASSED [ 60%]
+tests/unit/test_llm_rate_limit.py::TestRateLimitedOpenAI::test_initialization PASSED [ 60%]
+tests/unit/test_llm_rate_limit.py::TestRateLimitedOpenAI::test_chat_completions_create PASSED [ 60%]
+tests/unit/test_llm_rate_limit.py::TestRateLimitedAnthropic::test_initialization PASSED [ 60%]
+tests/unit/test_llm_rate_limit.py::TestRateLimitedAnthropic::test_messages_create PASSED [ 60%]
+tests/unit/test_llm_rate_limit.py::TestRateLimitedGemini::test_initialization PASSED [ 60%]
+tests/unit/test_llm_rate_limit.py::TestRateLimitedGemini::test_generate_content PASSED [ 60%]
+tests/unit/test_llm_rate_limit.py::TestGetLLMClient::test_get_openai_client PASSED [ 60%]
+tests/unit/test_llm_rate_limit.py::TestGetLLMClient::test_get_anthropic_client PASSED [ 60%]
+tests/unit/test_llm_rate_limit.py::TestGetLLMClient::test_get_gemini_client PASSED [ 60%]
+tests/unit/test_llm_rate_limit.py::TestGetLLMClient::test_unsupported_provider PASSED [ 61%]
+tests/unit/test_llm_rate_limit.py::TestGetLLMClient::test_case_insensitive_provider PASSED [ 61%]
+tests/unit/test_mcp_client.py::TestMCPClientInit::test_init_creates_instance PASSED [ 61%]
+tests/unit/test_mcp_client.py::TestMCPClientInit::test_client_has_required_methods PASSED [ 61%]
+tests/unit/test_mcp_client.py::TestMCPConnection::test_connect PASSED    [ 61%]
+tests/unit/test_mcp_client.py::TestMCPConnection::test_disconnect PASSED [ 61%]
+tests/unit/test_mcp_client.py::TestMCPToolCalling::test_call_tool PASSED [ 61%]
+tests/unit/test_mcp_client.py::TestMCPToolCalling::test_list_tools PASSED [ 61%]
+tests/unit/test_mcp_client.py::TestMCPResources::test_list_resources PASSED [ 61%]
+tests/unit/test_mcp_client.py::TestMCPResources::test_read_resource PASSED [ 61%]
+tests/unit/test_mcp_client.py::TestMCPErrorHandling::test_handles_connection_error PASSED [ 61%]
+tests/unit/test_mcp_client.py::TestMCPErrorHandling::test_handles_tool_error PASSED [ 61%]
+tests/unit/test_nl_to_sql.py::TestSQLInjectionProtector::test_valid_select_query PASSED [ 61%]
+tests/unit/test_nl_to_sql.py::TestSQLInjectionProtector::test_blocks_drop_statement PASSED [ 61%]
+tests/unit/test_nl_to_sql.py::TestSQLInjectionProtector::test_blocks_multiple_statements PASSED [ 62%]
+tests/unit/test_nl_to_sql.py::TestSQLInjectionProtector::test_blocks_unauthorized_table PASSED [ 62%]
+tests/unit/test_nl_to_sql.py::TestSQLInjectionProtector::test_allows_with_clause PASSED [ 62%]
+tests/unit/test_nl_to_sql.py::TestQueryCache::test_cache_miss_then_hit PASSED [ 62%]
+tests/unit/test_nl_to_sql.py::TestQueryCache::test_cache_expiration PASSED [ 62%]
+tests/unit/test_nl_to_sql.py::TestQueryCache::test_cache_stats PASSED    [ 62%]
+tests/unit/test_nl_to_sql.py::TestNLToSQLEngine::test_sql_injection_protection_standalone PASSED [ 62%]
+tests/unit/test_nl_to_sql.py::TestNLToSQLEngine::test_cache_functionality PASSED [ 62%]
+tests/unit/test_nl_to_sql.py::TestNLToSQLEngine::test_engine_initialization SKIPPED [ 62%]
+tests/unit/test_nl_to_sql.py::TestNLToSQLEngine::test_engine_has_dataframe SKIPPED [ 62%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_sql_injection_drop_table PASSED [ 62%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_sql_injection_union_attack PASSED [ 62%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_sql_injection_comment_bypass PASSED [ 62%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_empty_dataframe PASSED [ 62%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_null_values_in_query PASSED [ 63%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_empty_string_values PASSED [ 63%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_ambiguous_aggregation PASSED [ 63%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_conflicting_conditions PASSED [ 63%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_multiple_aggregations PASSED [ 63%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_very_large_numbers PASSED [ 63%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_negative_values PASSED [ 63%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_zero_values PASSED [ 63%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_invalid_date_formats PASSED [ 63%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_date_range_edge_cases PASSED [ 63%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_null_dates PASSED [ 63%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_special_characters_in_query PASSED [ 63%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_unicode_characters PASSED [ 63%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_missing_columns PASSED [ 64%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_case_sensitive_columns PASSED [ 64%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_duplicate_column_names PASSED [ 64%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_very_long_query PASSED [ 64%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_large_dataframe PASSED [ 64%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_nested_conditions PASSED [ 64%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_subquery_attempts PASSED [ 64%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_join_like_queries PASSED [ 64%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_malformed_query_recovery PASSED [ 64%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_timeout_handling PASSED [ 64%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_mixed_data_types PASSED [ 64%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCases::test_boolean_columns PASSED [ 64%]
+tests/unit/test_nl_to_sql_edge_cases.py::TestNLToSQLEdgeCaseIntegration::test_end_to_end_with_edge_cases SKIPPED [ 64%]
+tests/unit/test_nl_to_sql_engine.py::TestNLToSQLEngineInit::test_initialization_with_openai PASSED [ 64%]
+tests/unit/test_nl_to_sql_engine.py::TestNLToSQLEngineInit::test_initialization_with_gemini PASSED [ 65%]
+tests/unit/test_nl_to_sql_engine.py::TestNLToSQLEngineInit::test_sql_helper_initialized PASSED [ 65%]
+tests/unit/test_nl_to_sql_engine.py::TestSQLGeneration::test_generate_sql_basic SKIPPED [ 65%]
+tests/unit/test_nl_to_sql_engine.py::TestSQLGeneration::test_ask_method PASSED [ 65%]
+tests/unit/test_nl_to_sql_engine.py::TestMultiModelSupport::test_model_priority_order PASSED [ 65%]
+tests/unit/test_nl_to_sql_engine.py::TestMultiModelSupport::test_fallback_on_failure PASSED [ 65%]
+tests/unit/test_nl_to_sql_engine.py::TestSQLValidation::test_valid_select_query PASSED [ 65%]
+tests/unit/test_nl_to_sql_engine.py::TestSQLValidation::test_detect_dangerous_sql PASSED [ 65%]
+tests/unit/test_nl_to_sql_engine.py::TestSQLValidation::test_sql_injection_patterns PASSED [ 65%]
+tests/unit/test_nl_to_sql_engine.py::TestSchemaHandling::test_schema_to_prompt PASSED [ 65%]
+tests/unit/test_nl_to_sql_engine.py::TestSchemaHandling::test_column_type_inference PASSED [ 65%]
+tests/unit/test_nl_to_sql_engine.py::TestQueryExecution::test_duckdb_execution PASSED [ 65%]
+tests/unit/test_nl_to_sql_engine.py::TestQueryExecution::test_result_formatting PASSED [ 65%]
+tests/unit/test_observability.py::TestStructuredLogger::test_creates_logger PASSED [ 66%]
+tests/unit/test_observability.py::TestStructuredLogger::test_log_with_context PASSED [ 66%]
+tests/unit/test_observability.py::TestStructuredLogger::test_log_levels PASSED [ 66%]
+tests/unit/test_observability.py::TestStructuredLogger::test_json_serializable_output PASSED [ 66%]
+tests/unit/test_observability.py::TestStructuredLogger::test_context_propagation PASSED [ 66%]
+tests/unit/test_observability.py::TestMetricsCollector::test_increment_counter PASSED [ 66%]
+tests/unit/test_observability.py::TestMetricsCollector::test_set_gauge PASSED [ 66%]
+tests/unit/test_observability.py::TestMetricsCollector::test_record_histogram PASSED [ 66%]
+tests/unit/test_observability.py::TestMetricsCollector::test_labeled_metrics PASSED [ 66%]
+tests/unit/test_observability.py::TestMetricsCollector::test_export_prometheus_format PASSED [ 66%]
+tests/unit/test_observability.py::TestTracer::test_create_span PASSED    [ 66%]
+tests/unit/test_observability.py::TestTracer::test_span_timing PASSED    [ 66%]
+tests/unit/test_observability.py::TestTracer::test_nested_spans PASSED   [ 66%]
+tests/unit/test_observability.py::TestTracer::test_span_attributes PASSED [ 66%]
+tests/unit/test_observability.py::TestTracer::test_span_error_recording PASSED [ 67%]
+tests/unit/test_observability.py::TestAlertManager::test_create_alert_rule PASSED [ 67%]
+tests/unit/test_observability.py::TestAlertManager::test_trigger_alert PASSED [ 67%]
+tests/unit/test_observability.py::TestAlertManager::test_alert_cooldown PASSED [ 67%]
+tests/unit/test_observability.py::TestAlertManager::test_alert_severity_levels PASSED [ 67%]
+tests/unit/test_observability.py::TestCostTracker::test_track_token_usage PASSED [ 67%]
+tests/unit/test_observability.py::TestCostTracker::test_calculate_cost PASSED [ 67%]
+tests/unit/test_observability.py::TestCostTracker::test_budget_limit_warning PASSED [ 67%]
+tests/unit/test_observability.py::TestCostTracker::test_cost_by_provider PASSED [ 67%]
+tests/unit/test_observability.py::TestCostTracker::test_daily_cost_tracking PASSED [ 67%]
+tests/unit/test_observability.py::TestObservabilityIntegration::test_log_with_trace_context PASSED [ 67%]
+tests/unit/test_observability.py::TestObservabilityIntegration::test_metrics_trigger_alerts PASSED [ 67%]
+tests/unit/test_observability.py::TestObservabilityIntegration::test_cost_tracking_with_logging PASSED [ 67%]
+tests/unit/test_observability_extended.py::TestStructuredLoggerExtended::test_logger_creates_instance PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestStructuredLoggerExtended::test_logger_info PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestStructuredLoggerExtended::test_logger_error PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestStructuredLoggerExtended::test_logger_with_context PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestStructuredLoggerExtended::test_logger_with_exception PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestMetricsCollectorExtended::test_collector_creates_instance PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestMetricsCollectorExtended::test_increment_counter PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestMetricsCollectorExtended::test_set_gauge PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestMetricsCollectorExtended::test_record_histogram PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestMetricsCollectorExtended::test_get_all_metrics PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestMetricsCollectorExtended::test_reset_metrics PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestMetricsCollectorExtended::test_prometheus_export PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestTracerExtended::test_tracer_creates_instance PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestTracerExtended::test_start_span PASSED [ 68%]
+tests/unit/test_observability_extended.py::TestTracerExtended::test_span_context_manager PASSED [ 69%]
+tests/unit/test_observability_extended.py::TestTracerExtended::test_nested_spans PASSED [ 69%]
+tests/unit/test_observability_extended.py::TestTracerExtended::test_span_attributes PASSED [ 69%]
+tests/unit/test_observability_extended.py::TestTracerExtended::test_get_traces PASSED [ 69%]
+tests/unit/test_observability_extended.py::TestAlertManagerExtended::test_manager_creates_instance PASSED [ 69%]
+tests/unit/test_observability_extended.py::TestAlertManagerExtended::test_add_rule PASSED [ 69%]
+tests/unit/test_observability_extended.py::TestAlertManagerExtended::test_check_alerts PASSED [ 69%]
+tests/unit/test_observability_extended.py::TestAlertManagerExtended::test_alert_cooldown PASSED [ 69%]
+tests/unit/test_observability_extended.py::TestAlertManagerExtended::test_alert_severity_levels PASSED [ 69%]
+tests/unit/test_observability_extended.py::TestCostTrackerExtended::test_tracker_creates_instance PASSED [ 69%]
+tests/unit/test_observability_extended.py::TestCostTrackerExtended::test_track_usage PASSED [ 69%]
+tests/unit/test_observability_extended.py::TestCostTrackerExtended::test_get_usage_by_provider PASSED [ 69%]
+tests/unit/test_observability_extended.py::TestCostTrackerExtended::test_budget_limit PASSED [ 69%]
+tests/unit/test_observability_extended.py::TestCostTrackerExtended::test_reset_tracking PASSED [ 70%]
+tests/unit/test_observability_extended.py::TestLogContext::test_context_creates_instance PASSED [ 70%]
+tests/unit/test_observability_extended.py::TestLogContext::test_context_set_get PASSED [ 70%]
+tests/unit/test_observability_extended.py::TestLogContext::test_context_clear PASSED [ 70%]
+tests/unit/test_observability_extended.py::TestObservabilityIntegration::test_metrics_with_alerts PASSED [ 70%]
+tests/unit/test_observability_extended.py::TestObservabilityIntegration::test_tracing_with_metrics PASSED [ 70%]
+tests/unit/test_orchestration.py::TestWorkflowState::test_state_structure SKIPPED [ 70%]
+tests/unit/test_orchestration.py::TestPCAWorkflow::test_workflow_initialization SKIPPED [ 70%]
+tests/unit/test_orchestration.py::TestPCAWorkflow::test_workflow_has_graph SKIPPED [ 70%]
+tests/unit/test_orchestration.py::TestQueryOrchestrator::test_initialization PASSED [ 70%]
+tests/unit/test_orchestration.py::TestQueryOrchestrator::test_process_query SKIPPED [ 70%]
+tests/unit/test_orchestration.py::TestQueryOrchestrator::test_get_interpretations PASSED [ 70%]
+tests/unit/test_orchestrator_detailed.py::TestNeedsInterpretation::test_vague_terms_need_interpretation PASSED [ 70%]
+tests/unit/test_orchestrator_detailed.py::TestNeedsInterpretation::test_specific_queries_no_interpretation PASSED [ 70%]
+tests/unit/test_orchestrator_detailed.py::TestNeedsInterpretation::test_multiple_intents_need_interpretation PASSED [ 71%]
+tests/unit/test_orchestrator_detailed.py::TestNeedsInterpretation::test_column_mention_reduces_ambiguity PASSED [ 71%]
+tests/unit/test_orchestrator_detailed.py::TestExecuteDirect::test_execute_direct_success PASSED [ 71%]
+tests/unit/test_orchestrator_detailed.py::TestExecuteDirect::test_execute_direct_failure PASSED [ 71%]
+tests/unit/test_orchestrator_detailed.py::TestExecuteDirect::test_execute_direct_returns_data PASSED [ 71%]
+tests/unit/test_orchestrator_detailed.py::TestGenerateInterpretations::test_generate_interpretations_success PASSED [ 71%]
+tests/unit/test_orchestrator_detailed.py::TestGenerateInterpretations::test_generate_interpretations_failure_fallback PASSED [ 71%]
+tests/unit/test_orchestrator_detailed.py::TestGenerateInterpretations::test_interpretations_include_original_query PASSED [ 71%]
+tests/unit/test_orchestrator_detailed.py::TestProcessQuery::test_force_direct_skips_interpretation PASSED [ 71%]
+tests/unit/test_orchestrator_detailed.py::TestProcessQuery::test_no_interpreter_uses_direct PASSED [ 71%]
+tests/unit/test_orchestrator_detailed.py::TestProcessQuery::test_clear_query_uses_direct PASSED [ 71%]
+tests/unit/test_orchestrator_detailed.py::TestExecuteInterpretation::test_execute_selected_interpretation PASSED [ 71%]
+tests/unit/test_orchestrator_detailed.py::TestExecuteInterpretation::test_execute_interpretation_calls_engine PASSED [ 71%]
+tests/unit/test_predictive.py::TestBudgetOptimizer::test_initialization SKIPPED [ 72%]
+tests/unit/test_predictive.py::TestBudgetOptimizer::test_optimize_budget SKIPPED [ 72%]
+tests/unit/test_predictive.py::TestBudgetOptimizer::test_calculate_roas SKIPPED [ 72%]
+tests/unit/test_predictive.py::TestBudgetOptimizer::test_recommend_allocation SKIPPED [ 72%]
+tests/unit/test_predictive.py::TestCampaignSuccessPredictor::test_initialization PASSED [ 72%]
+tests/unit/test_predictive.py::TestCampaignSuccessPredictor::test_predict_success PASSED [ 72%]
+tests/unit/test_predictive.py::TestCampaignSuccessPredictor::test_train_model SKIPPED [ 72%]
+tests/unit/test_predictive.py::TestCampaignSuccessPredictor::test_feature_importance PASSED [ 72%]
+tests/unit/test_predictive.py::TestEarlyPerformanceIndicators::test_initialization PASSED [ 72%]
+tests/unit/test_predictive.py::TestEarlyPerformanceIndicators::test_detect_early_signals PASSED [ 72%]
+tests/unit/test_predictive.py::TestEarlyPerformanceIndicators::test_calculate_trend PASSED [ 72%]
+tests/unit/test_predictive_qa.py::TestPredictiveQAInit::test_initialization PASSED [ 72%]
+tests/unit/test_predictive_qa.py::TestForecastNextMonth::test_forecast_next_month PASSED [ 72%]
+tests/unit/test_predictive_qa.py::TestForecastNextMonth::test_forecast_contains_cpa PASSED [ 72%]
+tests/unit/test_predictive_qa.py::TestForecastNextMonth::test_forecast_contains_conversions PASSED [ 73%]
+tests/unit/test_predictive_qa.py::TestForecastNextMonth::test_forecast_contains_roas PASSED [ 73%]
+tests/unit/test_predictive_qa.py::TestForecastNextMonth::test_forecast_confidence_intervals PASSED [ 73%]
+tests/unit/test_predictive_qa.py::TestForecastNextMonth::test_forecast_with_missing_revenue SKIPPED [ 73%]
+tests/unit/test_predictive_qa.py::TestBudgetOptimization::test_optimize_budget PASSED [ 73%]
+tests/unit/test_predictive_qa.py::TestBudgetOptimization::test_optimize_budget_with_constraints PASSED [ 73%]
+tests/unit/test_predictive_qa.py::TestPerformancePrediction::test_predict_performance PASSED [ 73%]
+tests/unit/test_predictive_qa.py::TestPerformancePrediction::test_predict_conversions PASSED [ 73%]
+tests/unit/test_predictive_qa.py::TestTrendAnalysis::test_analyze_trends PASSED [ 73%]
+tests/unit/test_predictive_qa.py::TestTrendAnalysis::test_detect_seasonality PASSED [ 73%]
+tests/unit/test_predictive_qa.py::TestScenarioAnalysis::test_what_if_analysis PASSED [ 73%]
+tests/unit/test_predictive_qa.py::TestScenarioAnalysis::test_budget_scenarios PASSED [ 73%]
+tests/unit/test_query_clarification.py::TestQueryClarifierInit::test_initialization PASSED [ 73%]
+tests/unit/test_query_clarification.py::TestInterpretationGeneration::test_generate_interpretations PASSED [ 74%]
+tests/unit/test_query_clarification.py::TestInterpretationGeneration::test_generate_interpretations_custom_count PASSED [ 74%]
+tests/unit/test_query_clarification.py::TestInterpretationParsing::test_parse_valid_json PASSED [ 74%]
+tests/unit/test_query_clarification.py::TestInterpretationParsing::test_parse_invalid_json PASSED [ 74%]
+tests/unit/test_query_clarification.py::TestInterpretationParsing::test_interpretation_structure PASSED [ 74%]
+tests/unit/test_query_clarification.py::TestSQLKnowledgeIntegration::test_sql_context_building PASSED [ 74%]
+tests/unit/test_query_engine_extended.py::TestSmartQueryInterpreter::test_initialization PASSED [ 74%]
+tests/unit/test_query_engine_extended.py::TestSmartQueryInterpreter::test_generate_interpretations SKIPPED [ 74%]
+tests/unit/test_query_engine_extended.py::TestSmartQueryInterpreter::test_detect_available_metrics PASSED [ 74%]
+tests/unit/test_query_engine_extended.py::TestSmartQueryInterpreter::test_detect_available_dimensions PASSED [ 74%]
+tests/unit/test_query_engine_extended.py::TestSmartQueryInterpreter::test_build_smart_prompt PASSED [ 74%]
+tests/unit/test_query_engine_extended.py::TestSQLKnowledgeHelper::test_initialization PASSED [ 74%]
+tests/unit/test_query_engine_extended.py::TestSQLKnowledgeHelper::test_build_context PASSED [ 74%]
+tests/unit/test_query_engine_extended.py::TestSQLKnowledgeHelper::test_get_sql_patterns PASSED [ 74%]
+tests/unit/test_query_engine_extended.py::TestSQLKnowledgeHelper::test_get_examples PASSED [ 75%]
+tests/unit/test_query_engine_extended.py::TestNaturalLanguageQueryEngine::test_initialization SKIPPED [ 75%]
+tests/unit/test_query_engine_extended.py::TestNaturalLanguageQueryEngine::test_generate_sql SKIPPED [ 75%]
+tests/unit/test_query_engine_extended.py::TestNaturalLanguageQueryEngine::test_validate_sql SKIPPED [ 75%]
+tests/unit/test_query_engine_extended.py::TestNaturalLanguageQueryEngine::test_execute_query SKIPPED [ 75%]
+tests/unit/test_query_engine_extended.py::TestQueryEngineIntegration::test_interpreter_to_engine_flow PASSED [ 75%]
+tests/unit/test_query_engine_extended.py::TestQueryEngineIntegration::test_sql_knowledge_in_interpretation PASSED [ 75%]
+tests/unit/test_query_monitor.py::TestQueryMetrics::test_create_metrics PASSED [ 75%]
+tests/unit/test_query_monitor.py::TestQueryMetrics::test_failed_query_metrics PASSED [ 75%]
+tests/unit/test_query_monitor.py::TestQueryMonitor::test_initialization PASSED [ 75%]
+tests/unit/test_query_monitor.py::TestQueryMonitor::test_record_query PASSED [ 75%]
+tests/unit/test_query_monitor.py::TestQueryMonitor::test_record_slow_query PASSED [ 75%]
+tests/unit/test_query_monitor.py::TestQueryMonitor::test_record_failed_query PASSED [ 75%]
+tests/unit/test_query_monitor.py::TestQueryMonitor::test_query_counts_by_type PASSED [ 75%]
+tests/unit/test_query_monitor.py::TestQueryMonitor::test_max_history_limit PASSED [ 76%]
+tests/unit/test_query_monitor.py::TestQueryMonitor::test_get_statistics PASSED [ 76%]
+tests/unit/test_query_monitor.py::TestQueryMonitor::test_get_slow_queries PASSED [ 76%]
+tests/unit/test_query_monitor.py::TestQueryMonitor::test_average_duration PASSED [ 76%]
+tests/unit/test_query_monitor.py::TestQueryMonitorContextManager::test_track_query_context PASSED [ 76%]
+tests/unit/test_query_monitor.py::TestQueryMonitorThreadSafety::test_concurrent_recording PASSED [ 76%]
+tests/unit/test_query_orchestrator.py::TestQueryOrchestratorInit::test_init_without_interpreter PASSED [ 76%]
+tests/unit/test_query_orchestrator.py::TestQueryOrchestratorInit::test_init_with_interpreter PASSED [ 76%]
+tests/unit/test_query_orchestrator.py::TestQueryProcessing::test_process_query_direct PASSED [ 76%]
+tests/unit/test_query_orchestrator.py::TestQueryProcessing::test_process_query_force_direct PASSED [ 76%]
+tests/unit/test_query_orchestrator.py::TestQueryProcessing::test_process_query_with_interpretation PASSED [ 76%]
+tests/unit/test_query_orchestrator.py::TestQueryExecution::test_execute_interpretation PASSED [ 76%]
+tests/unit/test_query_orchestrator.py::TestQueryExecution::test_execute_direct_success PASSED [ 76%]
+tests/unit/test_query_orchestrator.py::TestQueryExecution::test_execute_direct_failure PASSED [ 77%]
+tests/unit/test_query_orchestrator.py::TestInterpretationLogic::test_needs_interpretation_ambiguous PASSED [ 77%]
+tests/unit/test_query_orchestrator.py::TestInterpretationLogic::test_needs_interpretation_clear PASSED [ 77%]
+tests/unit/test_query_orchestrator.py::TestInterpretationLogic::test_generate_interpretations PASSED [ 77%]
+tests/unit/test_query_tracker.py::TestQueryLog::test_create_query_log PASSED [ 77%]
+tests/unit/test_query_tracker.py::TestQueryMetrics::test_create_metrics PASSED [ 77%]
+tests/unit/test_query_tracker.py::TestQueryTracker::test_initialization PASSED [ 77%]
+tests/unit/test_query_tracker.py::TestQueryTracker::test_log_query PASSED [ 77%]
+tests/unit/test_query_tracker.py::TestQueryTracker::test_update_query_result PASSED [ 77%]
+tests/unit/test_query_tracker.py::TestQueryTracker::test_record_feedback PASSED [ 77%]
+tests/unit/test_query_tracker.py::TestQueryTracker::test_get_query_history PASSED [ 77%]
+tests/unit/test_query_tracker.py::TestQueryTracker::test_get_metrics PASSED [ 77%]
+tests/unit/test_rag_comprehensive.py::TestVectorSearch::test_cosine_similarity PASSED [ 77%]
+tests/unit/test_rag_comprehensive.py::TestVectorSearch::test_top_k_retrieval PASSED [ 77%]
+tests/unit/test_rag_comprehensive.py::TestVectorSearch::test_score_threshold PASSED [ 78%]
+tests/unit/test_rag_comprehensive.py::TestHybridRetrieval::test_reciprocal_rank_fusion PASSED [ 78%]
+tests/unit/test_rag_comprehensive.py::TestHybridRetrieval::test_score_combination PASSED [ 78%]
+tests/unit/test_rag_comprehensive.py::TestHybridRetrieval::test_deduplication PASSED [ 78%]
+tests/unit/test_rag_comprehensive.py::TestBM25Retrieval::test_term_frequency PASSED [ 78%]
+tests/unit/test_rag_comprehensive.py::TestBM25Retrieval::test_idf_calculation PASSED [ 78%]
+tests/unit/test_rag_comprehensive.py::TestBM25Retrieval::test_bm25_scoring PASSED [ 78%]
+tests/unit/test_rag_comprehensive.py::TestReranking::test_score_based_rerank PASSED [ 78%]
+tests/unit/test_rag_comprehensive.py::TestReranking::test_diversity_rerank PASSED [ 78%]
+tests/unit/test_rag_comprehensive.py::TestMetadataFiltering::test_category_filter PASSED [ 78%]
+tests/unit/test_rag_comprehensive.py::TestMetadataFiltering::test_priority_filter PASSED [ 78%]
+tests/unit/test_rag_comprehensive.py::TestMetadataFiltering::test_combined_filters PASSED [ 78%]
+tests/unit/test_rag_comprehensive.py::TestContextWindow::test_token_counting PASSED [ 78%]
+tests/unit/test_rag_comprehensive.py::TestContextWindow::test_context_truncation PASSED [ 79%]
+tests/unit/test_rag_comprehensive.py::TestContextWindow::test_overlap_handling PASSED [ 79%]
+tests/unit/test_rag_retrieval.py::TestMCPEnhancedRAG::test_initialization PASSED [ 79%]
+tests/unit/test_rag_retrieval.py::TestMCPEnhancedRAG::test_connect PASSED [ 79%]
+tests/unit/test_rag_retrieval.py::TestMCPEnhancedRAG::test_retrieve_context_static_only PASSED [ 79%]
+tests/unit/test_rag_retrieval.py::TestMCPEnhancedRAG::test_retrieve_context_with_live_data PASSED [ 79%]
+tests/unit/test_rag_retrieval.py::TestQueryAnalysis::test_detects_recent_data_query PASSED [ 79%]
+tests/unit/test_rag_retrieval.py::TestQueryAnalysis::test_detects_platform_query PASSED [ 79%]
+tests/unit/test_rag_retrieval.py::TestQueryAnalysis::test_detects_metric_query PASSED [ 79%]
+tests/unit/test_rag_retrieval.py::TestContextScoring::test_contexts_sorted_by_score PASSED [ 79%]
+tests/unit/test_rag_retrieval.py::TestContextScoring::test_live_data_high_score_for_recent_queries PASSED [ 79%]
+tests/unit/test_rag_retrieval.py::TestRAGErrorHandling::test_handles_knowledge_base_error PASSED [ 79%]
+tests/unit/test_rag_retrieval.py::TestRAGErrorHandling::test_handles_mcp_connection_error PASSED [ 79%]
+tests/unit/test_rag_retrieval.py::TestRAGErrorHandling::test_handles_live_data_error PASSED [ 79%]
+tests/unit/test_rag_retrieval.py::TestRAGIntegration::test_full_retrieval_flow PASSED [ 80%]
+tests/unit/test_rag_retrieval.py::TestRAGIntegration::test_respects_top_k_limit PASSED [ 80%]
+tests/unit/test_redis_cache.py::TestRedisCache::test_initialization PASSED [ 80%]
+tests/unit/test_redis_cache.py::TestRedisCache::test_is_enabled PASSED   [ 80%]
+tests/unit/test_redis_cache.py::TestRedisCache::test_get_missing_key PASSED [ 80%]
+tests/unit/test_redis_cache.py::TestRedisCache::test_get_existing_key PASSED [ 80%]
+tests/unit/test_redis_cache.py::TestRedisCache::test_set_value PASSED    [ 80%]
+tests/unit/test_redis_cache.py::TestRedisCache::test_set_with_ttl PASSED [ 80%]
+tests/unit/test_redis_cache.py::TestRedisCache::test_delete_key PASSED   [ 80%]
+tests/unit/test_redis_cache.py::TestRedisCache::test_exists PASSED       [ 80%]
+tests/unit/test_redis_cache.py::TestRedisCache::test_clear_pattern PASSED [ 80%]
+tests/unit/test_redis_cache.py::TestRedisCacheDecorator::test_cached_decorator PASSED [ 80%]
+tests/unit/test_redis_cache.py::TestRedisCacheDisabled::test_disabled_cache PASSED [ 80%]
+tests/unit/test_redis_cache.py::TestRedisCacheDisabled::test_get_when_disabled PASSED [ 81%]
+tests/unit/test_redis_cache.py::TestRedisCacheConnectionError::test_connection_failure PASSED [ 81%]
+tests/unit/test_redis_rate_limiter.py::TestRedisRateLimiter::test_initialization_disabled PASSED [ 81%]
+tests/unit/test_redis_rate_limiter.py::TestRedisRateLimiter::test_get_key PASSED [ 81%]
+tests/unit/test_redis_rate_limiter.py::TestRedisRateLimiter::test_check_rate_limit_allowed PASSED [ 81%]
+tests/unit/test_redis_rate_limiter.py::TestRedisRateLimiter::test_check_rate_limit_exceeded PASSED [ 81%]
+tests/unit/test_redis_rate_limiter.py::TestRedisRateLimiter::test_rate_limit_disabled PASSED [ 81%]
+tests/unit/test_redis_rate_limiter.py::TestRedisRateLimiter::test_get_current_usage PASSED [ 81%]
+tests/unit/test_redis_rate_limiter.py::TestRedisRateLimiter::test_reset_rate_limit PASSED [ 81%]
+tests/unit/test_redis_rate_limiter.py::TestRedisRateLimiterDecorator::test_rate_limit_decorator PASSED [ 81%]
+tests/unit/test_redis_rate_limiter.py::TestRedisRateLimiterSlidingWindow::test_sliding_window_add PASSED [ 81%]
+tests/unit/test_redis_rate_limiter.py::TestRedisRateLimiterMultiResource::test_separate_limits_per_resource PASSED [ 81%]
+tests/unit/test_resilience.py::TestRetryDecorator::test_succeeds_on_first_try PASSED [ 81%]
+tests/unit/test_resilience.py::TestRetryDecorator::test_retries_on_failure PASSED [ 81%]
+tests/unit/test_resilience.py::TestRetryDecorator::test_raises_after_max_retries PASSED [ 82%]
+tests/unit/test_resilience.py::TestRetryDecorator::test_exponential_backoff PASSED [ 82%]
+tests/unit/test_resilience.py::TestRetryDecorator::test_rate_limit_error_longer_delay PASSED [ 82%]
+tests/unit/test_resilience.py::TestCircuitBreaker::test_starts_closed PASSED [ 82%]
+tests/unit/test_resilience.py::TestCircuitBreaker::test_opens_after_threshold PASSED [ 82%]
+tests/unit/test_resilience.py::TestCircuitBreaker::test_rejects_when_open PASSED [ 82%]
+tests/unit/test_resilience.py::TestCircuitBreaker::test_half_open_after_timeout PASSED [ 82%]
+tests/unit/test_resilience.py::TestCircuitBreaker::test_closes_on_success_in_half_open PASSED [ 82%]
+tests/unit/test_resilience.py::TestCircuitBreaker::test_reopens_on_failure_in_half_open PASSED [ 82%]
+tests/unit/test_resilience.py::TestCircuitBreaker::test_success_resets_failure_count PASSED [ 82%]
+tests/unit/test_resilience.py::TestDeadLetterQueue::test_add_failed_job PASSED [ 82%]
+tests/unit/test_resilience.py::TestDeadLetterQueue::test_retrieve_jobs PASSED [ 82%]
+tests/unit/test_resilience.py::TestDeadLetterQueue::test_remove_job PASSED [ 82%]
+tests/unit/test_resilience.py::TestDeadLetterQueue::test_max_size_limit PASSED [ 83%]
+tests/unit/test_resilience.py::TestDeadLetterQueue::test_retry_job PASSED [ 83%]
+tests/unit/test_resilience.py::TestLLMExceptions::test_llm_error_message PASSED [ 83%]
+tests/unit/test_resilience.py::TestLLMExceptions::test_timeout_error_inheritance PASSED [ 83%]
+tests/unit/test_resilience.py::TestLLMExceptions::test_rate_limit_error_inheritance PASSED [ 83%]
+tests/unit/test_resilience.py::TestLLMExceptions::test_exception_with_context PASSED [ 83%]
+tests/unit/test_resilience.py::TestResilienceIntegration::test_retry_with_circuit_breaker PASSED [ 83%]
+tests/unit/test_resilience.py::TestResilienceIntegration::test_failed_calls_go_to_dlq PASSED [ 83%]
+tests/unit/test_resilience_extended.py::TestCircuitBreakerExtended::test_circuit_starts_closed PASSED [ 83%]
+tests/unit/test_resilience_extended.py::TestCircuitBreakerExtended::test_circuit_opens_after_failures PASSED [ 83%]
+tests/unit/test_resilience_extended.py::TestCircuitBreakerExtended::test_circuit_half_open_after_timeout PASSED [ 83%]
+tests/unit/test_resilience_extended.py::TestCircuitBreakerExtended::test_circuit_closes_on_success PASSED [ 83%]
+tests/unit/test_resilience_extended.py::TestCircuitBreakerExtended::test_circuit_blocks_when_open PASSED [ 83%]
+tests/unit/test_resilience_extended.py::TestCircuitBreakerExtended::test_circuit_allows_when_closed PASSED [ 83%]
+tests/unit/test_resilience_extended.py::TestCircuitBreakerExtended::test_failure_count_resets_on_close PASSED [ 84%]
+tests/unit/test_resilience_extended.py::TestCircuitBreakerExtended::test_circuit_with_custom_threshold PASSED [ 84%]
+tests/unit/test_resilience_extended.py::TestRetryExtended::test_retry_succeeds_first_try PASSED [ 84%]
+tests/unit/test_resilience_extended.py::TestRetryExtended::test_retry_succeeds_after_failures PASSED [ 84%]
+tests/unit/test_resilience_extended.py::TestRetryExtended::test_retry_exhausts_attempts PASSED [ 84%]
+tests/unit/test_resilience_extended.py::TestRetryExtended::test_retry_with_exponential_backoff PASSED [ 84%]
+tests/unit/test_resilience_extended.py::TestRetryExtended::test_retry_specific_exceptions PASSED [ 84%]
+tests/unit/test_resilience_extended.py::TestDeadLetterQueueExtended::test_dlq_add_item PASSED [ 84%]
+tests/unit/test_resilience_extended.py::TestDeadLetterQueueExtended::test_dlq_get_items PASSED [ 84%]
+tests/unit/test_resilience_extended.py::TestDeadLetterQueueExtended::test_dlq_clear PASSED [ 84%]
+tests/unit/test_resilience_extended.py::TestDeadLetterQueueExtended::test_dlq_retry_item PASSED [ 84%]
+tests/unit/test_resilience_extended.py::TestDeadLetterQueueExtended::test_dlq_max_size PASSED [ 84%]
+tests/unit/test_resilience_extended.py::TestCustomExceptions::test_llm_error PASSED [ 84%]
+tests/unit/test_resilience_extended.py::TestCustomExceptions::test_llm_timeout_error PASSED [ 85%]
+tests/unit/test_resilience_extended.py::TestCustomExceptions::test_llm_rate_limit_error PASSED [ 85%]
+tests/unit/test_resilience_extended.py::TestCustomExceptions::test_exception_inheritance PASSED [ 85%]
+tests/unit/test_resilience_extended.py::TestResilienceIntegration::test_retry_with_circuit_breaker PASSED [ 85%]
+tests/unit/test_resilience_extended.py::TestResilienceIntegration::test_dlq_with_retry_failures PASSED [ 85%]
+tests/unit/test_services_campaign.py::TestCampaignServiceInit::test_initialization SKIPPED [ 85%]
+tests/unit/test_services_campaign.py::TestCampaignServiceInit::test_initialization_with_session SKIPPED [ 85%]
+tests/unit/test_services_campaign.py::TestCampaignCRUD::test_create_campaign PASSED [ 85%]
+tests/unit/test_services_campaign.py::TestCampaignCRUD::test_get_campaign PASSED [ 85%]
+tests/unit/test_services_campaign.py::TestCampaignCRUD::test_get_campaign_not_found PASSED [ 85%]
+tests/unit/test_services_campaign.py::TestCampaignCRUD::test_list_campaigns PASSED [ 85%]
+tests/unit/test_services_campaign.py::TestCampaignCRUD::test_update_campaign PASSED [ 85%]
+tests/unit/test_services_campaign.py::TestCampaignCRUD::test_delete_campaign PASSED [ 85%]
+tests/unit/test_services_campaign.py::TestCampaignAnalysis::test_save_analysis PASSED [ 85%]
+tests/unit/test_services_campaign.py::TestCampaignAnalysis::test_get_analysis_history PASSED [ 86%]
+tests/unit/test_services_campaign.py::TestCampaignMetrics::test_get_campaign_metrics PASSED [ 86%]
+tests/unit/test_services_campaign.py::TestCampaignMetrics::test_calculate_kpis PASSED [ 86%]
+tests/unit/test_services_campaign.py::TestCampaignFiltering::test_filter_by_platform PASSED [ 86%]
+tests/unit/test_services_campaign.py::TestCampaignFiltering::test_filter_by_date_range PASSED [ 86%]
+tests/unit/test_services_extended.py::TestCampaignServiceExtended::test_initialization PASSED [ 86%]
+tests/unit/test_services_extended.py::TestCampaignServiceExtended::test_import_from_dataframe PASSED [ 86%]
+tests/unit/test_services_extended.py::TestCampaignServiceExtended::test_import_handles_timestamps PASSED [ 86%]
+tests/unit/test_services_extended.py::TestCampaignServiceExtended::test_import_handles_nan_values PASSED [ 86%]
+tests/unit/test_services_extended.py::TestCampaignServiceExtended::test_get_campaign PASSED [ 86%]
+tests/unit/test_services_extended.py::TestCampaignServiceExtended::test_list_campaigns PASSED [ 86%]
+tests/unit/test_services_extended.py::TestUserServiceExtended::test_initialization SKIPPED [ 86%]
+tests/unit/test_services_extended.py::TestUserServiceExtended::test_create_user SKIPPED [ 86%]
+tests/unit/test_services_extended.py::TestUserServiceExtended::test_authenticate_user SKIPPED [ 87%]
+tests/unit/test_smart_filters.py::TestPlatformFilter::test_filter_single_platform PASSED [ 87%]
+tests/unit/test_smart_filters.py::TestPlatformFilter::test_filter_multiple_platforms PASSED [ 87%]
+tests/unit/test_smart_filters.py::TestPlatformFilter::test_filter_all_platforms PASSED [ 87%]
+tests/unit/test_smart_filters.py::TestPlatformFilter::test_filter_nonexistent_platform PASSED [ 87%]
+tests/unit/test_smart_filters.py::TestDateRangeFilter::test_filter_date_range PASSED [ 87%]
+tests/unit/test_smart_filters.py::TestDateRangeFilter::test_filter_single_day PASSED [ 87%]
+tests/unit/test_smart_filters.py::TestDateRangeFilter::test_filter_future_dates PASSED [ 87%]
+tests/unit/test_smart_filters.py::TestDateRangeFilter::test_handles_mixed_date_formats PASSED [ 87%]
+tests/unit/test_smart_filters.py::TestNumericRangeFilter::test_filter_spend_range PASSED [ 87%]
+tests/unit/test_smart_filters.py::TestNumericRangeFilter::test_filter_conversions_minimum PASSED [ 87%]
+tests/unit/test_smart_filters.py::TestNumericRangeFilter::test_filter_zero_spend PASSED [ 87%]
+tests/unit/test_smart_filters.py::TestFunnelStageFilter::test_filter_awareness PASSED [ 87%]
+tests/unit/test_smart_filters.py::TestFunnelStageFilter::test_filter_multiple_stages PASSED [ 87%]
+tests/unit/test_smart_filters.py::TestFunnelStageFilter::test_funnel_stage_aggregation PASSED [ 88%]
+tests/unit/test_smart_filters.py::TestCombinedFilters::test_platform_and_date_filter PASSED [ 88%]
+tests/unit/test_smart_filters.py::TestCombinedFilters::test_all_filters_combined PASSED [ 88%]
+tests/unit/test_smart_filters.py::TestCombinedFilters::test_empty_result_from_filters PASSED [ 88%]
+tests/unit/test_smart_filters.py::TestFilteredMetrics::test_filtered_totals PASSED [ 88%]
+tests/unit/test_smart_filters.py::TestFilteredMetrics::test_filtered_cpa PASSED [ 88%]
+tests/unit/test_smart_filters.py::TestFilteredMetrics::test_filtered_ctr PASSED [ 88%]
+tests/unit/test_smart_filters.py::TestEdgeCases::test_empty_dataframe PASSED [ 88%]
+tests/unit/test_smart_filters.py::TestEdgeCases::test_missing_filter_column PASSED [ 88%]
+tests/unit/test_smart_filters.py::TestEdgeCases::test_null_values_in_filter_column PASSED [ 88%]
+tests/unit/test_smart_filters.py::TestEdgeCases::test_case_insensitive_platform_filter PASSED [ 88%]
+tests/unit/test_smart_visualization.py::TestChartGeneratorInit::test_initialization PASSED [ 88%]
+tests/unit/test_smart_visualization.py::TestChartGeneratorInit::test_has_color_schemes PASSED [ 88%]
+tests/unit/test_smart_visualization.py::TestOverviewCharts::test_generate_overview_charts PASSED [ 88%]
+tests/unit/test_smart_visualization.py::TestOverviewCharts::test_charts_have_required_fields PASSED [ 89%]
+tests/unit/test_smart_visualization.py::TestOverviewCharts::test_handles_minimal_data PASSED [ 89%]
+tests/unit/test_smart_visualization.py::TestOverviewCharts::test_handles_empty_data PASSED [ 89%]
+tests/unit/test_smart_visualization.py::TestColumnDetection::test_detects_spend_column PASSED [ 89%]
+tests/unit/test_smart_visualization.py::TestColumnDetection::test_detects_date_column PASSED [ 89%]
+tests/unit/test_smart_visualization.py::TestColumnDetection::test_detects_platform_column PASSED [ 89%]
+tests/unit/test_smart_visualization.py::TestColumnDetection::test_handles_missing_columns PASSED [ 89%]
+tests/unit/test_smart_visualization.py::TestQueryCharts::test_generate_query_charts PASSED [ 89%]
+tests/unit/test_smart_visualization.py::TestQueryCharts::test_trend_query_generates_line_chart PASSED [ 89%]
+tests/unit/test_smart_visualization.py::TestQueryCharts::test_comparison_query_generates_bar_chart PASSED [ 89%]
+tests/unit/test_smart_visualization.py::TestSpecificCharts::test_spend_vs_conversions_chart PASSED [ 89%]
+tests/unit/test_smart_visualization.py::TestSpecificCharts::test_kpi_trends_chart PASSED [ 89%]
+tests/unit/test_smart_visualization.py::TestSpecificCharts::test_channel_performance_chart PASSED [ 89%]
+tests/unit/test_smart_visualization.py::TestChartErrorHandling::test_handles_invalid_data_types PASSED [ 90%]
+tests/unit/test_smart_visualization.py::TestChartErrorHandling::test_handles_null_values PASSED [ 90%]
+tests/unit/test_smart_visualization.py::TestChartErrorHandling::test_handles_single_row PASSED [ 90%]
+tests/unit/test_smart_visualization.py::TestChartCustomization::test_uses_dark_template PASSED [ 90%]
+tests/unit/test_smart_visualization.py::TestChartCustomization::test_color_scheme_applied PASSED [ 90%]
+tests/unit/test_smart_visualization.py::TestChartPerformance::test_handles_large_dataset PASSED [ 90%]
+tests/unit/test_smart_visualization.py::TestChartPerformance::test_handles_many_categories PASSED [ 90%]
+tests/unit/test_streamlit_extended.py::TestStreamlitDatabaseManagerGetCampaigns::test_get_campaigns_with_cache PASSED [ 90%]
+tests/unit/test_streamlit_extended.py::TestStreamlitDatabaseManagerGetCampaigns::test_get_campaigns_without_cache PASSED [ 90%]
+tests/unit/test_streamlit_extended.py::TestStreamlitDatabaseManagerGetCampaigns::test_get_campaigns_with_filters PASSED [ 90%]
+tests/unit/test_streamlit_extended.py::TestStreamlitDatabaseManagerGetCampaigns::test_get_campaigns_with_limit PASSED [ 90%]
+tests/unit/test_streamlit_extended.py::TestStreamlitDatabaseManagerGetCampaigns::test_get_campaigns_error_handling PASSED [ 90%]
+tests/unit/test_streamlit_extended.py::TestStreamlitDatabaseManagerSaveAnalysis::test_save_analysis PASSED [ 90%]
+tests/unit/test_streamlit_extended.py::TestStreamlitDatabaseManagerSaveAnalysis::test_save_analysis_generates_session_id PASSED [ 90%]
+tests/unit/test_streamlit_extended.py::TestStreamlitDatabaseManagerQueryHistory::test_save_query PASSED [ 91%]
+tests/unit/test_streamlit_extended.py::TestStreamlitDatabaseManagerQueryHistory::test_get_query_history PASSED [ 91%]
+tests/unit/test_streamlit_extended.py::TestStreamlitSessionStateIntegration::test_session_state_df_storage PASSED [ 91%]
+tests/unit/test_streamlit_extended.py::TestStreamlitSessionStateIntegration::test_session_state_metadata PASSED [ 91%]
+tests/unit/test_streamlit_extended.py::TestStreamlitSessionStateIntegration::test_session_state_clear PASSED [ 91%]
+tests/unit/test_streamlit_extended.py::TestStreamlitCachingBehavior::test_cache_resource_decorator PASSED [ 91%]
+tests/unit/test_streamlit_extended.py::TestStreamlitCachingBehavior::test_cache_data_decorator PASSED [ 91%]
+tests/unit/test_streamlit_extended.py::TestStreamlitErrorHandling::test_import_dataframe_error PASSED [ 91%]
+tests/unit/test_streamlit_extended.py::TestStreamlitErrorHandling::test_container_initialization_fallback PASSED [ 91%]
+tests/unit/test_streamlit_integration.py::TestStreamlitDatabaseManagerInit::test_initialization PASSED [ 91%]
+tests/unit/test_streamlit_integration.py::TestStreamlitDatabaseManagerInit::test_initialization_fallback PASSED [ 91%]
+tests/unit/test_streamlit_integration.py::TestStreamlitDatabaseManagerOperations::test_get_campaign_service PASSED [ 91%]
+tests/unit/test_streamlit_integration.py::TestStreamlitDatabaseManagerOperations::test_import_dataframe PASSED [ 91%]
+tests/unit/test_streamlit_integration.py::TestStreamlitDatabaseManagerOperations::test_import_dataframe_with_session_id PASSED [ 92%]
+tests/unit/test_streamlit_integration.py::TestStreamlitSessionState::test_session_state_storage PASSED [ 92%]
+tests/unit/test_streamlit_integration.py::TestStreamlitSessionState::test_session_state_retrieval PASSED [ 92%]
+tests/unit/test_streamlit_integration.py::TestStreamlitCaching::test_cache_resource_decorator PASSED [ 92%]
+tests/unit/test_streamlit_tracking.py::TestQueryTracking::test_track_query_success PASSED [ 92%]
+tests/unit/test_streamlit_tracking.py::TestQueryTracking::test_track_query_with_dataframe_result PASSED [ 92%]
+tests/unit/test_streamlit_tracking.py::TestQueryTracking::test_track_query_failure PASSED [ 92%]
+tests/unit/test_streamlit_tracking.py::TestQueryTracking::test_track_rag_query PASSED [ 92%]
+tests/unit/test_streamlit_tracking.py::TestLLMUsageTracking::test_track_llm_usage_openai PASSED [ 92%]
+tests/unit/test_streamlit_tracking.py::TestLLMUsageTracking::test_track_llm_usage_anthropic PASSED [ 92%]
+tests/unit/test_streamlit_tracking.py::TestLLMUsageTracking::test_track_llm_usage_gemini PASSED [ 92%]
+tests/unit/test_streamlit_tracking.py::TestAnalysisHistory::test_session_state_analysis_history PASSED [ 92%]
+tests/unit/test_streamlit_tracking.py::TestAnalysisHistory::test_multiple_analyses PASSED [ 92%]
+tests/unit/test_streamlit_tracking.py::TestAnalysisHistory::test_analysis_history_retrieval PASSED [ 92%]
+tests/unit/test_streamlit_tracking.py::TestSessionManagement::test_session_id_generation PASSED [ 93%]
+tests/unit/test_streamlit_tracking.py::TestSessionManagement::test_session_state_persistence PASSED [ 93%]
+tests/unit/test_streamlit_tracking.py::TestSessionManagement::test_session_cleanup PASSED [ 93%]
+tests/unit/test_streamlit_tracking.py::TestDataImportTracking::test_import_metadata_storage PASSED [ 93%]
+tests/unit/test_streamlit_tracking.py::TestDataImportTracking::test_import_success_tracking PASSED [ 93%]
+tests/unit/test_user_behavior.py::TestUserSession::test_create_session PASSED [ 93%]
+tests/unit/test_user_behavior.py::TestUserSession::test_session_with_actions PASSED [ 93%]
+tests/unit/test_user_behavior.py::TestUserAction::test_create_action PASSED [ 93%]
+tests/unit/test_user_behavior.py::TestUserBehaviorAnalytics::test_initialization PASSED [ 93%]
+tests/unit/test_user_behavior.py::TestUserBehaviorAnalytics::test_start_session PASSED [ 93%]
+tests/unit/test_user_behavior.py::TestUserBehaviorAnalytics::test_end_session PASSED [ 93%]
+tests/unit/test_user_behavior.py::TestUserBehaviorAnalytics::test_record_action PASSED [ 93%]
+tests/unit/test_user_behavior.py::TestUserBehaviorAnalytics::test_record_page_view PASSED [ 93%]
+tests/unit/test_user_behavior.py::TestUserBehaviorAnalytics::test_get_user_sessions PASSED [ 94%]
+tests/unit/test_user_behavior.py::TestUserBehaviorAnalytics::test_get_session_duration PASSED [ 94%]
+tests/unit/test_user_behavior.py::TestUserBehaviorAnalytics_Statistics::test_get_active_users PASSED [ 94%]
+tests/unit/test_user_behavior.py::TestUserBehaviorAnalytics_Statistics::test_get_popular_pages PASSED [ 94%]
+tests/unit/test_user_behavior.py::TestUserBehaviorAnalytics_Statistics::test_get_device_breakdown PASSED [ 94%]
+tests/unit/test_user_service.py::TestPasswordValidator::test_valid_password PASSED [ 94%]
+tests/unit/test_user_service.py::TestPasswordValidator::test_password_too_short PASSED [ 94%]
+tests/unit/test_user_service.py::TestPasswordValidator::test_password_no_uppercase PASSED [ 94%]
+tests/unit/test_user_service.py::TestPasswordValidator::test_password_no_lowercase PASSED [ 94%]
+tests/unit/test_user_service.py::TestPasswordValidator::test_password_no_digit PASSED [ 94%]
+tests/unit/test_user_service.py::TestPasswordValidator::test_password_no_special PASSED [ 94%]
+tests/unit/test_user_service.py::TestUserServiceInit::test_init_with_session PASSED [ 94%]
+tests/unit/test_user_service.py::TestUserServiceInit::test_max_failed_attempts_set PASSED [ 94%]
+tests/unit/test_user_service.py::TestUserServiceInit::test_lockout_duration_set PASSED [ 94%]
+tests/unit/test_user_service.py::TestPasswordHashing::test_hash_password PASSED [ 95%]
+tests/unit/test_user_service.py::TestPasswordHashing::test_verify_correct_password PASSED [ 95%]
+tests/unit/test_user_service.py::TestPasswordHashing::test_verify_incorrect_password PASSED [ 95%]
+tests/unit/test_user_service.py::TestPasswordHashing::test_different_hashes_for_same_password PASSED [ 95%]
+tests/unit/test_user_service.py::TestUserCreation::test_create_user_valid PASSED [ 95%]
+tests/unit/test_user_service.py::TestUserCreation::test_create_user_weak_password_rejected PASSED [ 95%]
+tests/unit/test_user_service.py::TestUserCreation::test_create_user_with_role PASSED [ 95%]
+tests/unit/test_user_service.py::TestUserRetrieval::test_get_user_by_username PASSED [ 95%]
+tests/unit/test_user_service.py::TestUserRetrieval::test_get_nonexistent_user PASSED [ 95%]
+tests/unit/test_user_service.py::TestUserRetrieval::test_get_user_by_email PASSED [ 95%]
+tests/unit/test_user_service.py::TestAccountLockout::test_increment_failed_attempts PASSED [ 95%]
+tests/unit/test_user_service.py::TestAccountLockout::test_reset_failed_attempts PASSED [ 95%]
+tests/unit/test_user_service.py::TestAccountLockout::test_is_account_locked PASSED [ 95%]
+tests/unit/test_user_service.py::TestPasswordReset::test_generate_reset_token PASSED [ 96%]
+tests/unit/test_user_service.py::TestPasswordReset::test_validate_reset_token PASSED [ 96%]
+tests/unit/test_user_service.py::TestUserUpdate::test_update_user_email PASSED [ 96%]
+tests/unit/test_user_service.py::TestUserUpdate::test_change_password PASSED [ 96%]
+tests/unit/test_user_service.py::TestUserDeletion::test_delete_user PASSED [ 96%]
+tests/unit/test_user_service.py::TestUserDeletion::test_soft_delete_user PASSED [ 96%]
+tests/unit/test_utils_data_loader.py::TestDataLoader::test_initialization PASSED [ 96%]
+tests/unit/test_utils_data_loader.py::TestDataLoader::test_load_csv SKIPPED [ 96%]
+tests/unit/test_utils_data_loader.py::TestDataLoader::test_load_excel PASSED [ 96%]
+tests/unit/test_utils_data_loader.py::TestDataLoader::test_load_json PASSED [ 96%]
+tests/unit/test_utils_data_loader.py::TestDataLoader::test_detect_file_type PASSED [ 96%]
+tests/unit/test_utils_data_loader.py::TestDataLoaderTransformations::test_normalize_columns PASSED [ 96%]
+tests/unit/test_utils_data_loader.py::TestDataLoaderTransformations::test_calculate_metrics PASSED [ 96%]
+tests/unit/test_utils_data_loader.py::TestDataLoaderTransformations::test_filter_by_platform PASSED [ 96%]
+tests/unit/test_utils_data_loader.py::TestDataValidator::test_initialization PASSED [ 97%]
+tests/unit/test_utils_data_loader.py::TestDataValidator::test_validate_required_columns PASSED [ 97%]
+tests/unit/test_utils_data_loader.py::TestDataValidator::test_validate_missing_columns PASSED [ 97%]
+tests/unit/test_utils_data_loader.py::TestDataValidator::test_validate_data_types PASSED [ 97%]
+tests/unit/test_utils_data_loader.py::TestDataValidator::test_detect_anomalies PASSED [ 97%]
+tests/unit/test_utils_data_loader.py::TestDataLoaderCaching::test_cache_data PASSED [ 97%]
+tests/unit/test_utils_data_loader.py::TestDataLoaderCaching::test_clear_cache PASSED [ 97%]
+tests/unit/test_utils_extended.py::TestStructuredLogger::test_initialization PASSED [ 97%]
+tests/unit/test_utils_extended.py::TestStructuredLogger::test_log_info PASSED [ 97%]
+tests/unit/test_utils_extended.py::TestStructuredLogger::test_log_error PASSED [ 97%]
+tests/unit/test_utils_extended.py::TestStructuredLogger::test_log_with_context PASSED [ 97%]
+tests/unit/test_utils_extended.py::TestMetricsCollector::test_initialization PASSED [ 97%]
+tests/unit/test_utils_extended.py::TestMetricsCollector::test_increment_counter PASSED [ 97%]
+tests/unit/test_utils_extended.py::TestMetricsCollector::test_record_gauge PASSED [ 98%]
+tests/unit/test_utils_extended.py::TestMetricsCollector::test_record_histogram PASSED [ 98%]
+tests/unit/test_utils_extended.py::TestCircuitBreaker::test_initialization PASSED [ 98%]
+tests/unit/test_utils_extended.py::TestCircuitBreaker::test_initial_state_closed PASSED [ 98%]
+tests/unit/test_utils_extended.py::TestCircuitBreaker::test_record_success PASSED [ 98%]
+tests/unit/test_utils_extended.py::TestCircuitBreaker::test_record_failure SKIPPED [ 98%]
+tests/unit/test_utils_extended.py::TestCircuitBreaker::test_opens_after_threshold SKIPPED [ 98%]
+tests/unit/test_utils_extended.py::TestRetryDecorator::test_retry_on_success SKIPPED [ 98%]
+tests/unit/test_utils_extended.py::TestRetryDecorator::test_retry_on_failure SKIPPED [ 98%]
+tests/unit/test_utils_extended.py::TestDeadLetterQueue::test_initialization PASSED [ 98%]
+tests/unit/test_utils_extended.py::TestDeadLetterQueue::test_add_failed_job SKIPPED [ 98%]
+tests/unit/test_utils_extended.py::TestDeadLetterQueue::test_get_failed_jobs PASSED [ 98%]
+tests/unit/test_utils_extended.py::TestPerformanceMonitor::test_initialization SKIPPED [ 98%]
+tests/unit/test_utils_extended.py::TestPerformanceMonitor::test_start_timer SKIPPED [ 98%]
+tests/unit/test_utils_extended.py::TestPerformanceMonitor::test_stop_timer SKIPPED [ 99%]
+tests/unit/test_utils_extended.py::TestPerformanceMonitor::test_get_stats SKIPPED [ 99%]
+tests/unit/test_workflow_orchestration.py::TestWorkflowState::test_workflow_state_structure PASSED [ 99%]
+tests/unit/test_workflow_orchestration.py::TestPCAWorkflowInit::test_initialization PASSED [ 99%]
+tests/unit/test_workflow_orchestration.py::TestPCAWorkflowInit::test_graph_built PASSED [ 99%]
+tests/unit/test_workflow_orchestration.py::TestWorkflowGraphBuilding::test_nodes_added PASSED [ 99%]
+tests/unit/test_workflow_orchestration.py::TestWorkflowGraphBuilding::test_entry_point_set PASSED [ 99%]
+tests/unit/test_workflow_orchestration.py::TestWorkflowNodes::test_vision_extraction_node PASSED [ 99%]
+tests/unit/test_workflow_orchestration.py::TestWorkflowNodes::test_data_normalization_node PASSED [ 99%]
+tests/unit/test_workflow_orchestration.py::TestWorkflowNodes::test_reasoning_analysis_node PASSED [ 99%]
+tests/unit/test_workflow_orchestration.py::TestWorkflowExecution::test_run_workflow SKIPPED [ 99%]
+tests/unit/test_workflow_orchestration.py::TestWorkflowExecution::test_run_workflow_with_config SKIPPED [ 99%]
+tests/unit/test_workflow_orchestration.py::TestWorkflowErrorHandling::test_error_accumulation PASSED [ 99%]
+tests/unit/test_workflow_orchestration.py::TestWorkflowErrorHandling::test_log_accumulation PASSED [100%]
+
+=============================== warnings summary ===============================
+../../../../Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/PyPDF2/__init__.py:21
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/PyPDF2/__init__.py:21: DeprecationWarning:
+  
+  PyPDF2 is deprecated. Please move to the pypdf library instead.
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning:
+  
+  builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning:
+  
+  builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning:
+  
+  builtin type swigvarlink has no __module__ attribute
+
+tests/test_data_normalizer.py::TestDateParsing::test_parse_european_format
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/data_normalizer.py:313: UserWarning:
+  
+  Parsing dates in %d-%m-%Y format when dayfirst=False (the default) was specified. Pass `dayfirst=True` or specify a format to silence this warning.
+
+tests/test_reporting_module.py::TestPerformance::test_large_dataset_aggregation
+  /Users/ashwin/Desktop/pca_agent copy/tests/test_reporting_module.py:912: FutureWarning:
+  
+  'H' is deprecated and will be removed in a future version, please use 'h' instead.
+
+tests/unit/test_auto_insights.py: 4 warnings
+tests/unit/test_observability.py: 7 warnings
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:545: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_auto_insights.py: 4 warnings
+tests/unit/test_resilience.py: 23 warnings
+tests/unit/test_resilience_extended.py: 6 warnings
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/resilience.py:38: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_auto_insights.py::TestAnalyzeAll::test_analyze_all_returns_dict
+tests/unit/test_auto_insights.py::TestAnalyzeAll::test_analyze_all_handles_empty_df
+tests/unit/test_auto_insights.py::TestAnalyzeAll::test_analyze_all_handles_missing_columns
+tests/unit/test_auto_insights.py::TestErrorHandling::test_handles_llm_timeout
+tests/unit/test_observability.py::TestTracer::test_span_error_recording
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:565: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_auto_insights.py: 4 warnings
+tests/unit/test_observability.py: 7 warnings
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:571: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_data_validator.py::test_column_normalization_and_numeric_cast
+tests/unit/test_data_validator.py::test_column_normalization_and_numeric_cast
+tests/unit/test_data_validator.py::test_column_normalization_and_numeric_cast
+tests/unit/test_data_validator.py::test_funnel_stage_normalization
+tests/unit/test_data_validator.py::test_funnel_stage_normalization
+tests/unit/test_data_validator.py::test_funnel_stage_normalization
+tests/unit/test_data_validator.py::test_date_parsing_success
+tests/unit/test_data_validator.py::test_date_parsing_success
+tests/unit/test_data_validator.py::test_date_parsing_success
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/data_validator.py:185: UserWarning:
+  
+  Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+
+tests/unit/test_data_validator.py::test_column_normalization_and_numeric_cast
+tests/unit/test_data_validator.py::test_column_normalization_and_numeric_cast
+tests/unit/test_data_validator.py::test_column_normalization_and_numeric_cast
+tests/unit/test_data_validator.py::test_funnel_stage_normalization
+tests/unit/test_data_validator.py::test_funnel_stage_normalization
+tests/unit/test_data_validator.py::test_funnel_stage_normalization
+tests/unit/test_data_validator.py::test_date_parsing_success
+tests/unit/test_data_validator.py::test_date_parsing_success
+tests/unit/test_data_validator.py::test_date_parsing_success
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/data_validator.py:186: UserWarning:
+  
+  Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+
+tests/unit/test_database_connector.py::TestDatabaseConnector::test_execute_query
+  /Users/ashwin/Desktop/pca_agent copy/src/data/database_connector.py:277: UserWarning:
+  
+  pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+
+tests/unit/test_database_models.py: 50 warnings
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/sqlalchemy/sql/schema.py:3624: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_database_models.py::TestCampaignModel::test_campaign_additional_data
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/sqlalchemy/sql/visitors.py:134: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132e674c0>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestCampaignModel::test_campaign_repr
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/sqlalchemy/util/compat.py:84: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132e67f10>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestCampaignModel::test_campaign_repr
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/sqlalchemy/util/compat.py:84: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132ec35b0>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestAnalysisModel::test_analysis_json_fields
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/sqlalchemy/sql/visitors.py:126: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132ec3a60>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestLLMUsageModel::test_create_llm_usage
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/weakref.py:415: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132ded120>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestLLMUsageModel::test_create_llm_usage
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/weakref.py:415: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132577c40>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestLLMUsageModel::test_create_llm_usage
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/weakref.py:415: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132e65a80>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestLLMUsageModel::test_create_llm_usage
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/weakref.py:415: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132ec0f40>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestLLMUsageModel::test_create_llm_usage
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/weakref.py:415: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132e676a0>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestLLMUsageModel::test_create_llm_usage
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/weakref.py:415: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132ec2980>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestLLMUsageModel::test_create_llm_usage
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/weakref.py:415: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132f39f30>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestLLMUsageModel::test_create_llm_usage
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/weakref.py:415: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132ec32e0>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestLLMUsageModel::test_create_llm_usage
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/weakref.py:415: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132f3bf10>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestLLMUsageModel::test_create_llm_usage
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/weakref.py:415: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132fcdc60>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestDatabaseQueries::test_query_campaigns_by_date_range
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/sqlalchemy/engine/reflection.py:79: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132f3a5c0>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestDatabaseQueries::test_query_campaigns_by_date_range
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/sqlalchemy/engine/reflection.py:79: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132f38b80>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_database_models.py::TestDatabaseQueries::test_query_campaigns_by_date_range
+  /Users/ashwin/Desktop/pca_agent copy/tests/unit/test_database_models.py:383: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_enhanced_reasoning.py::TestContextRetrieval::test_retrieve_context
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/loguru/_datetime.py:23: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132f38040>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_mcp_client.py::TestMCPResources::test_read_resource
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:194: RuntimeWarning:
+  
+  coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_mcp_client.py::TestMCPErrorHandling::test_handles_connection_error
+  /Users/ashwin/Desktop/pca_agent copy/tests/unit/test_mcp_client.py:149: RuntimeWarning:
+  
+  coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_nl_to_sql_engine.py::TestNLToSQLEngineInit::test_initialization_with_openai
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/contextlib.py:515: ResourceWarning:
+  
+  unclosed database in <sqlite3.Connection object at 0x132ec2d40>
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_observability.py: 6 warnings
+tests/unit/test_observability_extended.py: 9 warnings
+tests/unit/test_utils_extended.py: 4 warnings
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:282: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_observability.py::TestMetricsCollector::test_export_prometheus_format
+tests/unit/test_observability_extended.py::TestMetricsCollectorExtended::test_get_all_metrics
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:380: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_observability.py::TestAlertManager::test_trigger_alert
+tests/unit/test_observability.py::TestAlertManager::test_alert_cooldown
+tests/unit/test_observability.py::TestObservabilityIntegration::test_metrics_trigger_alerts
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:831: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_observability.py::TestAlertManager::test_trigger_alert
+tests/unit/test_observability.py::TestAlertManager::test_alert_cooldown
+tests/unit/test_observability.py::TestObservabilityIntegration::test_metrics_trigger_alerts
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:836: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_observability.py::TestAlertManager::test_alert_cooldown
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:819: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_observability.py::TestCostTracker::test_track_token_usage
+tests/unit/test_observability.py::TestCostTracker::test_budget_limit_warning
+tests/unit/test_observability.py::TestCostTracker::test_cost_by_provider
+tests/unit/test_observability.py::TestCostTracker::test_cost_by_provider
+tests/unit/test_observability.py::TestCostTracker::test_daily_cost_tracking
+tests/unit/test_observability.py::TestObservabilityIntegration::test_cost_tracking_with_logging
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:1018: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_observability.py::TestCostTracker::test_track_token_usage
+tests/unit/test_observability.py::TestCostTracker::test_budget_limit_warning
+tests/unit/test_observability.py::TestCostTracker::test_cost_by_provider
+tests/unit/test_observability.py::TestCostTracker::test_cost_by_provider
+tests/unit/test_observability.py::TestCostTracker::test_daily_cost_tracking
+tests/unit/test_observability.py::TestObservabilityIntegration::test_cost_tracking_with_logging
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:978: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_observability.py: 9 warnings
+tests/unit/test_observability_extended.py: 2 warnings
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:1059: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_observability.py: 9 warnings
+tests/unit/test_observability_extended.py: 1 warning
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:1065: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_observability.py::TestCostTracker::test_budget_limit_warning
+tests/unit/test_observability.py::TestCostTracker::test_cost_by_provider
+tests/unit/test_observability.py::TestCostTracker::test_daily_cost_tracking
+tests/unit/test_observability_extended.py::TestCostTrackerExtended::test_get_usage_by_provider
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:1077: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_observability_extended.py::TestMetricsCollectorExtended::test_reset_metrics
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/observability.py:420: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_predictive_qa.py::TestForecastNextMonth::test_forecast_next_month
+tests/unit/test_predictive_qa.py::TestForecastNextMonth::test_forecast_contains_cpa
+tests/unit/test_predictive_qa.py::TestForecastNextMonth::test_forecast_contains_conversions
+tests/unit/test_predictive_qa.py::TestForecastNextMonth::test_forecast_contains_roas
+tests/unit/test_predictive_qa.py::TestForecastNextMonth::test_forecast_confidence_intervals
+tests/unit/test_predictive_qa.py::TestForecastNextMonth::test_forecast_with_missing_revenue
+  /Users/ashwin/Desktop/pca_agent copy/src/predictive/predictive_qa_integration.py:39: FutureWarning:
+  
+  'M' is deprecated and will be removed in a future version, please use 'ME' instead.
+
+tests/unit/test_resilience.py: 15 warnings
+tests/unit/test_resilience_extended.py: 21 warnings
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/resilience.py:213: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_resilience.py::TestCircuitBreaker::test_rejects_when_open
+tests/unit/test_resilience.py::TestCircuitBreaker::test_half_open_after_timeout
+tests/unit/test_resilience.py::TestCircuitBreaker::test_closes_on_success_in_half_open
+tests/unit/test_resilience.py::TestCircuitBreaker::test_reopens_on_failure_in_half_open
+tests/unit/test_resilience_extended.py::TestCircuitBreakerExtended::test_circuit_half_open_after_timeout
+tests/unit/test_resilience_extended.py::TestCircuitBreakerExtended::test_circuit_closes_on_success
+tests/unit/test_resilience_extended.py::TestCircuitBreakerExtended::test_circuit_blocks_when_open
+tests/unit/test_resilience_extended.py::TestCircuitBreakerExtended::test_failure_count_resets_on_close
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/resilience.py:180: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_resilience.py: 9 warnings
+tests/unit/test_resilience_extended.py: 11 warnings
+  /Users/ashwin/Desktop/pca_agent copy/src/utils/resilience.py:543: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_smart_visualization.py::TestChartPerformance::test_handles_large_dataset
+  /Users/ashwin/Desktop/pca_agent copy/tests/unit/test_smart_visualization.py:305: FutureWarning:
+  
+  'H' is deprecated and will be removed in a future version, please use 'h' instead.
+
+tests/unit/test_user_behavior.py::TestUserSession::test_create_session
+  /Users/ashwin/Desktop/pca_agent copy/tests/unit/test_user_behavior.py:35: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_user_behavior.py::TestUserSession::test_session_with_actions
+  /Users/ashwin/Desktop/pca_agent copy/tests/unit/test_user_behavior.py:54: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_user_behavior.py::TestUserAction::test_create_action
+  /Users/ashwin/Desktop/pca_agent copy/tests/unit/test_user_behavior.py:80: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_user_behavior.py: 12 warnings
+  /Users/ashwin/Desktop/pca_agent copy/src/analytics/user_behavior.py:65: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_user_behavior.py::TestUserBehaviorAnalytics::test_end_session
+tests/unit/test_user_behavior.py::TestUserBehaviorAnalytics::test_get_session_duration
+  /Users/ashwin/Desktop/pca_agent copy/src/analytics/user_behavior.py:86: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_user_service.py::TestAccountLockout::test_is_account_locked
+  /Users/ashwin/Desktop/pca_agent copy/tests/unit/test_user_service.py:282: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_user_service.py::TestPasswordReset::test_validate_reset_token
+  /Users/ashwin/Desktop/pca_agent copy/tests/unit/test_user_service.py:312: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_user_service.py::TestUserUpdate::test_update_user_email
+  /Users/ashwin/Desktop/pca_agent copy/src/services/user_service.py:350: DeprecationWarning:
+  
+  datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+
+tests/unit/test_workflow_orchestration.py::TestWorkflowNodes::test_vision_extraction_node
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:194: RuntimeWarning:
+  
+  coroutine 'PCAWorkflow.vision_extraction_node' was never awaited
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_workflow_orchestration.py::TestWorkflowNodes::test_data_normalization_node
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:194: RuntimeWarning:
+  
+  coroutine 'PCAWorkflow.data_normalization_node' was never awaited
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_workflow_orchestration.py::TestWorkflowNodes::test_reasoning_analysis_node
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:194: RuntimeWarning:
+  
+  coroutine 'PCAWorkflow.reasoning_analysis_node' was never awaited
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform darwin, python 3.13.7-final-0 _______________
+
+Name                                                   Stmts   Miss Branch BrPart  Cover   Missing
+--------------------------------------------------------------------------------------------------
+src/__init__.py                                            1      0      0      0   100%
+src/agents/__init__.py                                    14      0      0      0   100%
+src/agents/agent_registry.py                             155     74     44      7    47%   115, 132->134, 134->131, 142-143, 149->148, 151->148, 156, 172-202, 219-236, 253-267, 271, 296-317, 321, 334-337, 342-470
+src/agents/b2b_specialist_agent.py                       273    245     88      0     8%   24-27, 43-54, 70-105, 121-144, 161-172, 180-222, 227-264, 269-296, 301-325, 330-361, 369-390, 395-420, 425-454, 459-487, 494-523, 528-557, 563-566, 572, 592, 612-615, 625, 633-644
+src/agents/channel_specialists/__init__.py                 6      0      0      0   100%
+src/agents/channel_specialists/base_specialist.py         63     20     32     10    66%   37, 47, 64-74, 92, 95, 147, 149, 151, 153, 155, 157, 159
+src/agents/channel_specialists/channel_router.py         186     69     86     21    62%   94-95, 119->123, 124, 126, 128, 130, 132, 134, 136, 138, 214-215, 243-245, 269-284, 345->344, 348, 350, 352, 356->368, 359, 361, 363, 369->368, 397-444
+src/agents/channel_specialists/programmatic_agent.py     260    146    100     22    40%   80, 102-104, 115, 128-129, 131-132, 139-143, 148-155, 184-226, 250-290, 314-343, 369-394, 418-442, 464->472, 469, 474-478, 483-487, 490->505, 497-503, 524, 526, 529, 534, 537-540
+src/agents/channel_specialists/search_agent.py           182     84     70     14    49%   114-115, 117, 124-125, 157, 162-167, 193-220, 244-277, 301-326, 350-361, 379, 383, 385, 393, 396-399
+src/agents/channel_specialists/social_agent.py           242     79    106     28    64%   54, 56, 58, 60, 144-149, 152->173, 156->173, 161-163, 165-167, 175-179, 217-219, 221-223, 225-227, 235-236, 268->293, 272->293, 295->294, 298->306, 302->306, 326-327, 333->353, 345-350, 357->365, 389-424, 448-475, 487, 494, 499
+src/agents/chart_generators.py                           154     59     34      4    61%   182->187, 200->212, 272-329, 357, 407-436, 458-549, 643->654, 675-726
+src/agents/enhanced_reasoning_agent.py                   348    130    172     43    57%   52-65, 78-86, 108-116, 120-122, 175-176, 180-181, 185-186, 190-191, 203-229, 234-244, 256-257, 266-267, 287-299, 309, 357->367, 359->367, 367->378, 369->378, 385-390, 399-402, 413->410, 421, 428-435, 448->470, 454-468, 482, 490->500, 496->500, 501-523, 532-545, 557-578, 587-605, 620->639, 636-637, 652, 673-674, 687-688, 713-716, 737, 744->776, 754-774, 791->814, 798->814, 814->835, 820->835, 835->852, 841->852, 859-862
+src/agents/enhanced_visualization_agent.py               241     94    130     22    53%   90-92, 118-129, 153-218, 253, 261, 265, 274-278, 282, 289, 293, 303-322, 362, 379, 397-454, 484->502, 502->530, 530->561, 561->586, 572->586, 601->625, 606-622, 658->671, 671->697, 697->721, 707->721, 738-747, 757
+src/agents/extraction_agent.py                           114     74     72      5    30%   57-59, 68-90, 111-113, 121-122, 128-129, 135-136, 157-205, 225-302, 319-325
+src/agents/filter_presets.py                              55     31     22      3    35%   411-412, 424->430, 427-428, 445-452, 458-459, 473-482, 487, 501-526
+src/agents/marketing_visualization_rules.py               94     45     30      1    40%   62, 511-532, 538-549, 554-564, 569-570, 575-582, 587-588, 636, 647-661
+src/agents/reasoning_agent.py                            133     87     40      5    32%   42, 67-87, 96, 99-104, 118-151, 159-192, 201-227, 244, 259, 294-309, 317-381, 391-436, 440-465
+src/agents/report_agent.py                               227    206     46      0     8%   35-37, 54-94, 103-144, 153-191, 200-235, 244-314, 323-345, 354-380, 389-404, 413-425
+src/agents/smart_visualization_engine.py                 292    158    120     15    38%   189->214, 196-212, 237, 241, 245, 249, 253, 266, 270-273, 280-287, 299-309, 321-331, 336-351, 356-370, 375-392, 397-407, 412-420, 425-426, 430, 434-439, 443-444, 448-457, 488-500, 508-509, 515-526, 533-538, 544-550, 554-564, 572-577, 583-590, 594-601, 605-615, 619-638, 642-652, 656-668, 672-682
+src/agents/vision_agent.py                               130     89     24      1    30%   50, 76-101, 112-139, 147-212, 220-275, 283-328, 332-352, 356-359, 363-383, 387-412, 417, 421-435
+src/agents/visualization_agent.py                        139    117     46      0    12%   46-82, 90-134, 147-179, 192-230, 243-281, 294-329, 343-375, 390
+src/agents/visualization_filters.py                      278    184    132      6    26%   92-274, 298, 301, 317-328, 347-357, 361-397, 404-407, 421-435, 451-461, 465-487, 491-495, 499-523, 527-532, 543-567, 572-575, 579-585, 589-599, 603
+src/analytics/__init__.py                                  2      0      0      0   100%
+src/analytics/auto_insights.py                          1406    860    586     75    36%   44-46, 66->69, 76-89, 91->104, 94, 107-112, 130->134, 142-212, 217-237, 254, 257, 262, 313, 339-346, 397-399, 405, 416-418, 424-442, 462-464, 472-474, 523-532, 540, 551->554, 555->558, 559->562, 563->567, 568->567, 575-578, 581->590, 598->601, 602->605, 605->608, 614-617, 660, 665-689, 692-695, 697-699, 701-708, 716-744, 760-764, 768-778, 782-842, 847-911, 939, 950-951, 966-967, 974-984, 991-1001, 1004->1021, 1008-1018, 1025, 1034-1058, 1070->1072, 1072->1074, 1074->1077, 1077->1095, 1081->1095, 1091-1092, 1106->1124, 1137->1149, 1163->1175, 1180, 1186-1188, 1191, 1206, 1240, 1242, 1244, 1248, 1429-1434, 1438-1445, 1448->1457, 1452, 1458-1477, 1480, 1482, 1491-1495, 1499->1555, 1513->1523, 1523->1555, 1573-1689, 1693-1735, 1743-1744, 1758->1771, 1786-1805, 1811-1812, 1815->1828, 1820-1825, 1829-1850, 1888, 1895, 1906-1907, 1912, 1914->1908, 1955-1960, 1996->2014, 2003->2002, 2054, 2082->2096, 2096->2108, 2111-2112, 2123->2133, 2147-2153, 2209-2403, 2410-2478, 2492-2542, 2546-2564, 2568-2620, 2625-2632, 2636-2653, 2683-2880, 2885-3035, 3040-3087, 3106-3267, 3294-3351, 3355-3360
+src/analytics/causal_analysis.py                         422    422     98      0     0%   13-1112
+src/analytics/performance_diagnostics.py                 320    320     64      0     0%   10-836
+src/analytics/user_behavior.py                           175    108     54      1    30%   83, 112-131, 140-143, 155-184, 202-215, 219-224, 240-271, 281-302, 309-315, 325, 335-339, 343-350, 354-362, 366-377, 385-400
+src/api/__init__.py                                        0      0      0      0   100%
+src/api/error_handlers.py                                 40     20      4      0    45%   31-41, 69-86, 117-138, 169-182
+src/api/exceptions.py                                    153     67     34      0    46%   132-136, 147-151, 162-166, 179-183, 199-205, 216, 229-233, 244-248, 261, 272-276, 289-293, 306-310, 321-325, 341-347, 360-364, 375-379, 392, 403-407
+src/api/main.py                                           68     25      4      1    61%   63-75, 162-164, 177-194, 201, 205-206
+src/api/main_v3.py                                        68     68      4      0     0%   14-206
+src/api/middleware/__init__.py                             3      0      0      0   100%
+src/api/middleware/auth.py                                99     39     18      2    60%   60->70, 66-68, 86-88, 93-94, 171, 195-204, 222-228, 251-295
+src/api/middleware/monitoring_middleware.py               23     23      2      0     0%   6-69
+src/api/middleware/rate_limit.py                          22      6      4      1    65%   40, 56-62
+src/api/middleware/redis_rate_limit.py                    75     61     30      0    13%   25-26, 30-93, 98-104, 113-133, 150-191, 206-221
+src/api/middleware/secure_auth.py                         54     54     12      0     0%   7-210
+src/api/v1/__init__.py                                     7      0      0      0   100%
+src/api/v1/auth.py                                        36     14      4      0    55%   55-72, 94-112, 130-132
+src/api/v1/campaigns.py                                  680    608    258      0     8%   39-79, 92-127, 140-156, 176-249, 254-350, 356-468, 477-495, 512-545, 558-574, 588-623, 638-670, 686-746, 759-772, 786-817, 832-879, 893-942, 957-1012, 1026-1084, 1104-1263, 1290-1369, 1388-1479
+src/api/v1/models.py                                       6      0      0      0   100%
+src/api/v1/user_management.py                            110    110     12      0     0%   7-307
+src/backup/__init__.py                                     2      0      0      0   100%
+src/backup/backup_manager.py                             140     89     38      2    32%   84-104, 117-155, 168-174, 184-189, 192, 223-242, 250-272, 282-319, 328-340, 357-359
+src/cache/__init__.py                                      2      0      0      0   100%
+src/cache/redis_cache.py                                 151     73     36      8    49%   51, 68, 102-108, 130, 138, 142, 146-148, 153, 158-160, 165, 169-171, 184, 190-193, 197-204, 208-224, 228-235, 245-247, 268-303, 318
+src/config/__init__.py                                     2      0      0      0   100%
+src/config/llm_router.py                                 103     70     28      0    25%   116-121, 134-154, 176-225, 240-260, 278-297, 301-313
+src/config/settings.py                                    52      3      2      1    93%   119, 126-128
+src/data/database_connector.py                           229    124     84     10    46%   83, 112-113, 128->130, 131, 133->136, 144, 164, 213-223, 235-254, 268, 275, 279-280, 299, 310-327, 353-397, 422-457, 478-510, 514-517, 537-548, 568-583
+src/data_processing/__init__.py                            2      0      0      0   100%
+src/data_processing/advanced_processor.py                238     98    114      6    56%   83->89, 110-113, 125->121, 139-140, 166->165, 188, 196-203, 220-252, 271-306, 323-347, 367-400, 417-439, 520-523
+src/database/__init__.py                                   4      0      0      0   100%
+src/database/connection.py                               100     29     14      5    67%   40, 57-58, 66, 104-106, 119, 125-128, 137-140, 144-147, 156-158, 168->171, 176-177, 190-195
+src/database/models.py                                    98      4      0      0    96%   99, 136, 171, 198
+src/database/repositories.py                             188    139     56      0    20%   21, 25, 29, 33, 41-44, 48-51, 55, 59, 63, 67, 73, 82-107, 111-117, 121-126, 130-132, 136-169, 186-189, 193, 197, 201, 207, 213, 219-227, 231-244, 252-255, 259, 263, 269, 275, 285-288, 292-305, 314-327, 336-349, 361-364, 368, 374-384
+src/database/user_models.py                               39      6      2      0    80%   47, 51-53, 57, 86
+src/di/__init__.py                                         2      0      0      0   100%
+src/di/containers.py                                      36      3      0      0    92%   127-128, 133
+src/enterprise/__init__.py                                 4      0      0      0   100%
+src/enterprise/audit.py                                  111     73     30      0    27%   46-48, 76-104, 108-109, 130-146, 154-172, 191-233, 252-275, 279-287, 291-308
+src/enterprise/auth.py                                   183     79     36      2    54%   150-162, 174-182, 198-199, 251, 272, 288-289, 293-309, 313-322, 326-332, 336-352, 356-360, 364-365, 373-377, 381-398, 402-403, 413-430, 434-438, 442-443
+src/enterprise/monitoring.py                             167    120     40      0    23%   39-43, 67-80, 84, 107-125, 135-146, 150-174, 178-188, 196-197, 209-224, 228-241, 264-266, 270, 281-303, 307-308, 312-316, 320-324, 328-329, 333-342, 346-355, 363, 367, 377-405
+src/evaluation/__init__.py                                 2      0      0      0   100%
+src/evaluation/query_tracker.py                          152     92     20      1    35%   59-61, 132-158, 171-208, 224-234, 243-265, 269-292, 296-307, 311-317, 321-352, 363-366
+src/feedback/__init__.py                                   2      0      0      0   100%
+src/feedback/feedback_system.py                          130    100     60      0    16%   96-114, 147-166, 175-249, 258-305, 317-341, 354, 366-382, 391-412
+src/knowledge/__init__.py                                  5      0      0      0   100%
+src/knowledge/auto_refresh.py                            199    117     50      4    35%   136-138, 142-147, 156-183, 197, 199, 203, 207-216, 220-235, 248-250, 263-313, 321-337, 341-348, 352-373, 380-390, 403-404, 408-411, 441-446
+src/knowledge/benchmark_engine.py                        154     65     80      8    53%   68-74, 108-126, 328-329, 338, 360, 402-403, 408->411, 420, 427-476, 484-495, 499-508, 512-518, 522-540
+src/knowledge/causal_kb_rag.py                           155    127     78      0    12%   46-47, 51-53, 58-67, 71, 195, 246, 287, 342, 367, 425-501, 527-554, 580-615, 631-654, 673-705, 721-723
+src/knowledge/chunk_optimizer.py                         186    144     70      1    17%   106-108, 118, 137-156, 164-189, 198-235, 249-274, 283-298, 309-321, 326-327, 332-333, 351-393, 410-440, 455-457
+src/knowledge/chunking_strategy.py                       133    109     60      0    12%   74-93, 97, 110-139, 144-147, 158-194, 206-246, 256-272, 283-300, 312-324, 354-368
+src/knowledge/enhanced_auto_refresh.py                   286    230     72      0    16%   44-45, 76-101, 124-157, 172-245, 262-304, 313-354, 380-423, 427-435, 439-446, 450-464, 477-486, 490-501, 505-522, 526-540, 545, 549-557, 561-574, 578-588, 592-597, 614, 630-671, 684-689
+src/knowledge/enhanced_reasoning.py                      124     87     28      4    27%   39-43, 47, 61, 66-68, 70->80, 76-78, 92-93, 105-106, 118-119, 138-218, 239-280, 298-321, 330, 334-335, 340-363, 369-394
+src/knowledge/freshness_validator.py                     137     89     28      3    30%   36, 53, 119-130, 134-145, 170-190, 203-240, 252-279, 288-295, 299, 306-317, 321-335, 347-373, 383-385
+src/knowledge/knowledge_ingestion.py                     218    183     76      2    13%   17-19, 24-26, 31-33, 62, 76-144, 162-213, 230-279, 298-330, 339-352, 356-357, 369-379, 391-402, 414-421, 434-515, 521-541
+src/knowledge/persistent_vector_store.py                 134    111     28      0    14%   17-18, 53-83, 100-173, 186-199, 218-259, 263-269, 273-283, 287-303, 307-332, 345-350
+src/knowledge/vector_store.py                            221     94     70      7    54%   19, 79, 157, 164, 167-172, 182-206, 218-229, 233, 241-263, 275, 283-284, 289-311, 340->346, 346->exit, 358-417, 428-444
+src/mcp/__init__.py                                        6      0      0      0   100%
+src/mcp/client.py                                         92     68     20      0    21%   26-36, 40-52, 56-73, 78-91, 101-108, 117-126, 130-131, 135-136, 140-142, 146-147, 153-155, 164-169
+src/mcp/rag_integration.py                               112     54     34      1    50%   48->63, 68-69, 118-119, 141-142, 163-219, 236-271, 275-277, 283-285
+src/mcp/resource_server.py                               125    102     28      0    15%   22-30, 35-104, 109-137, 142, 150, 158-171, 176-194, 199-217, 221-239, 248-268, 275-278, 282, 292-294
+src/mcp/streamlit_helpers.py                             118     82     18      0    26%   22-24, 28-39, 43-46, 56-59, 70-73, 79-82, 88-92, 100-102, 106-117, 126-129, 140-143, 153-156, 162-166, 174-177, 181, 185, 191, 195, 199, 203, 207, 213-215, 220-222, 227, 237-247
+src/mcp/tools.py                                          59     39     20      0    25%   20-21, 25, 274-302, 317, 332, 347, 362, 375, 389, 402, 414, 427, 440
+src/models/__init__.py                                     3      0      0      0   100%
+src/models/campaign.py                                   155     13      8      0    87%   59, 88, 92, 96-111
+src/models/platform.py                                    99      0      0      0   100%
+src/monitoring/__init__.py                                 2      0      0      0   100%
+src/monitoring/query_monitor.py                          113     52     20      0    49%   131-134, 149-178, 219-237, 241-247, 252-261, 271-273, 286-295
+src/orchestration/__init__.py                              2      0      0      0   100%
+src/orchestration/query_orchestrator.py                   47      0      8      0   100%
+src/orchestration/workflow.py                            123     57     12      1    50%   111-117, 127-152, 161-173, 181-200, 209-220, 228-251, 283-284
+src/predictive/__init__.py                                 5      0      0      0   100%
+src/predictive/budget_optimizer.py                       160    102     56      5    33%   120->129, 130, 132, 134, 138-158, 191-221, 240-253, 263-269, 275-282, 291-329, 346-381, 393-407, 413-421, 428-455
+src/predictive/campaign_success_predictor.py             199    170     72      1    11%   49-110, 120-129, 135-190, 196-217, 232-266, 282-289, 295-300, 306-326, 332-341, 352-390, 401-451, 455-461, 465-470, 477-530
+src/predictive/early_performance_indicators.py           161    142     76      1     8%   60-78, 96-124, 143-160, 167-180, 186-207, 213-271, 286-345, 356-428, 443-476, 481-504
+src/predictive/predictive_qa_integration.py              105     67     22      1    31%   35->39, 120-181, 193-240, 252-279
+src/query_engine/__init__.py                               2      0      0      0   100%
+src/query_engine/nl_to_sql.py                            300    237     98      5    18%   23-25, 31-33, 65-70, 73->78, 80-85, 90-92, 109-134, 143-180, 193-532, 544-590, 602-608, 631-665, 700-888, 892, 927-929, 938
+src/query_engine/query_clarification.py                   50     28     12      0    35%   98-114, 145-172, 185-198
+src/query_engine/smart_interpretation.py                  86     20     26     12    71%   73-74, 130, 139, 156-157, 253, 255, 257, 263-265, 268, 276-277, 284-285, 295-296, 307
+src/query_engine/sql_knowledge.py                         69     22     20      6    62%   66-67, 95-113, 119, 125->127, 133-138, 152-153, 156-158
+src/reporting/__init__.py                                  2      0      0      0   100%
+src/reporting/automated_reporter.py                      306    306     92      0     0%   14-716
+src/reporting/intelligent_reporter.py                    550    150    196     22    69%   118, 123, 133, 146, 152-159, 170-180, 183, 190-206, 209, 258, 263, 289, 294, 368->367, 399-409, 413-424, 442-463, 467-504, 508-510, 593->592, 768-771, 801-805, 817-820, 833, 838-846, 899->902, 904-906, 931-932, 947, 954-955, 969-983, 1075-1077, 1119-1148, 1152
+src/reporting/smart_template_engine.py                   244    244    120      0     0%   15-557
+src/services/__init__.py                                   2      0      0      0   100%
+src/services/campaign_ingestion.py                        47      0     16      0   100%
+src/services/campaign_service.py                         252    161     72      7    36%   46-47, 73, 80-103, 120, 128-135, 147, 160, 184-186, 189, 200-204, 210-238, 274-284, 288-293, 297-301, 322-352, 356-366, 373-447, 455-470, 474-477, 502-505, 520-557, 569, 573-574, 585-595, 608-609, 613, 616-625
+src/services/user_service.py                             152     84     52      4    41%   101-128, 147-187, 209-236, 240-250, 259-280, 297-327, 331, 342, 347->346, 363
+src/streamlit_integration/__init__.py                      2      0      0      0   100%
+src/streamlit_integration/database_manager.py            148     61     20      2    57%   76-89, 136-155, 196-205, 301-303, 315-344, 348-353, 357-362, 372-374
+src/utils/__init__.py                                      3      0      0      0   100%
+src/utils/agent_monitor.py                               129      2     34      5    96%   45, 52, 119->126, 213->exit, 286->exit
+src/utils/anonymization.py                               159    159     68      0     0%   14-364
+src/utils/anthropic_helpers.py                            35     27     12      0    17%   31-35, 40-59, 67-75
+src/utils/campaign_context.py                            117    117     62      0     0%   5-323
+src/utils/comparison_logger.py                            91     16     24      6    74%   42->55, 55->exit, 223->238, 226-236, 240-241, 252->255, 293-301
+src/utils/confidence_scorer.py                           143    143     88      0     0%   5-303
+src/utils/data_loader.py                                 230     49     92     22    76%   69-71, 74-76, 89->101, 95-96, 114->118, 122-140, 159, 164, 169, 242, 244, 246, 252-255, 271, 273->276, 294->299, 297, 299->302, 320->325, 323, 325->328, 355-362, 472-473, 479-480, 484
+src/utils/data_normalizer.py                             178     18     94      7    90%   60, 123, 149, 217, 239, 314-324, 380-381, 388-389, 429
+src/utils/data_validator.py                              290    112    102     24    58%   62->68, 64->68, 71-73, 96, 111, 113, 115, 134, 146, 153, 157, 161, 165, 169, 177, 188-189, 214-215, 238-284, 301, 305, 322-323, 347, 351, 392-428, 441-464, 477-488, 547-549, 701->706, 706->710, 724, 784, 796, 813-820
+src/utils/frontend_logger.py                              25      3      2      1    85%   15, 35-36
+src/utils/llm_with_rate_limit.py                          92      2     20      3    96%   86->94, 87->90, 90->94, 107-108
+src/utils/logger.py                                       13      0      0      0   100%
+src/utils/observability.py                               585    142     96     24    72%   85->87, 94-97, 127, 136-137, 146-147, 159, 164-173, 181, 187, 193, 202-235, 290->292, 322, 337, 347, 364-369, 373, 400-401, 405-409, 429-447, 470-472, 475, 517->519, 531-532, 575->577, 581, 590, 594-596, 604-607, 615, 620-621, 674, 704-712, 743->745, 801-802, 846-847, 851-856, 860-862, 866-867, 871-872, 954->956, 962->exit, 968-969, 984-985, 992, 1036, 1043, 1046, 1052->1054, 1055, 1119-1156, 1165
+src/utils/opentelemetry_config.py                        123     80     30      2    29%   20-37, 69-90, 94-124, 132-162, 166-169, 173-178, 188->190, 238-239, 244-245
+src/utils/performance.py                                 505    360    126      1    23%   51-53, 61-64, 78-108, 120-129, 132, 177-201, 205-208, 217-236, 240-250, 254-255, 268-309, 324-342, 346-361, 365-374, 378-387, 391-394, 403-404, 454-455, 475-528, 532-541, 545-556, 559, 611, 629-669, 673-680, 686-718, 724-748, 754-771, 774, 863-866, 874-875, 879-881, 904-908, 916-919, 931-950, 955-974, 978-985, 989-1010, 1014, 1021-1024, 1027, 1127-1130, 1151-1201, 1205, 1208, 1233-1240, 1244-1247, 1251-1260, 1264, 1280-1296, 1329-1332, 1337, 1342, 1347, 1352, 1357, 1362, 1367, 1372
+src/utils/recommendation_validator.py                    140    140     90      0     0%   5-367
+src/utils/redis_rate_limiter.py                          137     81     26      0    38%   67-69, 153-156, 176-199, 212-223, 235-254, 290, 310-315, 340-372, 385-414, 425-427, 433-435
+src/utils/resilience.py                                  422    173     68     12    57%   42, 74, 80-81, 87-88, 94, 100, 153-156, 161, 179->186, 189, 196->exit, 201->exit, 209, 219->exit, 226-236, 240-245, 250-261, 321->350, 326, 346, 364-383, 393, 408-433, 469-470, 498-501, 510-512, 523-524, 561-562, 568->567, 570, 576->575, 580, 593-613, 624-634, 657, 676, 680-689, 698, 702, 711-722, 737-738, 742-743, 752-766, 782-790, 812-817, 822
+src/utils/structure_enforcer.py                           47     41     22      0     9%   36-52, 61-90, 98-126
+src/utils/summary_formatter.py                            56     44     10      1    20%   38-49, 56-99, 106-131, 138-162
+src/visualization/__init__.py                              2      0      0      0   100%
+src/visualization/chart_generator.py                     230     49     76     17    76%   54->58, 60->64, 66->70, 72->76, 78->84, 81-82, 120->123, 125->128, 130->133, 135->138, 139-141, 145-150, 235, 268-270, 284, 314-316, 344-346, 374-376, 420-422, 455-457, 469->472, 472->475, 475->479, 480, 500-502, 528-530, 534-570
+--------------------------------------------------------------------------------------------------
+TOTAL                                                  19097  11273   6042    544    37%
+Coverage HTML written to dir htmlcov
+Coverage XML written to file coverage.xml
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_excel_upload.py:27: Test requires full reflex runtime - skipping in unit test context
+SKIPPED [1] tests/unit/test_agents_channel_specialists.py:181: Programmatic agent not available
+SKIPPED [1] tests/unit/test_agents_channel_specialists.py:185: Programmatic agent not available
+SKIPPED [1] tests/unit/test_agents_reasoning.py:102: Campaign analysis requires full setup
+SKIPPED [1] tests/unit/test_agents_reasoning.py:116: Insight generation requires LLM
+SKIPPED [1] tests/unit/test_agents_reasoning.py:144: Achievement detection requires setup
+SKIPPED [1] tests/unit/test_agents_reasoning.py:157: Recommendation generation requires LLM
+SKIPPED [1] tests/unit/test_agents_visualization.py:166: Chart generator not available
+SKIPPED [1] tests/unit/test_agents_visualization.py:170: Chart generator not available
+SKIPPED [1] tests/unit/test_agents_visualization.py:183: Chart generator not available
+SKIPPED [1] tests/unit/test_agents_visualization.py:196: Chart generator not available
+SKIPPED [1] tests/unit/test_api_extended.py:38: Exceptions not available
+SKIPPED [1] tests/unit/test_api_extended.py:46: Exceptions not available
+SKIPPED [1] tests/unit/test_api_extended.py:54: Exceptions not available
+SKIPPED [1] tests/unit/test_api_extended.py:62: Exceptions not available
+SKIPPED [1] tests/unit/test_budget_optimizer.py:169: optimize_allocation not available or requires different params
+SKIPPED [1] tests/unit/test_budget_optimizer.py:181: optimize_allocation not available
+SKIPPED [1] tests/unit/test_budget_optimizer.py:192: optimize_allocation not available
+SKIPPED [1] tests/unit/test_budget_optimizer.py:203: optimize_allocation not available
+SKIPPED [1] tests/unit/test_budget_optimizer.py:220: optimize_allocation not available
+SKIPPED [1] tests/unit/test_budget_optimizer.py:257: optimize_allocation not available
+SKIPPED [1] tests/unit/test_budget_optimizer.py:265: optimize_allocation not available
+SKIPPED [1] tests/unit/test_budget_optimizer.py:283: optimize_allocation not available
+SKIPPED [1] tests/unit/test_campaign_service.py:66: CampaignService requires different initialization
+SKIPPED [1] tests/unit/test_campaign_service.py:76: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:92: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:116: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:124: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:132: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:140: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:148: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:165: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:174: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:183: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:205: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:216: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:248: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:256: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:270: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:278: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:297: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:311: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:328: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_campaign_service.py:342: CampaignService initialization failed
+SKIPPED [1] tests/unit/test_data_connector_extended.py:304: Execute query requires full setup
+SKIPPED [1] tests/unit/test_data_connector_extended.py:327: Load table requires full setup
+SKIPPED [1] tests/unit/test_data_loader_extended.py:325: normalize_campaign_dataframe not available
+SKIPPED [1] tests/unit/test_data_loader_extended.py:340: normalize_campaign_dataframe not available
+SKIPPED [1] tests/unit/test_database_connector.py:104: Query execution requires connection
+SKIPPED [1] tests/unit/test_feedback_system.py:66: Method signature differs
+SKIPPED [1] tests/unit/test_knowledge_benchmark.py:124: Objective adjustments requires specific setup
+SKIPPED [1] tests/unit/test_knowledge_comprehensive.py:160: Change detection requires source setup
+SKIPPED [1] tests/unit/test_knowledge_extended.py:62: Chunking not available
+SKIPPED [1] tests/unit/test_knowledge_extended.py:66: Chunking not available
+SKIPPED [1] tests/unit/test_knowledge_extended.py:74: Chunking not available
+SKIPPED [1] tests/unit/test_knowledge_extended.py:82: Chunking not available
+SKIPPED [1] tests/unit/test_knowledge_extended.py:126: Freshness check requires specific setup
+SKIPPED [1] tests/unit/test_knowledge_extended.py:161: Enhanced reasoning not available
+SKIPPED [1] tests/unit/test_knowledge_extended.py:165: Enhanced reasoning not available
+SKIPPED [1] tests/unit/test_knowledge_extended.py:177: Enhanced reasoning not available
+SKIPPED [1] tests/unit/test_knowledge_extended.py:206: PersistentVectorStore initialization failed
+SKIPPED [1] tests/unit/test_knowledge_extended.py:210: PersistentVectorStore initialization failed
+SKIPPED [1] tests/unit/test_knowledge_extended.py:223: PersistentVectorStore initialization failed
+SKIPPED [1] tests/unit/test_knowledge_extended.py:232: PersistentVectorStore initialization failed
+SKIPPED [1] tests/unit/test_knowledge_extended.py:240: PersistentVectorStore initialization failed
+SKIPPED [1] tests/unit/test_knowledge_extended.py:259: Enhanced refresh not available
+SKIPPED [1] tests/unit/test_knowledge_extended.py:263: Enhanced refresh not available
+SKIPPED [1] tests/unit/test_knowledge_extended.py:271: Enhanced refresh not available
+SKIPPED [1] tests/unit/test_knowledge_extended.py:280: Enhanced refresh not available
+SKIPPED [1] tests/unit/test_knowledge_refresh.py:136: check_for_changes requires source setup
+SKIPPED [1] tests/unit/test_knowledge_vector_retriever.py:194: Retriever initialization failed
+SKIPPED [1] tests/unit/test_knowledge_vector_retriever.py:198: Retriever initialization failed
+SKIPPED [1] tests/unit/test_knowledge_vector_retriever.py:212: Retriever initialization failed
+SKIPPED [1] tests/unit/test_nl_to_sql.py:281: Engine initialization failed
+SKIPPED [1] tests/unit/test_nl_to_sql.py:292: Engine initialization failed
+SKIPPED [1] tests/unit/test_nl_to_sql_edge_cases.py:385: Engine initialization failed
+SKIPPED [1] tests/unit/test_nl_to_sql_engine.py:101: SQL generation requires LLM
+SKIPPED [1] tests/unit/test_orchestration.py:42: Workflow not available
+SKIPPED [1] tests/unit/test_orchestration.py:83: Workflow not available
+SKIPPED [1] tests/unit/test_orchestration.py:94: Workflow not available
+SKIPPED [1] tests/unit/test_orchestration.py:140: Query processing requires dependencies
+SKIPPED [1] tests/unit/test_predictive.py:60: Budget optimizer not available
+SKIPPED [1] tests/unit/test_predictive.py:64: Budget optimizer not available
+SKIPPED [1] tests/unit/test_predictive.py:77: Budget optimizer not available
+SKIPPED [1] tests/unit/test_predictive.py:83: Budget optimizer not available
+SKIPPED [1] tests/unit/test_predictive.py:142: Training requires more data
+SKIPPED [1] tests/unit/test_predictive_qa.py:102: Forecast requires Revenue column
+SKIPPED [1] tests/unit/test_query_engine_extended.py:80: Interpretation requires LLM setup
+SKIPPED [1] tests/unit/test_query_engine_extended.py:179: Engine initialization failed
+SKIPPED [1] tests/unit/test_query_engine_extended.py:183: Engine initialization failed
+SKIPPED [1] tests/unit/test_query_engine_extended.py:203: Engine initialization failed
+SKIPPED [1] tests/unit/test_query_engine_extended.py:212: Engine initialization failed
+SKIPPED [1] tests/unit/test_services_campaign.py:32: Service initialization requires full setup
+SKIPPED [1] tests/unit/test_services_campaign.py:42: Service initialization requires full setup
+SKIPPED [1] tests/unit/test_services_extended.py:159: UserService initialization failed
+SKIPPED [1] tests/unit/test_services_extended.py:165: UserService initialization failed
+SKIPPED [1] tests/unit/test_services_extended.py:180: UserService initialization failed
+SKIPPED [1] tests/unit/test_utils_data_loader.py:58: CSV loading requires specific setup
+SKIPPED [1] tests/unit/test_utils_extended.py:145: record_failure not supported
+SKIPPED [1] tests/unit/test_utils_extended.py:158: Circuit breaker state management differs
+SKIPPED [1] tests/unit/test_utils_extended.py:184: Retry decorator signature differs
+SKIPPED [1] tests/unit/test_utils_extended.py:205: Retry decorator signature differs
+SKIPPED [1] tests/unit/test_utils_extended.py:238: DLQ add signature differs
+SKIPPED [1] tests/unit/test_utils_extended.py:259: Performance not available
+SKIPPED [1] tests/unit/test_utils_extended.py:263: Performance not available
+SKIPPED [1] tests/unit/test_utils_extended.py:269: Performance not available
+SKIPPED [1] tests/unit/test_utils_extended.py:277: Performance not available
+SKIPPED [1] tests/unit/test_workflow_orchestration.py:236: Workflow run requires full setup
+SKIPPED [1] tests/unit/test_workflow_orchestration.py:258: Workflow run requires full setup
+=============== 1245 passed, 109 skipped, 316 warnings in 30.86s ===============

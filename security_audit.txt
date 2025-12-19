@@ -1,0 +1,600 @@
+Run started:2025-12-02 08:50:47.095491+00:00
+
+Test results:
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'AUTH_1002'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b105_hardcoded_password_string.html
+   Location: src/api\exceptions.py:16:25
+15	    AUTH_INVALID_CREDENTIALS = "AUTH_1001"
+16	    AUTH_TOKEN_EXPIRED = "AUTH_1002"
+17	    AUTH_TOKEN_INVALID = "AUTH_1003"
+
+--------------------------------------------------
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'AUTH_1003'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b105_hardcoded_password_string.html
+   Location: src/api\exceptions.py:17:25
+16	    AUTH_TOKEN_EXPIRED = "AUTH_1002"
+17	    AUTH_TOKEN_INVALID = "AUTH_1003"
+18	    AUTH_INSUFFICIENT_PERMISSIONS = "AUTH_1004"
+
+--------------------------------------------------
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'change-this-secret-key'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b105_hardcoded_password_string.html
+   Location: src/api\main_v2.py:170:21
+169	    # Verify JWT secret key
+170	    if SECRET_KEY == "change-this-secret-key":
+171	        logger.warning("⚠️  WARNING: Using default JWT secret key!")
+
+--------------------------------------------------
+>> Issue: [B104:hardcoded_bind_all_interfaces] Possible binding to all interfaces.
+   Severity: Medium   Confidence: Medium
+   CWE: CWE-605 (https://cwe.mitre.org/data/definitions/605.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b104_hardcoded_bind_all_interfaces.html
+   Location: src/api\main_v2.py:187:26
+186	    import uvicorn
+187	    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+--------------------------------------------------
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'change-this-secret-key'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b105_hardcoded_password_string.html
+   Location: src/api\main_v3.py:189:21
+188	    
+189	    if SECRET_KEY == "change-this-secret-key":
+190	        logger.warning("⚠️  WARNING: Using default JWT secret key!")
+
+--------------------------------------------------
+>> Issue: [B104:hardcoded_bind_all_interfaces] Possible binding to all interfaces.
+   Severity: Medium   Confidence: Medium
+   CWE: CWE-605 (https://cwe.mitre.org/data/definitions/605.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b104_hardcoded_bind_all_interfaces.html
+   Location: src/api\main_v3.py:206:26
+205	    import uvicorn
+206	    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b110_try_except_pass.html
+   Location: src/api\middleware\auth.py:93:12
+92	                db.close()
+93	            except:
+94	                pass
+95	
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b110_try_except_pass.html
+   Location: src/api\middleware\auth.py:294:12
+293	                db.close()
+294	            except:
+295	                pass
+
+--------------------------------------------------
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: src/backup\backup_manager.py:7:0
+6	import os
+7	import subprocess
+8	import logging
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: src/backup\backup_manager.py:136:12
+135	        try:
+136	            subprocess.run(
+137	                cmd,
+138	                env=env,
+139	                check=True,
+140	                capture_output=True,
+141	                text=True
+142	            )
+143	        except subprocess.CalledProcessError as e:
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: src/backup\backup_manager.py:305:12
+304	        try:
+305	            subprocess.run(
+306	                cmd,
+307	                env=env,
+308	                check=True,
+309	                capture_output=True,
+310	                text=True
+311	            )
+312	        except subprocess.CalledProcessError as e:
+
+--------------------------------------------------
+>> Issue: [B403:blacklist] Consider possible security implications associated with pickle module.
+   Severity: Low   Confidence: High
+   CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_imports.html#b403-import-pickle
+   Location: src/cache\redis_cache.py:8:0
+7	import logging
+8	import pickle
+9	from typing import Any, Optional, Callable
+
+--------------------------------------------------
+>> Issue: [B301:blacklist] Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
+   Severity: Medium   Confidence: High
+   CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b301-pickle
+   Location: src/cache\redis_cache.py:101:23
+100	            try:
+101	                return pickle.loads(value)
+102	            except:
+
+--------------------------------------------------
+>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b311-random
+   Location: src/chaos\chaos_framework.py:174:15
+173	        for _ in range(attempts):
+174	            if random.random() < failure_rate:
+175	                failures += 1
+
+--------------------------------------------------
+>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b311-random
+   Location: src/chaos\chaos_framework.py:269:11
+268	        # Randomly raise errors
+269	        if random.random() < error_rate:
+270	            raise Exception("Chaos-induced error")
+
+--------------------------------------------------
+>> Issue: [B104:hardcoded_bind_all_interfaces] Possible binding to all interfaces.
+   Severity: Medium   Confidence: Medium
+   CWE: CWE-605 (https://cwe.mitre.org/data/definitions/605.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b104_hardcoded_bind_all_interfaces.html
+   Location: src/config\settings.py:45:26
+44	    # API Configuration
+45	    api_host: str = Field("0.0.0.0", description="API host")
+46	    api_port: int = Field(8000, description="API port")
+
+--------------------------------------------------
+>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+   Severity: Medium   Confidence: Low
+   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b608_hardcoded_sql_expressions.html
+   Location: src/data\database_connector.py:297:18
+296	        """
+297	        query = f"SELECT * FROM {table_name}"
+298	        if limit:
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b110_try_except_pass.html
+   Location: src/data_processing\advanced_processor.py:112:16
+111	                        logger.debug(f"Converted {col} to numeric")
+112	                except:
+113	                    pass
+114	        
+
+--------------------------------------------------
+>> Issue: [B112:try_except_continue] Try, Except, Continue detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b112_try_except_continue.html
+   Location: src/data_processing\advanced_processor.py:139:16
+138	                        break
+139	                except:
+140	                    continue
+141	        
+
+--------------------------------------------------
+>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+   Severity: Medium   Confidence: Low
+   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b608_hardcoded_sql_expressions.html
+   Location: src/evaluation\query_tracker.py:203:20
+202	            params.append(query_id)
+203	            sql = f"UPDATE query_logs SET {', '.join(updates)} WHERE query_id = ?"
+204	            cursor.execute(sql, params)
+
+--------------------------------------------------
+>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+   Severity: Medium   Confidence: Low
+   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b608_hardcoded_sql_expressions.html
+   Location: src/evaluation\query_tracker.py:313:14
+312	        df = pd.read_sql_query(
+313	            f"SELECT * FROM query_logs ORDER BY timestamp DESC LIMIT {limit}",
+314	            conn
+
+--------------------------------------------------
+>> Issue: [B501:request_with_no_cert_validation] Call to requests with verify=False disabling SSL certificate checks, security issue.
+   Severity: High   Confidence: High
+   CWE: CWE-295 (https://cwe.mitre.org/data/definitions/295.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b501_request_with_no_cert_validation.html
+   Location: src/observability\log_aggregation.py:225:23
+224	                headers={"Authorization": f"Splunk {self.token}"},
+225	                verify=False,  # Configure SSL verification in production
+226	                timeout=5
+227	            )
+228	            
+229	            if response.status_code == 200:
+230	                logger.info(f"✅ Connected to Splunk at {self.host}")
+231	            else:
+
+--------------------------------------------------
+>> Issue: [B501:request_with_no_cert_validation] Call to requests with verify=False disabling SSL certificate checks, security issue.
+   Severity: High   Confidence: High
+   CWE: CWE-295 (https://cwe.mitre.org/data/definitions/295.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b501_request_with_no_cert_validation.html
+   Location: src/observability\log_aggregation.py:265:23
+264	                },
+265	                verify=False,  # Configure SSL verification in production
+266	                timeout=5
+267	            )
+268	            
+269	            if response.status_code != 200:
+270	                logger.debug(f"Failed to ship log to Splunk: {response.status_code}")
+271	        
+272	        except Exception as e:
+273	            logger.debug(f"Splunk shipping error: {e}")
+274	    
+275	    def _enrich_log(self, log_entry: Dict[str, Any]) -> Dict[str, Any]:
+
+--------------------------------------------------
+>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+   Severity: Medium   Confidence: Low
+   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b608_hardcoded_sql_expressions.html
+   Location: src/query_engine\nl_to_sql.py:182:21
+181	        
+182	        prompt = f"""You are a SQL expert specializing in marketing campaign analytics. Convert the following natural language question into a DuckDB SQL query.
+183	
+184	Database Schema:
+185	{schema_description}
+186	
+187	SQL Knowledge & Reference:
+188	{sql_context}
+189	
+190	🔴 CRITICAL AGGREGATION RULES - NEVER VIOLATE:
+191	
+192	For calculated/rate metrics (CTR, CPC, CPM, CPA, ROAS, Conversion Rate), you MUST:
+193	✓ ALWAYS compute from aggregates: SUM(numerator) / SUM(denominator)
+194	✗ NEVER use AVG() on pre-calculated rate columns
+195	
+196	Examples:
+197	- CTR = (SUM(Clicks) / NULLIF(SUM(Impressions), 0)) * 100
+198	- CPC = SUM(Spend) / NULLIF(SUM(Clicks), 0)
+199	- CPM = (SUM(Spend) / NULLIF(SUM(Impressions), 0)) * 1000
+200	- CPA = SUM(Spend) / NULLIF(SUM(Conversions), 0)
+201	- ROAS = SUM(Revenue) / NULLIF(SUM(Spend), 0)  [or use Conversion_Value if Revenue not available]
+202	- Conversion_Rate = (SUM(Conversions) / NULLIF(SUM(Clicks), 0)) * 100
+203	
+204	⏰ TEMPORAL COMPARISON PATTERNS (ANCHOR ON DATA, NOT CURRENT_DATE):
+205	
+206	Always anchor relative time windows on the *latest date present in the data*, not on CURRENT_DATE.
+207	
+208	🔴 CRITICAL: DATE COLUMN FLEXIBILITY
+209	- The date column may NOT be named "Date"
+210	- Look for columns with these keywords: date, week, week_range, week range, day, month, year, time, period
+211	- Common examples: "Week Range", "Week", "Date Range", "Day", "Month", "Period"
+212	- ALWAYS check the schema for the actual date column name before writing queries
+213	- Use the EXACT column name from the schema (case-sensitive)
+214	
+215	1) Find the campaign end date (max_date) from the table first, using a CTE pattern like:
+216	
+217	   WITH bounds AS (
+218	       SELECT MAX([actual_date_column_name]) AS max_date
+219	       FROM campaigns
+220	   )
+221	   
+222	   Replace [actual_date_column_name] with the real column name from the schema.
+223	
+224	2) Then express natural language time windows relative to bounds.max_date (campaign life):
+225	
+226	- "last 2 weeks"      -> [date_col] >= max_date - INTERVAL 14 DAY
+227	- "previous 2 weeks"  -> [date_col] >= max_date - INTERVAL 28 DAY AND [date_col] < max_date - INTERVAL 14 DAY
+228	- "last month"        -> [date_col] >= DATE_TRUNC('month', max_date - INTERVAL 1 MONTH)
+229	- "last 2 months"     -> [date_col] >= max_date - INTERVAL 2 MONTH
+230	- "last 6 months"     -> [date_col] >= max_date - INTERVAL 6 MONTH
+231	- "last 2 years"      -> [date_col] >= max_date - INTERVAL 2 YEAR
+232	- "couple of months"  -> treat as 2 months (use 2 MONTH window)
+233	- "week-over-week"    -> GROUP BY DATE_TRUNC('week', [date_col])
+234	- "month-over-month"  -> GROUP BY DATE_TRUNC('month', [date_col])
+235	- "Q3 vs Q2"          -> use QUARTER([date_col]) or DATE_TRUNC('quarter', [date_col])
+236	- "year-over-year"    -> compare same period across different years using YEAR([date_col])
+237	- "by day"            -> GROUP BY [date_col] (use the actual date column name)
+238	- "by week"           -> GROUP BY [date_col] or DATE_TRUNC('week', [date_col])
+239	- "by month"          -> GROUP BY DATE_TRUNC('month', [date_col])
+240	
+241	EXAMPLE: If schema has "Week Range" column and user asks "show total spend by day":
+242	SELECT "Week Range", SUM(Cost) AS Total_Spend
+243	FROM campaigns
+244	GROUP BY "Week Range"
+245	ORDER BY "Week Range"
+246	
+247	For comparisons ("last X vs previous X") you should:
+248	- Use a CTE that joins every row with max_date from bounds
+249	- Create a period label using CASE WHEN, for example for last 2 months vs previous 2 months:
+250	
+251	   WITH bounds AS (
+252	       SELECT MAX(Date) AS max_date FROM campaigns
+253	   ),
+254	   periods AS (
+255	       SELECT
+256	           c.*,
+257	           CASE
+258	               WHEN Date >= max_date - INTERVAL 2 MONTH
+259	                    THEN 'last_period'
+260	               WHEN Date >= max_date - INTERVAL 4 MONTH
+261	                AND Date <  max_date - INTERVAL 2 MONTH
+262	                    THEN 'previous_period'
+263	               ELSE 'other'
+264	           END AS period
+265	       FROM campaigns c
+266	       CROSS JOIN bounds
+267	   )
+268	   SELECT period, ...
+269	   FROM periods
+270	   WHERE period IN ('last_period', 'previous_period')
+271	   GROUP BY period;
+272	
+273	- Calculate metrics separately for each period
+274	- Use CTEs or subqueries for clarity
+275	
+276	📊 MULTI-DIMENSIONAL ANALYSIS:
+277	
+278	- Channel analysis: GROUP BY Platform or Channel
+279	- Funnel analysis: Calculate conversion rates between stages
+280	- Segment analysis: GROUP BY demographic/audience columns
+281	- Creative analysis: GROUP BY creative_variant, ad_copy, subject_line columns
+282	- Time analysis: GROUP BY hour, day_of_week, or use DATE_TRUNC
+283	
+284	🎯 PERFORMANCE ANALYSIS - CRITICAL:
+285	
+286	When user asks about "performance", "best performing", "top performing", or "sort by performance", you MUST include ALL applicable KPIs:
+287	
+288	✓ Raw Metrics (ALWAYS include):
+289	  - Total_Spend = SUM("Total Spent")
+290	  - Total_Impressions = SUM(Impressions)
+291	  - Total_Clicks = SUM(Clicks)
+292	  - Total_Conversions = SUM("Site Visit") or SUM(Conversions) [if exists]
+293	
+294	✓ Calculated KPIs (ALWAYS include all applicable):
+295	  - CTR (Click-Through Rate) = ROUND((SUM(Clicks) / NULLIF(SUM(Impressions), 0)) * 100, 2)
+296	  - CPC (Cost Per Click) = ROUND(SUM("Total Spent") / NULLIF(SUM(Clicks), 0), 2)
+297	  - CPM (Cost Per Mille) = ROUND((SUM("Total Spent") / NULLIF(SUM(Impressions), 0)) * 1000, 2)
+298	  - CPA (Cost Per Acquisition) = ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) [if conversions exist]
+299	  - Conversion_Rate = ROUND((SUM("Site Visit") / NULLIF(SUM(Clicks), 0)) * 100, 2) [if conversions exist]
+300	  - ROAS (Return on Ad Spend) = ROUND(SUM(Revenue) / NULLIF(SUM("Total Spent"), 0), 2) [if Revenue exists]
+301	
+302	✓ ORDER BY: Use the most relevant metric (CTR, ROAS, Conversion_Rate, or CPA depending on context)
+303	
+304	❌ NEVER return just the dimension name (Channel, Funnel, etc.) without metrics
+305	❌ NEVER return only one calculated metric - include ALL applicable KPIs
+306	
+307	Examples:
+308	1. "which is the best performing channel" should include:
+309	   - Channel
+310	   - Total_Spend, Total_Impressions, Total_Clicks, Total_Conversions
+311	   - CTR, CPC, CPM, CPA, Conversion_Rate, ROAS (if applicable)
+312	   - ORDER BY Conversion_Rate DESC or ROAS DESC (most relevant for "best")
+313	   - LIMIT 1 (if asking for single best)
+314	
+315	2. "sort by funnel performance" should include:
+316	   - Funnel
+317	   - All raw metrics + all calculated KPIs
+318	   - ORDER BY the most relevant metric
+319	
+320	🎯 ADVANCED PATTERNS:
+321	
+322	- ROI calculation: (SUM(Revenue) - SUM(Spend)) / NULLIF(SUM(Spend), 0)
+323	- Budget variance: SUM(Actual_Spend) - SUM(Budgeted_Spend)
+324	- Growth rate: ((current - previous) / NULLIF(previous, 0)) * 100
+325	- Drop-off rate: (stage1_count - stage2_count) / NULLIF(stage1_count, 0) * 100
+326	
+327	📝 SQL BEST PRACTICES:
+328	
+329	- Use NULLIF to prevent division by zero
+330	- Cast Date columns: CAST(Date AS DATE) or TRY_CAST(Date AS DATE)
+331	- Use CTEs for complex multi-step queries
+332	- Round decimals appropriately: ROUND(value, 2)
+333	- Use descriptive column aliases
+334	- For percentages, multiply by 100
+335	- Column names are case-sensitive
+336	- ⚠️ IMPORTANT: If column names contain underscores (e.g., Ad_Type, Device_Type), use them AS-IS without quotes
+337	- ⚠️ If a column name is a SQL keyword (Type, Order, Group), wrap it in double quotes: "Type"
+338	- Always reference columns exactly as they appear in the schema
+339	
+340	🔬 ADVANCED ANALYTICAL PATTERNS:
+341	
+342	**Anomaly Detection:**
+343	- Use STDDEV() and AVG() to identify outliers: WHERE metric > AVG(metric) + 2*STDDEV(metric)
+344	- Window functions for moving averages: AVG(metric) OVER (ORDER BY date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+345	- Percent change from baseline: ((current - baseline) / NULLIF(baseline, 0)) * 100
+346	
+347	**Cohort Analysis:**
+348	- Use DATE_TRUNC to group by acquisition period
+349	- Self-joins or window functions to compare cohorts
+350	- Retention analysis: COUNT(DISTINCT user_id) by time period
+351	
+352	**Trend Analysis:**
+353	- Linear regression slope: REGR_SLOPE(y, x) for trend direction
+354	- Moving averages: AVG(metric) OVER (ORDER BY date ROWS BETWEEN n PRECEDING AND CURRENT ROW)
+355	- Growth rate: ((current - previous) / NULLIF(previous, 0)) * 100
+356	- Cumulative metrics: SUM(metric) OVER (ORDER BY date)
+357	
+358	**Statistical Analysis:**
+359	- Standard deviation: STDDEV(metric) for volatility
+360	- Variance: VARIANCE(metric)
+361	- Percentiles: PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY metric) for median
+362	- Correlation: CORR(metric1, metric2)
+363	
+364	**Efficiency Analysis:**
+365	- Pareto analysis: Use window functions with PERCENT_RANK() or cumulative sums
+366	- Efficiency frontier: Rank by multiple criteria (volume AND efficiency)
+367	- Marginal analysis: Compare incremental performance at different levels
+368	
+369	**Segmentation:**
+370	- CASE WHEN for bucketing (high/medium/low performers)
+371	- NTILE(n) for equal-sized segments
+372	- Clustering by multiple dimensions
+373	
+374	**Forecasting Patterns:**
+375	- Historical averages with trend adjustment
+376	- Seasonality detection: GROUP BY DAYOFWEEK(Date) or MONTH(Date)
+377	- Extrapolation: Use historical growth rates to project forward
+378	
+379	**Multi-Touch Attribution:**
+380	- Use ARRAY_AGG or STRING_AGG to track journey paths
+381	- Window functions to identify first/last touch: FIRST_VALUE(), LAST_VALUE()
+382	- Count touchpoints: COUNT(*) OVER (PARTITION BY user_id)
+383	
+384	**Strategic Insights:**
+385	- Scenario analysis: Use CASE WHEN to model different budget levels
+386	- Optimization: Identify top performers with RANK() or ROW_NUMBER()
+387	- Risk analysis: Calculate concentration with cumulative percentages
+388	
+389	Question: {question}
+390	
+391	SQL Query:"""
+392	        
+
+--------------------------------------------------
+>> Issue: [B307:blacklist] Use of possibly insecure function - consider using safer ast.literal_eval.
+   Severity: Medium   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b307-eval
+   Location: src/streamlit_integration\database_manager.py:143:26
+142	                # Simple parsing - in production, use proper serialization
+143	                filters = eval(filter_key)
+144	            
+
+--------------------------------------------------
+>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b311-random
+   Location: src/testing\agent_ab_testing.py:120:15
+119	        """
+120	        rand = random.random() * 100
+121	        cumulative = 0
+
+--------------------------------------------------
+>> Issue: [B112:try_except_continue] Try, Except, Continue detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b112_try_except_continue.html
+   Location: src/utils\data_validator.py:251:12
+250	                    return result
+251	            except:
+252	                continue
+253	        
+
+--------------------------------------------------
+>> Issue: [B112:try_except_continue] Try, Except, Continue detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b112_try_except_continue.html
+   Location: src/utils\data_validator.py:265:16
+264	                    return datetime.strptime(val_str, fmt)
+265	                except:
+266	                    continue
+267	            
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b110_try_except_pass.html
+   Location: src/utils\observability.py:136:12
+135	                    f.write(json.dumps(log_entry) + "\n")
+136	            except Exception:
+137	                pass  # Silently fail if we can't write
+138	        
+
+--------------------------------------------------
+>> Issue: [B403:blacklist] Consider possible security implications associated with pickle module.
+   Severity: Low   Confidence: High
+   CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_imports.html#b403-import-pickle
+   Location: src/utils\performance.py:20:0
+19	import os
+20	import pickle
+21	import threading
+
+--------------------------------------------------
+>> Issue: [B324:hashlib] Use of weak MD5 hash for security. Consider usedforsecurity=False
+   Severity: High   Confidence: High
+   CWE: CWE-327 (https://cwe.mitre.org/data/definitions/327.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b324_hashlib.html
+   Location: src/utils\performance.py:226:28
+225	        for i, word in enumerate(words):
+226	            word_hash = int(hashlib.md5(word.encode()).hexdigest(), 16)
+227	            for j in range(128):
+
+--------------------------------------------------
+>> Issue: [B301:blacklist] Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
+   Severity: Medium   Confidence: High
+   CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b301-pickle
+   Location: src/utils\performance.py:368:27
+367	                with open(cache_file, 'rb') as f:
+368	                    data = pickle.load(f)
+369	                    self._cache = data.get('cache', {})
+
+--------------------------------------------------
+>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b311-random
+   Location: src/utils\resilience.py:338:47
+337	                    if jitter:
+338	                        delay = delay * (0.5 + random.random())
+339	                    
+
+--------------------------------------------------
+>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b311-random
+   Location: src/utils\resilience.py:378:35
+377	            delay = min(base_delay * (2 ** attempt), 60.0)
+378	            delay = delay * (0.5 + random.random())
+379	            
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 35928
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 21
+		Medium: 10
+		High: 3
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 4
+		Medium: 7
+		High: 23
+Files skipped (0):

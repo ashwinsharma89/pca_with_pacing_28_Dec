@@ -1,0 +1,101 @@
+Date,Platform,Channel,Campaign_Name,AdGroup_Name,Ad_Name,Impressions,Clicks,CTR_%,Spend_USD,CPC_USD,Conversions,CPA_USD,Revenue_USD
+2024-07-14,Google Ads,Search,Google_Jul_Campaign_001,Search_Group_09,Ad_2428,423154,16294,3.85,16043.9,0.98,3703,4.33,124363.68
+2024-11-15,Bing Ads,Search,Bing_Nov_Campaign_002,Search_Group_18,Ad_6442,198676,13837,6.96,16860.12,1.22,1349,12.5,135040.55
+2024-09-01,Meta Ads,Paid Social,Meta_Sep_Campaign_003,PaidSocial_Group_06,Ad_1027,494955,20065,4.05,17943.34,0.89,3159,5.68,128641.8
+2024-09-19,YouTube,Video,YouTube_Sep_Campaign_004,Video_Group_15,Ad_2671,494689,6466,1.31,22644.72,3.5,317,71.43,72588.81
+2024-09-13,Snapchat Ads,Paid Social,Snapchat_Sep_Campaign_005,PaidSocial_Group_14,Ad_8813,159104,6817,4.28,4535.66,0.67,614,7.39,87418.75
+2024-11-01,Google Ads,Search,Google_Nov_Campaign_006,Search_Group_07,Ad_9635,316125,21070,6.67,40426.68,1.92,2351,17.2,465704.41
+2024-11-09,Bing Ads,Search,Bing_Nov_Campaign_007,Search_Group_14,Ad_9823,354680,23321,6.58,74260.37,3.18,4937,15.04,701730.5
+2024-10-16,Meta Ads,Paid Social,Meta_Oct_Campaign_008,PaidSocial_Group_12,Ad_9356,36694,2543,6.93,8657.72,3.4,475,18.23,20703.92
+2024-11-02,YouTube,Video,YouTube_Nov_Campaign_009,Video_Group_09,Ad_3787,195584,6568,3.36,14846.11,2.26,242,61.35,30920.97
+2024-11-24,Snapchat Ads,Paid Social,Snapchat_Nov_Campaign_010,PaidSocial_Group_11,Ad_1267,119122,6079,5.1,25788.44,4.24,629,41.0,142552.57
+2024-08-28,Google Ads,Search,Google_Aug_Campaign_011,Search_Group_13,Ad_9716,282672,17145,6.07,78715.95,4.59,2861,27.51,709967.01
+2024-12-09,Bing Ads,Search,Bing_Dec_Campaign_012,Search_Group_08,Ad_9915,273656,21522,7.86,25652.66,1.19,3085,8.32,339913.9
+2024-10-27,Meta Ads,Paid Social,Meta_Oct_Campaign_013,PaidSocial_Group_02,Ad_1166,90636,3801,4.19,2259.84,0.59,774,2.92,138636.89
+2024-10-20,YouTube,Video,YouTube_Oct_Campaign_014,Video_Group_14,Ad_1005,76948,4096,5.32,11454.22,2.8,748,15.31,32653.0
+2024-07-03,Snapchat Ads,Paid Social,Snapchat_Jul_Campaign_015,PaidSocial_Group_18,Ad_7184,58526,2824,4.83,9482.76,3.36,75,126.44,7316.48
+2024-10-29,Google Ads,Search,Google_Oct_Campaign_016,Search_Group_02,Ad_6485,237092,8152,3.44,27521.77,3.38,1981,13.89,443492.47
+2024-10-16,Bing Ads,Search,Bing_Oct_Campaign_017,Search_Group_03,Ad_3359,215092,12220,5.68,47028.83,3.85,2562,18.36,425785.15
+2024-11-10,Meta Ads,Paid Social,Meta_Nov_Campaign_018,PaidSocial_Group_13,Ad_9806,180517,3651,2.02,12602.13,3.45,842,14.97,168088.39
+2024-10-08,YouTube,Video,YouTube_Oct_Campaign_019,Video_Group_12,Ad_3072,300452,23508,7.82,66456.31,2.83,3874,17.15,796154.44
+2024-10-07,Snapchat Ads,Paid Social,Snapchat_Oct_Campaign_020,PaidSocial_Group_14,Ad_2016,408686,7978,1.95,27986.92,3.51,800,34.98,176793.9
+2024-12-30,Google Ads,Search,Google_Dec_Campaign_021,Search_Group_15,Ad_5977,244924,16012,6.54,10042.1,0.63,2241,4.48,495403.98
+2024-11-09,Bing Ads,Search,Bing_Nov_Campaign_022,Search_Group_18,Ad_3250,200130,9007,4.5,26611.72,2.95,944,28.19,213365.29
+2024-09-26,Meta Ads,Paid Social,Meta_Sep_Campaign_023,PaidSocial_Group_03,Ad_5452,285447,7714,2.7,34629.89,4.49,623,55.59,21605.98
+2024-11-06,YouTube,Video,YouTube_Nov_Campaign_024,Video_Group_03,Ad_4229,284834,6826,2.4,33984.56,4.98,1535,22.14,105434.15
+2024-11-22,Snapchat Ads,Paid Social,Snapchat_Nov_Campaign_025,PaidSocial_Group_08,Ad_2394,334626,10772,3.22,21922.63,2.04,1547,14.17,362166.97
+2024-11-14,Google Ads,Search,Google_Nov_Campaign_026,Search_Group_05,Ad_8929,278100,17002,6.11,67945.01,4.0,1344,50.55,285431.78
+2024-11-25,Bing Ads,Search,Bing_Nov_Campaign_027,Search_Group_16,Ad_6579,227520,16839,7.4,72096.7,4.28,3919,18.4,635638.09
+2024-07-02,Meta Ads,Paid Social,Meta_Jul_Campaign_028,PaidSocial_Group_20,Ad_9101,200037,11743,5.87,12335.12,1.05,376,32.81,82295.34
+2024-10-01,YouTube,Video,YouTube_Oct_Campaign_029,Video_Group_14,Ad_6169,208046,5234,2.52,13193.4,2.52,1081,12.2,73838.54
+2024-08-16,Snapchat Ads,Paid Social,Snapchat_Aug_Campaign_030,PaidSocial_Group_13,Ad_2023,461254,18003,3.9,49546.72,2.75,3794,13.06,244135.18
+2024-11-21,Google Ads,Search,Google_Nov_Campaign_031,Search_Group_13,Ad_7037,56259,4192,7.45,4403.57,1.05,339,12.99,71005.44
+2024-09-21,Bing Ads,Search,Bing_Sep_Campaign_032,Search_Group_02,Ad_7235,47055,2400,5.1,4423.95,1.84,304,14.55,59966.71
+2024-12-28,Meta Ads,Paid Social,Meta_Dec_Campaign_033,PaidSocial_Group_11,Ad_4975,359128,14788,4.12,63349.18,4.28,2209,28.68,226228.13
+2024-12-24,YouTube,Video,YouTube_Dec_Campaign_034,Video_Group_15,Ad_9208,321443,23588,7.34,40986.41,1.74,5652,7.25,373011.16
+2024-07-06,Snapchat Ads,Paid Social,Snapchat_Jul_Campaign_035,PaidSocial_Group_14,Ad_9133,404702,7783,1.92,22632.77,2.91,997,22.7,146489.48
+2024-09-22,Google Ads,Search,Google_Sep_Campaign_036,Search_Group_12,Ad_4618,333361,23493,7.05,60737.12,2.59,5330,11.4,1197612.45
+2024-09-12,Bing Ads,Search,Bing_Sep_Campaign_037,Search_Group_19,Ad_1228,188098,11490,6.11,17511.87,1.52,2575,6.8,569350.81
+2024-09-11,Meta Ads,Paid Social,Meta_Sep_Campaign_038,PaidSocial_Group_06,Ad_7816,207498,8247,3.97,26652.35,3.23,1107,24.08,68714.97
+2024-07-12,YouTube,Video,YouTube_Jul_Campaign_039,Video_Group_09,Ad_9597,106994,6790,6.35,31716.24,4.67,1447,21.92,134743.74
+2024-10-28,Snapchat Ads,Paid Social,Snapchat_Oct_Campaign_040,PaidSocial_Group_08,Ad_5627,296724,4881,1.64,12164.46,2.49,709,17.16,62280.23
+2024-08-19,Google Ads,Search,Google_Aug_Campaign_041,Search_Group_17,Ad_2110,353178,26755,7.58,62308.6,2.33,5405,11.53,270051.7
+2024-11-23,Bing Ads,Search,Bing_Nov_Campaign_042,Search_Group_14,Ad_8143,291209,10178,3.5,27678.91,2.72,658,42.07,47781.83
+2024-08-31,Meta Ads,Paid Social,Meta_Aug_Campaign_043,PaidSocial_Group_02,Ad_5005,497114,12215,2.46,28295.17,2.32,316,89.54,37209.06
+2024-09-21,YouTube,Video,YouTube_Sep_Campaign_044,Video_Group_18,Ad_1490,41937,3133,7.47,5042.23,1.61,701,7.19,152048.13
+2024-12-26,Snapchat Ads,Paid Social,Snapchat_Dec_Campaign_045,PaidSocial_Group_10,Ad_4046,179480,3210,1.79,11296.87,3.52,670,16.86,48710.67
+2024-07-07,Google Ads,Search,Google_Jul_Campaign_046,Search_Group_12,Ad_3504,264263,6803,2.57,10199.22,1.5,1172,8.7,143904.87
+2024-11-21,Bing Ads,Search,Bing_Nov_Campaign_047,Search_Group_07,Ad_7391,60406,4763,7.88,13032.52,2.74,141,92.43,7941.84
+2024-07-28,Meta Ads,Paid Social,Meta_Jul_Campaign_048,PaidSocial_Group_05,Ad_2998,261227,19553,7.49,40826.2,2.09,3155,12.94,394791.58
+2024-09-29,YouTube,Video,YouTube_Sep_Campaign_049,Video_Group_10,Ad_6943,131869,4924,3.73,3508.64,0.71,674,5.21,151089.05
+2024-07-25,Snapchat Ads,Paid Social,Snapchat_Jul_Campaign_050,PaidSocial_Group_19,Ad_6322,405947,6411,1.58,22498.46,3.51,1542,14.59,100930.45
+2024-08-02,Google Ads,Search,Google_Aug_Campaign_051,Search_Group_16,Ad_3303,466356,32828,7.04,40429.22,1.23,6651,6.08,661645.87
+2024-07-26,Bing Ads,Search,Bing_Jul_Campaign_052,Search_Group_05,Ad_4589,259917,10426,4.01,14634.92,1.4,1178,12.42,44390.81
+2024-07-30,Meta Ads,Paid Social,Meta_Jul_Campaign_053,PaidSocial_Group_15,Ad_2479,90427,5134,5.68,10859.43,2.12,1231,8.82,257811.56
+2024-08-31,YouTube,Video,YouTube_Aug_Campaign_054,Video_Group_08,Ad_8066,199021,11346,5.7,10237.65,0.9,251,40.79,24763.89
+2024-10-11,Snapchat Ads,Paid Social,Snapchat_Oct_Campaign_055,PaidSocial_Group_12,Ad_4750,447112,6376,1.43,18973.38,2.98,289,65.65,23460.22
+2024-08-30,Google Ads,Search,Google_Aug_Campaign_056,Search_Group_05,Ad_1013,431559,31047,7.19,140517.79,4.53,5196,27.04,1156147.88
+2024-11-17,Bing Ads,Search,Bing_Nov_Campaign_057,Search_Group_09,Ad_7895,311074,11118,3.57,36882.84,3.32,2386,15.46,530365.8
+2024-12-02,Meta Ads,Paid Social,Meta_Dec_Campaign_058,PaidSocial_Group_10,Ad_6732,184350,10750,5.83,5533.99,0.51,1081,5.12,211596.68
+2024-12-13,YouTube,Video,YouTube_Dec_Campaign_059,Video_Group_10,Ad_2308,218454,13188,6.04,42795.62,3.25,1612,26.55,78245.03
+2024-11-30,Snapchat Ads,Paid Social,Snapchat_Nov_Campaign_060,PaidSocial_Group_18,Ad_4255,229228,12479,5.44,10204.55,0.82,838,12.18,88501.27
+2024-11-01,Google Ads,Search,Google_Nov_Campaign_061,Search_Group_10,Ad_9923,105645,3920,3.71,6552.82,1.67,106,61.82,24442.95
+2024-12-08,Bing Ads,Search,Bing_Dec_Campaign_062,Search_Group_06,Ad_4156,211637,4842,2.29,5392.64,1.11,892,6.05,42649.94
+2024-08-01,Meta Ads,Paid Social,Meta_Aug_Campaign_063,PaidSocial_Group_03,Ad_6916,49769,3684,7.4,7829.17,2.13,287,27.28,13165.36
+2024-09-05,YouTube,Video,YouTube_Sep_Campaign_064,Video_Group_17,Ad_2955,369296,17521,4.74,85646.6,4.89,1679,51.01,343910.69
+2024-12-11,Snapchat Ads,Paid Social,Snapchat_Dec_Campaign_065,PaidSocial_Group_10,Ad_8200,143195,1485,1.04,6347.82,4.27,241,26.34,56578.7
+2024-10-21,Google Ads,Search,Google_Oct_Campaign_066,Search_Group_13,Ad_6878,373416,8446,2.26,38596.75,4.57,921,41.91,109097.87
+2024-08-31,Bing Ads,Search,Bing_Aug_Campaign_067,Search_Group_01,Ad_7835,87969,5824,6.62,5109.68,0.88,834,6.13,99907.43
+2024-10-08,Meta Ads,Paid Social,Meta_Oct_Campaign_068,PaidSocial_Group_10,Ad_2063,478074,5578,1.17,22649.76,4.06,616,36.77,94183.4
+2024-12-11,YouTube,Video,YouTube_Dec_Campaign_069,Video_Group_18,Ad_4080,478766,15188,3.17,48427.07,3.19,3043,15.91,307644.47
+2024-07-06,Snapchat Ads,Paid Social,Snapchat_Jul_Campaign_070,PaidSocial_Group_05,Ad_6048,169361,12128,7.16,16977.25,1.4,833,20.38,29252.9
+2024-07-17,Google Ads,Search,Google_Jul_Campaign_071,Search_Group_05,Ad_3787,369214,4915,1.33,7375.92,1.5,1035,7.13,130430.21
+2024-08-18,Bing Ads,Search,Bing_Aug_Campaign_072,Search_Group_13,Ad_8111,392842,18634,4.74,39934.04,2.14,4422,9.03,968604.91
+2024-07-23,Meta Ads,Paid Social,Meta_Jul_Campaign_073,PaidSocial_Group_15,Ad_1700,300459,22476,7.48,82169.53,3.66,1525,53.88,50352.54
+2024-12-12,YouTube,Video,YouTube_Dec_Campaign_074,Video_Group_17,Ad_2615,394302,5344,1.36,12574.55,2.35,1005,12.51,131968.61
+2024-10-07,Snapchat Ads,Paid Social,Snapchat_Oct_Campaign_075,PaidSocial_Group_11,Ad_3989,357076,20013,5.6,97746.97,4.88,3429,28.51,165911.65
+2024-07-12,Google Ads,Search,Google_Jul_Campaign_076,Search_Group_07,Ad_3494,364202,24111,6.62,26804.77,1.11,4396,6.1,687266.75
+2024-10-02,Bing Ads,Search,Bing_Oct_Campaign_077,Search_Group_17,Ad_7894,390037,11086,2.84,26045.28,2.35,690,37.75,99398.96
+2024-12-17,Meta Ads,Paid Social,Meta_Dec_Campaign_078,PaidSocial_Group_18,Ad_2501,468196,34998,7.48,157710.25,4.51,5561,28.36,319233.81
+2024-11-30,YouTube,Video,YouTube_Nov_Campaign_079,Video_Group_20,Ad_2656,258051,19024,7.37,30596.49,1.61,3874,7.9,577327.39
+2024-07-08,Snapchat Ads,Paid Social,Snapchat_Jul_Campaign_080,PaidSocial_Group_12,Ad_5853,443625,27817,6.27,60658.75,2.18,5291,11.46,1124532.89
+2024-11-22,Google Ads,Search,Google_Nov_Campaign_081,Search_Group_19,Ad_6548,124166,2712,2.18,5931.21,2.19,419,14.16,56747.97
+2024-10-04,Bing Ads,Search,Bing_Oct_Campaign_082,Search_Group_14,Ad_3903,494102,8563,1.73,29609.87,3.46,314,94.3,48390.23
+2024-08-04,Meta Ads,Paid Social,Meta_Aug_Campaign_083,PaidSocial_Group_17,Ad_2629,420313,31756,7.56,149225.24,4.7,6156,24.24,1372235.63
+2024-11-12,YouTube,Video,YouTube_Nov_Campaign_084,Video_Group_16,Ad_6492,185309,14017,7.56,46849.47,3.34,1622,28.88,369967.75
+2024-12-14,Snapchat Ads,Paid Social,Snapchat_Dec_Campaign_085,PaidSocial_Group_09,Ad_6535,374467,16350,4.37,25485.58,1.56,3067,8.31,656773.77
+2024-12-24,Google Ads,Search,Google_Dec_Campaign_086,Search_Group_17,Ad_3354,213470,16080,7.53,18192.34,1.13,3307,5.5,207114.52
+2024-12-23,Bing Ads,Search,Bing_Dec_Campaign_087,Search_Group_13,Ad_3929,424431,20827,4.91,33752.47,1.62,4980,6.78,329156.25
+2024-11-02,Meta Ads,Paid Social,Meta_Nov_Campaign_088,PaidSocial_Group_17,Ad_1085,266728,5575,2.09,11572.69,2.08,979,11.82,165111.7
+2024-08-27,YouTube,Video,YouTube_Aug_Campaign_089,Video_Group_03,Ad_7993,411399,28553,6.94,74972.06,2.63,2663,28.15,448770.28
+2024-10-15,Snapchat Ads,Paid Social,Snapchat_Oct_Campaign_090,PaidSocial_Group_03,Ad_6362,252474,10722,4.25,10748.11,1.0,1974,5.44,205994.38
+2024-09-21,Google Ads,Search,Google_Sep_Campaign_091,Search_Group_08,Ad_9982,384351,21960,5.71,66524.73,3.03,4123,16.14,865788.18
+2024-12-25,Bing Ads,Search,Bing_Dec_Campaign_092,Search_Group_11,Ad_4826,37123,851,2.29,2927.59,3.44,56,52.28,9932.35
+2024-10-29,Meta Ads,Paid Social,Meta_Oct_Campaign_093,PaidSocial_Group_14,Ad_1233,202551,15439,7.62,72271.83,4.68,1264,57.18,297561.66
+2024-11-17,YouTube,Video,YouTube_Nov_Campaign_094,Video_Group_10,Ad_2171,201400,4915,2.44,3494.99,0.71,729,4.79,178440.31
+2024-07-03,Snapchat Ads,Paid Social,Snapchat_Jul_Campaign_095,PaidSocial_Group_20,Ad_8963,290224,11443,3.94,41987.08,3.67,397,105.76,26757.03
+2024-09-28,Google Ads,Search,Google_Sep_Campaign_096,Search_Group_08,Ad_6391,385943,15062,3.9,40627.65,2.7,1672,24.3,176883.91
+2024-10-05,Bing Ads,Search,Bing_Oct_Campaign_097,Search_Group_04,Ad_4210,154825,2519,1.63,2631.66,1.04,151,17.43,6574.63
+2024-07-17,Meta Ads,Paid Social,Meta_Jul_Campaign_098,PaidSocial_Group_14,Ad_8348,402935,16348,4.06,41085.76,2.51,478,85.95,17494.04
+2024-09-15,YouTube,Video,YouTube_Sep_Campaign_099,Video_Group_17,Ad_7432,217354,14850,6.83,56313.5,3.79,1553,36.26,60876.34
+2024-12-03,Snapchat Ads,Paid Social,Snapchat_Dec_Campaign_100,PaidSocial_Group_06,Ad_2983,34136,1403,4.11,3858.8,2.75,38,101.55,2699.5

@@ -1,0 +1,85 @@
+test_number,question_id,category,question,status,generated_sql,execution_time,row_count,error
+1,1,Basic Aggregation,What is the total spend across all campaigns?,PASS,SELECT SUM(Spend) AS Total_Spend FROM campaigns,3.6495521068573,1,
+2,2,Platform Comparison,Which platform generated the highest total conversions?,PASS,"SELECT Platform, SUM(Conversions) as Total_Conversions
+FROM campaigns
+GROUP BY Platform
+ORDER BY Total_Conversions DESC
+LIMIT 1;",3.7083513736724854,1,
+3,3,Campaign Performance,Show me the top 3 campaigns by ROAS,PASS,"SELECT Campaign_Name, ROAS 
+FROM campaigns 
+ORDER BY ROAS DESC 
+LIMIT 3",3.9701290130615234,3,
+4,4,Time-based Analysis,Compare performance of last 2 months,PASS,"SELECT 
+    Platform, 
+    SUM(Impressions) AS Total_Impressions, 
+    SUM(Clicks) AS Total_Clicks, 
+    SUM(Conversions) AS Total_Conversions, 
+    SUM(Spend) AS Total_Spend, 
+    AVG(CTR) AS Average_CTR, 
+    AVG(CPC) AS Average_CPC, 
+    AVG(CPA) AS Average_CPA, 
+    AVG(ROAS) AS Average_ROAS, 
+    SUM(Reach) AS Total_Reach, 
+    AVG(Frequency) AS Average_Frequency 
+FROM 
+    campaigns 
+WHERE 
+    CAST(Date AS DATE) >= DATE_TRUNC('MONTH', CURRENT_DATE) - INTERVAL '2 MONTH' 
+    AND CAST(Date AS DATE) < DATE_TRUNC('MONTH', CURRENT_DATE)
+GROUP BY 
+    Platform;",7.883343696594238,0,
+5,5,Cost Metrics,What is the average CPC by platform?,PASS,"SELECT Platform, AVG(CPC) as Average_CPC
+FROM campaigns
+GROUP BY Platform",5.19848370552063,6,
+6,6,Efficiency Analysis,Which campaign has the lowest CPA?,PASS,"SELECT Campaign_Name, MIN(CPA) as Lowest_CPA
+FROM campaigns
+GROUP BY Campaign_Name
+ORDER BY Lowest_CPA ASC
+LIMIT 1;",4.472960948944092,1,
+7,7,Multi-metric Comparison,"Show total impressions, clicks, and conversions for each platform",PASS,"SELECT Platform, SUM(Impressions) AS Total_Impressions, SUM(Clicks) AS Total_Clicks, SUM(Conversions) AS Total_Conversions
+FROM campaigns
+GROUP BY Platform;",8.274224996566772,6,
+8,8,Specific Campaign,What was the total spend for Black Friday 2024 campaign?,PASS,"SELECT SUM(Spend) AS Total_Spend
+FROM campaigns
+WHERE Campaign_Name = 'Black Friday 2024';",3.4395933151245117,1,
+9,9,CTR Analysis,Which platform has the highest average CTR?,PASS,"SELECT Platform, AVG(CTR) as Average_CTR
+FROM campaigns
+GROUP BY Platform
+ORDER BY Average_CTR DESC
+LIMIT 1;",3.5604848861694336,1,
+10,10,Date Range,Show all campaigns that ran in November 2024,PASS,"SELECT * FROM campaigns
+WHERE CAST(Date AS DATE) >= '2024-11-01' AND CAST(Date AS DATE) <= '2024-11-30';",5.312892198562622,8,
+11,11,Reach & Frequency,What is the total reach and average frequency for Google Ads?,PASS,"SELECT SUM(Reach) as Total_Reach, AVG(Frequency) as Average_Frequency
+FROM campaigns
+WHERE Platform = 'google_ads'",3.7951650619506836,1,
+12,12,ROI Comparison,Compare ROAS between Google Ads and Meta Ads,PASS,"SELECT Platform, AVG(ROAS) as Average_ROAS
+FROM campaigns
+WHERE Platform IN ('google_ads', 'meta_ads')
+GROUP BY Platform",5.6701719760894775,2,
+13,13,Budget Analysis,What percentage of total spend was on LinkedIn Ads?,PASS,"SELECT 
+    (SUM(Spend) / (SELECT SUM(Spend) FROM campaigns) * 100) AS percentage_spend_on_linkedin
+FROM 
+    campaigns
+WHERE 
+    Platform = 'linkedin_ads'",4.623265027999878,1,
+14,14,Seasonal Performance,Which month had the highest total conversions?,PASS,"SELECT DATE_TRUNC('month', CAST(Date AS DATE)) AS Month, SUM(Conversions) AS Total_Conversions
+FROM campaigns
+GROUP BY Month
+ORDER BY Total_Conversions DESC
+LIMIT 1;",3.4185211658477783,1,
+15,15,Campaign Count,How many unique campaigns are in the dataset?,PASS,SELECT COUNT(DISTINCT Campaign_Name) FROM campaigns;,2.1815481185913086,1,
+16,16,Platform Distribution,Show the number of campaigns per platform,PASS,"SELECT Platform, COUNT(DISTINCT Campaign_Name) AS Number_of_Campaigns
+FROM campaigns
+GROUP BY Platform;",3.751258134841919,6,
+17,17,Performance Threshold,Show campaigns with ROAS greater than 4.5,PASS,SELECT * FROM campaigns WHERE ROAS > 4.5;,4.629767894744873,5,
+18,18,Cost Efficiency,What is the average CPA for campaigns with more than 1000 conversions?,PASS,"SELECT AVG(CPA) 
+FROM campaigns 
+WHERE Conversions > 1000;",2.616905927658081,1,
+19,19,Top Performers,Show the top 5 campaign-platform combinations by total spend,PASS,"SELECT Campaign_Name, Platform, SUM(Spend) as Total_Spend
+FROM campaigns
+GROUP BY Campaign_Name, Platform
+ORDER BY Total_Spend DESC
+LIMIT 5",6.562114000320435,5,
+20,20,Quarterly Analysis,What was the total spend in Q4 2024 (October-December)?,PASS,"SELECT SUM(Spend) AS Total_Spend
+FROM campaigns
+WHERE CAST(Date AS DATE) BETWEEN '2024-10-01' AND '2024-12-31';",3.609553337097168,1,

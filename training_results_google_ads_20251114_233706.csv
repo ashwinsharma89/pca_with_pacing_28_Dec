@@ -1,0 +1,106 @@
+question_id,question,category,difficulty,success,execution_time,sql_generated,error
+1,What is the total cost across all campaigns?,basic_aggregation,easy,True,8.520050525665283,SELECT SUM(Cost) AS Total_Cost FROM google_campaigns;,
+2,Which keywords have Quality Score greater than 8?,performance_filtering,easy,True,10.034334421157837,"SELECT Keyword 
+FROM google_campaigns 
+WHERE Quality_Score > 8;",
+3,Show average CTR by match type,dimensional_analysis,easy,True,5.426984786987305,"SELECT Match_Type, AVG(CTR) as Average_CTR
+FROM google_campaigns
+GROUP BY Match_Type",
+4,Compare Search vs Shopping network performance by ROAS,comparative_analysis,medium,True,8.188351392745972,"SELECT Network, AVG(ROAS) as Average_ROAS
+FROM google_campaigns
+GROUP BY Network;",
+5,Which campaign has the highest conversion rate?,performance_ranking,easy,True,8.707731485366821,"SELECT Campaign_Name, MAX(Conv_Rate) AS Highest_Conversion_Rate
+FROM google_campaigns
+GROUP BY Campaign_Name
+ORDER BY Highest_Conversion_Rate DESC
+LIMIT 1;",
+6,What is the average impression share by device?,dimensional_analysis,medium,True,5.258883953094482,"SELECT Device, AVG(Impression_Share) AS Avg_Impression_Share
+FROM google_campaigns
+GROUP BY Device",
+7,Show top 5 keywords by conversion value,performance_ranking,easy,True,9.282782316207886,"SELECT Keyword, SUM(Conv_Value) as Total_Conversion_Value
+FROM google_campaigns
+GROUP BY Keyword
+ORDER BY Total_Conversion_Value DESC
+LIMIT 5;",
+8,Which campaigns have search lost IS due to rank greater than 15%?,performance_filtering,medium,True,7.061501741409302,"SELECT Campaign_Name 
+FROM google_campaigns 
+WHERE Search_Impr_Share > 15;",
+9,What is the cost per conversion by age group?,demographic_analysis,medium,True,5.63080620765686,"SELECT Age, SUM(Cost) / SUM(Conversions) AS Cost_Per_Conversion
+FROM google_campaigns
+GROUP BY Age",
+10,Show daily conversion trend for the last 30 days,time_series,medium,True,8.689096212387085,"SELECT CAST(Date AS DATE) AS Date, SUM(Conversions) AS Daily_Conversions
+FROM google_campaigns
+WHERE CAST(Date AS DATE) >= DATE_TRUNC('DAY', CURRENT_DATE - INTERVAL '30' DAY)
+GROUP BY CAST(Date AS DATE)
+ORDER BY Date ASC;",
+11,Compare exact match vs broad match keywords by CTR,comparative_analysis,medium,False,4.0104079246521,,"Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4 in organization org-voYyxsXqwkJ7iAkDEN0DXNxP on tokens per min (TPM): Limit 10000, Used 10000, Requested 102. Please try again in 612ms. Visit https://platform.openai.com/account/rate-limits to learn more.', 'type': 'tokens', 'param': None, 'code': 'rate_limit_exceeded'}}"
+12,What is the average CPC by location?,dimensional_analysis,easy,True,12.283314228057861,"SELECT Location, AVG(Avg_CPC) as Average_CPC
+FROM google_campaigns
+GROUP BY Location;",
+13,Which ad groups have the best ROAS?,performance_ranking,easy,True,7.374717473983765,"SELECT Ad_Group_Name, MAX(ROAS) as Max_ROAS
+FROM google_campaigns
+GROUP BY Ad_Group_Name
+ORDER BY Max_ROAS DESC;",
+14,Show top impression rate by campaign,dimensional_analysis,medium,True,8.290806531906128,"SELECT Campaign_Name, MAX(Top_Impr_Rate) as Max_Impression_Rate
+FROM google_campaigns
+GROUP BY Campaign_Name
+ORDER BY Max_Impression_Rate DESC;",
+15,What is the total number of clicks by gender?,demographic_analysis,easy,True,6.957759141921997,"SELECT Gender, SUM(Clicks) as Total_Clicks
+FROM google_campaigns
+GROUP BY Gender;",
+16,Compare mobile vs desktop performance by conversion rate,comparative_analysis,medium,True,8.708954334259033,"SELECT Device, AVG(Conv_Rate) as Average_Conversion_Rate
+FROM google_campaigns
+WHERE Device IN ('Mobile', 'Desktop')
+GROUP BY Device",
+17,Which keywords have the lowest cost per conversion?,efficiency_metrics,easy,True,10.1348237991333,"SELECT Keyword, MIN(Cost_Per_Conv) as Lowest_Cost_Per_Conv
+FROM google_campaigns
+GROUP BY Keyword
+ORDER BY Lowest_Cost_Per_Conv ASC;",
+18,Show weekly cost trend,time_series,medium,True,6.142154693603516,"SELECT DATE_TRUNC('week', CAST(Date AS DATE)) AS Week, SUM(Cost) AS Weekly_Cost
+FROM google_campaigns
+GROUP BY Week
+ORDER BY Week;",
+19,What is the search impression share by campaign?,dimensional_analysis,medium,True,7.37321400642395,"SELECT Campaign_Name, AVG(Search_Impr_Share) as Avg_Search_Impression_Share
+FROM google_campaigns
+GROUP BY Campaign_Name",
+20,Which campaigns have Quality Score of 10?,performance_filtering,easy,False,5.9378578662872314,,"Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4 in organization org-voYyxsXqwkJ7iAkDEN0DXNxP on tokens per min (TPM): Limit 10000, Used 9939, Requested 138. Please try again in 462ms. Visit https://platform.openai.com/account/rate-limits to learn more.', 'type': 'tokens', 'param': None, 'code': 'rate_limit_exceeded'}}"
+21,Show total impressions by network and device,dimensional_analysis,medium,True,9.934033870697021,"SELECT Network, Device, SUM(Impressions) as Total_Impressions
+FROM google_campaigns
+GROUP BY Network, Device;",
+22,What is the average conversion value by match type?,dimensional_analysis,medium,True,9.41678786277771,"SELECT Match_Type, AVG(Conv_Value) as Average_Conversion_Value
+FROM google_campaigns
+GROUP BY Match_Type;",
+23,Compare phrase match vs exact match by ROAS,comparative_analysis,medium,True,5.1234705448150635,"SELECT Match_Type, AVG(ROAS) as Average_ROAS
+FROM google_campaigns
+WHERE Match_Type IN ('Phrase', 'Exact')
+GROUP BY Match_Type;",
+24,Which age group has the highest CTR?,demographic_analysis,medium,True,7.270537614822388,"SELECT Age, AVG(CTR) as Average_CTR
+FROM google_campaigns
+GROUP BY Age
+ORDER BY Average_CTR DESC
+LIMIT 1;",
+25,Show campaigns with impression share below 70%,performance_filtering,medium,True,7.3724164962768555,"SELECT Campaign_Name, Impression_Share
+FROM google_campaigns
+WHERE Impression_Share < 70;",
+26,What is the total conversion value by campaign?,basic_aggregation,easy,True,9.214887142181396,"SELECT Campaign_Name, SUM(Conv_Value) as Total_Conversion_Value
+FROM google_campaigns
+GROUP BY Campaign_Name;",
+27,Show month-over-month clicks trend,time_series,hard,True,8.475112676620483,"SELECT 
+    DATE_TRUNC('MONTH', CAST(Date AS DATE)) AS Month, 
+    SUM(Clicks) AS Total_Clicks 
+FROM 
+    google_campaigns 
+GROUP BY 
+    Month 
+ORDER BY 
+    Month;",
+28,Which keywords drive the most conversions?,performance_ranking,easy,True,6.575428485870361,"SELECT Keyword, SUM(Conversions) as Total_Conversions
+FROM google_campaigns
+GROUP BY Keyword
+ORDER BY Total_Conversions DESC;",
+29,What is the average top impression rate by network?,dimensional_analysis,medium,True,8.498078107833862,"SELECT Network, AVG(Top_Impr_Rate) as Avg_Top_Impression_Rate
+FROM google_campaigns
+GROUP BY Network",
+30,Compare male vs female performance by cost per conversion,demographic_analysis,medium,True,6.859660863876343,"SELECT Gender, AVG(Cost_Per_Conv) as Avg_Cost_Per_Conv
+FROM google_campaigns
+GROUP BY Gender;",
