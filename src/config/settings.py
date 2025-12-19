@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     snapshot_dir: Path = Field(Path("./data/snapshots"), description="Snapshot storage directory")
     
     # API Configuration
-    api_host: str = Field("0.0.0.0", description="API host")
+    api_host: str = Field("127.0.0.1", description="API host (use 127.0.0.1 for localhost, 0.0.0.0 for all interfaces)")
     api_port: int = Field(8000, description="API port")
     api_workers: int = Field(4, description="Number of API workers")
     debug: bool = Field(False, description="Debug mode")

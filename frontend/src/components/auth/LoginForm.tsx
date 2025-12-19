@@ -51,12 +51,12 @@ export function LoginForm() {
                 <CardContent>
                     <div className="grid w-full items-center gap-4">
                         <div className="flex flex-col space-y-1.5">
-                            <Label htmlFor="username">Username</Label>
-                            <Input id="username" name="username" placeholder="johndoe" defaultValue="test@example.com" readOnly required />
+                            <Label htmlFor="username">Username or Email</Label>
+                            <Input id="username" name="username" placeholder="johndoe@example.com" defaultValue="test@example.com" required />
                         </div>
                         <div className="flex flex-col space-y-1.5">
                             <Label htmlFor="password">Password</Label>
-                            <Input id="password" name="password" type="password" defaultValue="testpassword123" readOnly required />
+                            <Input id="password" name="password" type="password" placeholder="••••••••" required />
                         </div>
                     </div>
                     {error && <p className="text-sm text-red-500 mt-4">{error}</p>}

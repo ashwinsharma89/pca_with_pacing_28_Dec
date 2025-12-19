@@ -43,6 +43,10 @@ class User(Base):
     failed_login_attempts = Column(Integer, default=0)
     locked_until = Column(DateTime(timezone=True), nullable=True)
     
+    # MFA
+    mfa_enabled = Column(Boolean, default=False, nullable=False)
+    mfa_secret = Column(String(32), nullable=True)
+    
     def __repr__(self):
         return f"<User(username='{self.username}', email='{self.email}', role='{self.role}')>"
     
@@ -63,6 +67,7 @@ class User(Base):
             "is_active": self.is_active,
             "is_verified": self.is_verified,
             "must_change_password": self.must_change_password,
+            "mfa_enabled": self.mfa_enabled,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "last_login": self.last_login.isoformat() if self.last_login else None
         }

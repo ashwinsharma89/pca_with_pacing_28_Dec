@@ -25,18 +25,27 @@ from loguru import logger
 
 from .middleware.auth import SECRET_KEY
 from .middleware.rate_limit import limiter, RATE_LIMIT_ENABLED
+from .middleware.security_headers import SecurityHeadersMiddleware
 from .v1 import router_v1
 from .error_handlers import setup_exception_handlers
 from .exceptions import RateLimitExceededError
 from ..utils import setup_logger
 from ..database.connection import get_db_manager
 from ..utils.opentelemetry_config import setup_opentelemetry
+from ..utils.secrets_manager import get_secrets_manager
+from ..enterprise.audit import AuditLogger, AuditEventType, AuditSeverity
 
 # Initialize logger
 setup_logger()
 
 # Initialize database
 db_manager = get_db_manager()
+
+# Initialize Secrets Manager
+secrets = get_secrets_manager()
+
+# Initialize Audit Logger
+audit_logger = AuditLogger()
 
 # Create FastAPI app
 app = FastAPI(
@@ -49,6 +58,9 @@ app = FastAPI(
 
 # Setup exception handlers (MUST be before other middleware)
 setup_exception_handlers(app)
+
+# Add Security Headers middleware
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Setup OpenTelemetry (if enabled)
 setup_opentelemetry(app)
@@ -85,14 +97,72 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
         }
     )
 
-# Add CORS middleware
+# Add CORS middleware with secure production configuration
+allowed_origins_str = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",")]
+
+# In production, NEVER use "*" for allow_origins
+if os.getenv("PRODUCTION_MODE", "false").lower() == "true":
+    if "*" in allowed_origins:
+        logger.error("🔴 CRITICAL: Wildcard CORS origins not allowed in production!")
+        allowed_origins = [o for o in allowed_origins if o != "*"]
+        if not allowed_origins:
+            allowed_origins = ["https://app.pca-agent.com"] # Secure fallback
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure properly in production
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Audit Logging Middleware
+@app.middleware("http")
+async def audit_middleware(request: Request, call_next):
+    """Log all sensitive API calls to the audit log."""
+    # Process request
+    response = await call_next(request)
+    
+    # List of sensitive paths to audit
+    sensitive_prefixes = [
+        "/api/v1/auth",
+        "/api/v1/admin",
+        "/api/v1/users",
+        "/api/v1/data/delete",
+        "/api/v1/campaigns/delete"
+    ]
+    
+    is_sensitive = any(request.url.path.startswith(prefix) for prefix in sensitive_prefixes)
+    
+    if is_sensitive or response.status_code >= 400:
+        # Get user from state (if authenticated)
+        user = "anonymous"
+        if hasattr(request.state, "user") and request.state.user:
+            user = request.state.user.id
+        
+        severity = AuditSeverity.INFO
+        if response.status_code >= 500:
+            severity = AuditSeverity.ERROR
+        elif response.status_code >= 400:
+            severity = AuditSeverity.WARNING
+            
+        audit_logger.log_event(
+            event_type=AuditEventType.API_CALL,
+            user=user,
+            action=f"{request.method} {request.url.path}",
+            resource=request.url.path,
+            details={
+                "status_code": response.status_code,
+                "ip": request.client.host if request.client else "unknown",
+                "query_params": str(request.query_params)
+            },
+            severity=severity,
+            ip_address=request.client.host if request.client else "unknown",
+            user_agent=request.headers.get("user-agent")
+        )
+        
+    return response
 
 # Include v1 router
 app.include_router(router_v1)
@@ -185,13 +255,14 @@ async def startup_event():
     logger.info("✅ Structured error codes enabled")
     logger.info("✅ Specific exception handling enabled")
     logger.info("=" * 60)
+    # Security validation - ensure JWT secret is properly configured
+    if SECRET_KEY == "change-this-secret-key" or not SECRET_KEY:
+        raise ValueError(
+            "🔴 SECURITY ERROR: JWT_SECRET_KEY must be set to a secure value!\n"
+            "Generate one with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
+        )
     
-    if SECRET_KEY == "change-this-secret-key":
-        logger.warning("⚠️  WARNING: Using default JWT secret key!")
-        logger.warning("⚠️  Change JWT_SECRET_KEY in .env for production")
-    
-    logger.info("API ready at http://localhost:8000")
-    logger.info("Docs available at http://localhost:8000/api/docs")
+    logger.info("✅ JWT secret key validated")
 
 
 # Shutdown event
@@ -203,4 +274,8 @@ async def shutdown_event():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    from ..config.settings import Settings
+    
+    settings = Settings()
+    # Use settings.api_host (defaults to 127.0.0.1) instead of 0.0.0.0
+    uvicorn.run(app, host=settings.api_host, port=8000)

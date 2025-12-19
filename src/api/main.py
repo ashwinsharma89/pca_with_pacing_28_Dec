@@ -99,13 +99,28 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 # Add Security Headers middleware
 app.add_middleware(SecurityHeadersMiddleware)
 
-# Add CORS middleware
+# Add CORS middleware with secure production configuration
+# Get allowed origins from environment or use secure defaults
+allowed_origins_str = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",")]
+
+# In production, NEVER use "*" for allow_origins
+if os.getenv("PRODUCTION_MODE", "false").lower() == "true":
+    if "*" in allowed_origins:
+        logger.error("🔴 CRITICAL: Wildcard CORS origins not allowed in production!")
+        logger.error("Set CORS_ALLOWED_ORIGINS environment variable with specific domains.")
+        import sys
+        sys.exit(1)
+
+logger.info(f"CORS allowed origins: {allowed_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure properly in production
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
+    max_age=3600,  # Cache preflight requests for 1 hour
 )
 
 # Include v1 router
@@ -226,4 +241,16 @@ async def shutdown_event():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    from src.config.settings import settings
+    
+    logger.info(f"Starting server on {settings.api_host}:{settings.api_port}")
+    if settings.api_host == "0.0.0.0":
+        logger.warning("⚠️  WARNING: Binding to 0.0.0.0 (all network interfaces)")
+        logger.warning("⚠️  Ensure firewall rules are properly configured!")
+    
+    uvicorn.run(
+        app,
+        host=settings.api_host,
+        port=settings.api_port,
+        log_level="info"
+    )

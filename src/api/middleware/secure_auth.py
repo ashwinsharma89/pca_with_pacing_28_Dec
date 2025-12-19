@@ -19,7 +19,16 @@ from src.services.user_service import UserService
 from loguru import logger
 
 # JWT Configuration
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-this-secret-key")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+# Security validation - fail fast if secret is not properly configured
+if not SECRET_KEY or SECRET_KEY in ["change-this-secret-key", "your-secure-random-secret-here-change-this"]:
+    raise ValueError(
+        "🔴 SECURITY ERROR: JWT_SECRET_KEY environment variable must be set to a secure value.\n"
+        "Generate a secure key with: python -c 'import secrets; print(secrets.token_urlsafe(32))'\n"
+        "Then set it in your environment: export JWT_SECRET_KEY='your-generated-key'"
+    )
+
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "480"))  # 8 hours
 

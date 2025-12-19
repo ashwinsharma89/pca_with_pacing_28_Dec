@@ -12,6 +12,8 @@ import sys
 
 from .sql_knowledge import SQLKnowledgeHelper
 from src.utils.anthropic_helpers import create_anthropic_client
+from .query_optimizer import QueryOptimizer
+from .multi_table_manager import MultiTableManager
 
 # Configure logger to also write to file
 logger.add("query_debug.log", rotation="1 MB", level="INFO")
@@ -95,9 +97,18 @@ class NaturalLanguageQueryEngine:
         
         self.conn = None
         self.schema_info = None
+        self.optimizer: Optional[QueryOptimizer] = None
+        self.multi_table_manager: Optional[MultiTableManager] = None
         logger.info("Initialized NaturalLanguageQueryEngine")
     
     def load_data(self, df: pd.DataFrame, table_name: str = "campaigns"):
+        """
+        Load data into DuckDB.
+        
+        Args:
+            df: DataFrame with campaign data
+            table_name: Name for the table
+        """
         """
         Load data into DuckDB.
         
@@ -123,6 +134,25 @@ class NaturalLanguageQueryEngine:
         self.conn = duckdb.connect(':memory:')
         self.conn.register(table_name, df_copy)
         
+        # Initialize optimizer and multi-table manager
+        self.optimizer = QueryOptimizer(self.conn)
+        self.multi_table_manager = MultiTableManager(self.conn)
+        
+        # Register primary table with multi-table manager
+        # Try to detect primary key
+        primary_key = None
+        for col in df_copy.columns:
+            if 'id' in col.lower() and col.lower() in ['id', 'campaign_id', f'{table_name}_id']:
+                primary_key = col
+                break
+        
+        self.multi_table_manager.register_table(
+            name=table_name,
+            df=df_copy,
+            primary_key=primary_key,
+            description=f"Main {table_name} table"
+        )
+        
         # Store schema information
         self.schema_info = {
             "table_name": table_name,
@@ -132,6 +162,99 @@ class NaturalLanguageQueryEngine:
         }
         
         logger.info(f"Loaded {len(df_copy)} rows into table '{table_name}'")
+    
+    def load_additional_table(
+        self,
+        df: pd.DataFrame,
+        table_name: str,
+        primary_key: Optional[str] = None,
+        description: Optional[str] = None
+    ):
+        """
+        Load an additional table for multi-table queries.
+        
+        Args:
+            df: DataFrame to load
+            table_name: Name for the table
+            primary_key: Primary key column
+            description: Table description
+        """
+        if not self.multi_table_manager:
+            raise ValueError("Call load_data() first to initialize the query engine")
+        
+        # Convert date columns
+        df_copy = df.copy()
+        date_keywords = ['date', 'week', 'day', 'month', 'year', 'time', 'period']
+        date_columns = [col for col in df_copy.columns 
+                       if any(keyword in col.lower() for keyword in date_keywords)]
+        
+        for col in date_columns:
+            try:
+                df_copy[col] = pd.to_datetime(df_copy[col], errors='coerce')
+                logger.info(f"Converted {col} to datetime in {table_name}")
+            except:
+                logger.warning(f"Could not convert {col} to datetime in {table_name}")
+        
+        # Register with multi-table manager
+        self.multi_table_manager.register_table(
+            name=table_name,
+            df=df_copy,
+            primary_key=primary_key,
+            description=description or f"{table_name} table"
+        )
+        
+        logger.info(f"Loaded additional table '{table_name}' with {len(df_copy)} rows")
+    
+    def auto_detect_relationships(self) -> List[Dict[str, Any]]:
+        """
+        Auto-detect relationships between loaded tables.
+        
+        Returns:
+            List of detected relationships
+        """
+        if not self.multi_table_manager:
+            raise ValueError("No tables loaded")
+        
+        detected = self.multi_table_manager.auto_detect_relationships()
+        
+        # Add to relationships list
+        self.multi_table_manager.relationships.extend(detected)
+        
+        logger.info(f"Auto-detected {len(detected)} relationships")
+        return [r.to_dict() for r in detected]
+    
+    def validate_relationships(self) -> Dict[str, Any]:
+        """
+        Validate all relationships.
+        
+        Returns:
+            Dictionary with validation results
+        """
+        if not self.multi_table_manager:
+            return {'validated': 0, 'failed': 0, 'results': []}
+        
+        results = []
+        validated_count = 0
+        failed_count = 0
+        
+        for rel in self.multi_table_manager.relationships:
+            is_valid, message = self.multi_table_manager.validate_relationship(rel)
+            results.append({
+                'relationship': rel.to_dict(),
+                'valid': is_valid,
+                'message': message
+            })
+            if is_valid:
+                validated_count += 1
+            else:
+                failed_count += 1
+        
+        return {
+            'validated': validated_count,
+            'failed': failed_count,
+            'results': results
+        }
+
 
     def _get_schema_description(self) -> str:
         """Return a formatted schema description for prompt injection."""
@@ -595,17 +718,27 @@ SQL Query:"""
         
         return sql_query
     
-    def execute_query(self, sql_query: str) -> pd.DataFrame:
+    def execute_query(self, sql_query: str, analyze_plan: bool = False) -> pd.DataFrame:
         """
         Execute SQL query and return results.
         
         Args:
             sql_query: SQL query to execute
+            analyze_plan: If True, analyze query plan with EXPLAIN
             
         Returns:
             DataFrame with query results
         """
         try:
+            # Optionally analyze query plan
+            if analyze_plan and self.optimizer:
+                stats = self.optimizer.get_query_stats(sql_query)
+                logger.info(f"Query Stats: {stats['execution_time']:.3f}s, Cost: {stats['cost']:.2f}")
+                if stats['optimization_suggestions']:
+                    logger.info("Optimization Suggestions:")
+                    for suggestion in stats['optimization_suggestions']:
+                        logger.info(f"  {suggestion}")
+            
             result = self.conn.execute(sql_query).fetchdf()
             logger.info(f"Query executed successfully, returned {len(result)} rows")
             return result

@@ -93,8 +93,9 @@ class AuthenticationManager:
         )
     
     def _hash_password(self, password: str) -> str:
-        """Hash password using bcrypt."""
-        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        """Hash password using bcrypt with explicit rounds (OWASP recommendation)."""
+        # Use 12 rounds (OWASP recommendation for bcrypt)
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=12)).decode('utf-8')
     
     def _verify_password(self, password: str, password_hash: str) -> bool:
         """Verify password against hash."""

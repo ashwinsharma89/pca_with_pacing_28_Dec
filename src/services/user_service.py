@@ -59,8 +59,9 @@ class UserService:
         self.db = db
     
     def hash_password(self, password: str) -> str:
-        """Hash password using bcrypt."""
-        return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+        """Hash password using bcrypt with explicit rounds (OWASP recommendation)."""
+        # Use 12 rounds (OWASP recommendation for bcrypt)
+        return bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12)).decode()
     
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """Verify password against hash."""
@@ -342,7 +343,7 @@ class UserService:
             return None
         
         # Update allowed fields
-        allowed_fields = ['email', 'role', 'tier', 'is_active', 'is_verified']
+        allowed_fields = ['email', 'role', 'tier', 'is_active', 'is_verified', 'mfa_enabled']
         for field, value in kwargs.items():
             if field in allowed_fields:
                 setattr(user, field, value)
@@ -354,6 +355,32 @@ class UserService:
         logger.info(f"User updated: {user.username}")
         
         return user
+
+    def enable_mfa(self, user_id: int, secret: str) -> bool:
+        """Enable MFA for user."""
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return False
+        
+        user.mfa_enabled = True
+        user.mfa_secret = secret
+        self.db.commit()
+        
+        logger.info(f"MFA enabled for user: {user.username}")
+        return True
+
+    def disable_mfa(self, user_id: int) -> bool:
+        """Disable MFA for user."""
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return False
+        
+        user.mfa_enabled = False
+        user.mfa_secret = None
+        self.db.commit()
+        
+        logger.info(f"MFA disabled for user: {user.username}")
+        return True
     
     def delete_user(self, user_id: int) -> bool:
         """Delete user."""

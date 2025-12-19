@@ -5,6 +5,7 @@ Provides JWT token generation, verification, and user authentication.
 """
 
 import os
+import sys
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
 
@@ -15,9 +16,25 @@ import bcrypt
 from loguru import logger
 
 # JWT Configuration
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-this-secret-key")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "480"))  # 8 hours
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "1440"))
+
+# Security validation on import
+if not SECRET_KEY:
+    logger.error("🔴 CRITICAL: JWT_SECRET_KEY environment variable not set!")
+    logger.error("Generate one with: python -c \"import secrets; print(secrets.token_urlsafe(32))\"")
+    sys.exit(1)
+
+if SECRET_KEY in ["change-this-secret-key", "your-secure-random-secret-here-change-this"]:
+    logger.error("🔴 CRITICAL: Using default/insecure JWT_SECRET_KEY!")
+    logger.error("This is a SECURITY VULNERABILITY. Generate a secure secret immediately.")
+    if os.getenv("PRODUCTION_MODE", "false").lower() == "true":
+        logger.error("Refusing to start in production mode with insecure secret.")
+        sys.exit(1)
+    else:
+        logger.warning("⚠️  Allowing insecure secret in development mode only.")
+        logger.warning("⚠️  DO NOT deploy to production with this configuration!")
 
 # Security scheme
 security = HTTPBearer()
@@ -71,6 +88,10 @@ def get_user(username: str, db=None) -> Optional[Dict[str, Any]]:
         from src.services.user_service import UserService
         user_service = UserService(db)
         user_model = user_service.get_user_by_username(username)
+        
+        # If not found by username, try by email
+        if not user_model:
+            user_model = user_service.get_user_by_email(username)
         
         if not user_model:
             return None

@@ -36,6 +36,7 @@ async def preview_excel_sheets(
 ):
     """
     Preview available sheets in an Excel file before uploading.
+    Optimized to minimize file reads.
     """
     try:
         if not file.filename.endswith(('.xls', '.xlsx')):
@@ -44,21 +45,20 @@ async def preview_excel_sheets(
         contents = await file.read()
         import io
         
-        # Read Excel file to get sheet names
+        # Read Excel file metadata efficiently
         xl_file = pd.ExcelFile(io.BytesIO(contents))
         sheet_names = xl_file.sheet_names
         
-        # Get row counts for each sheet
+        # Get row/column counts efficiently (read each sheet only once)
         sheet_info = []
         for sheet_name in sheet_names:
             try:
-                df = pd.read_excel(io.BytesIO(contents), sheet_name=sheet_name, nrows=0)
-                # Get actual row count
-                df_full = pd.read_excel(io.BytesIO(contents), sheet_name=sheet_name)
+                # Read the sheet once and get both dimensions
+                df = pd.read_excel(xl_file, sheet_name=sheet_name)
                 sheet_info.append({
                     'name': sheet_name,
-                    'row_count': len(df_full),
-                    'column_count': len(df_full.columns)
+                    'row_count': len(df),
+                    'column_count': len(df.columns)
                 })
             except Exception as e:
                 logger.warning(f"Could not read sheet {sheet_name}: {e}")
@@ -1170,12 +1170,14 @@ async def get_analytics_snapshot(
             try:
                 from datetime import datetime
                 filters['start_date'] = datetime.strptime(start_date, '%Y-%m-%d')
-            except: pass
+            except ValueError as e:
+                logger.warning(f"Invalid start_date format '{start_date}': {e}. Expected YYYY-MM-DD.")
         if end_date:
             try:
                 from datetime import datetime
                 filters['end_date'] = datetime.strptime(end_date, '%Y-%m-%d')
-            except: pass
+            except ValueError as e:
+                logger.warning(f"Invalid end_date format '{end_date}': {e}. Expected YYYY-MM-DD.")
             
         return campaign_service.get_analytics_studio_snapshot(filters)
         

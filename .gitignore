@@ -58,6 +58,7 @@ data/*.db
 data/*.sqlite3
 data/chroma_db/
 data/llm_usage.json
+data/enterprise/
 !data/.gitkeep
 
 # Reports

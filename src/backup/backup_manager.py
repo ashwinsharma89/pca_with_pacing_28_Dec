@@ -12,6 +12,7 @@ from typing import Optional, List, Dict, Any
 from pathlib import Path
 import gzip
 import json
+import re
 
 from src.database.connection import DatabaseConfig
 
@@ -79,6 +80,46 @@ class BackupManager:
                 'timestamp': datetime.now().isoformat()
             }
     
+    def _validate_pg_dump_params(self):
+        """
+        Validate pg_dump parameters to prevent command injection.
+        
+        Raises:
+            ValueError: If any parameter contains invalid characters
+        """
+        # Whitelist pattern for database parameters (alphanumeric, underscore, hyphen, dot)
+        safe_pattern = re.compile(r'^[a-zA-Z0-9_\-\.]+$')
+        
+        # Validate host
+        if not safe_pattern.match(self.db_config.host):
+            raise ValueError(
+                f"Invalid database host: '{self.db_config.host}'. "
+                "Only alphanumeric characters, underscores, hyphens, and dots are allowed."
+            )
+        
+        # Validate user
+        if not safe_pattern.match(self.db_config.user):
+            raise ValueError(
+                f"Invalid database user: '{self.db_config.user}'. "
+                "Only alphanumeric characters, underscores, and hyphens are allowed."
+            )
+        
+        # Validate database name
+        if not safe_pattern.match(self.db_config.database):
+            raise ValueError(
+                f"Invalid database name: '{self.db_config.database}'. "
+                "Only alphanumeric characters, underscores, and hyphens are allowed."
+            )
+        
+        # Validate port
+        if not (1 <= self.db_config.port <= 65535):
+            raise ValueError(
+                f"Invalid database port: {self.db_config.port}. "
+                "Port must be between 1 and 65535."
+            )
+        
+        logger.info("✅ pg_dump parameters validated")
+    
     def _backup_sqlite(self, backup_name: str) -> Dict[str, Any]:
         """Backup SQLite database."""
         source_db = Path('./pca_agent.db')
@@ -116,7 +157,10 @@ class BackupManager:
         """Backup PostgreSQL database using pg_dump."""
         backup_file = self.backup_dir / f"{backup_name}.sql"
         
-        # Build pg_dump command
+        # Security: Validate all parameters before subprocess call
+        self._validate_pg_dump_params()
+        
+        # Set password in environment
         env = os.environ.copy()
         if self.db_config.password:
             env['PGPASSWORD'] = self.db_config.password

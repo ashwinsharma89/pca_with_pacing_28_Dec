@@ -49,211 +49,181 @@ class CampaignService:
             # 2. Clean Column Headers (Strip Whitespace)
             df.columns = df.columns.astype(str).str.strip()
             
-            # Expanded Column Alias Mapping
+            # 3. VECTORIZED Column Mapping
             column_aliases = {
-                'Campaign_Name': ['Campaign', 'Campaign Name', 'Campaign_Name', 'Name'],
-                'Spend': ['Spend', 'Total Spent', 'Amount Spent', 'Cost', 'Budget used', 'Investment'],
-                'Impressions': ['Impressions', 'Impr', 'Views', 'Impression'],
-                'Clicks': ['Clicks', 'Link Clicks', 'Click'],
-                'Conversions': ['Conversions', 'Results', 'Purchases', 'Site Visit', 'Total Conversions', 'Leads', 'Installs', 'Sales'],
-                'Platform': ['Platform', 'Source', 'Publisher', 'Network'],
-                'Channel': ['Channel', 'Medium'],
-                'CTR': ['CTR', 'Click Through Rate', 'C.T.R.'],
-                'CPC': ['CPC', 'Cost Per Click', 'C.P.C.'],
-                'ROAS': ['ROAS', 'Return on Ad Spend', 'R.O.A.S.']
+                'campaign_name': ['Campaign', 'Campaign Name', 'Campaign_Name', 'Name'],
+                'spend': ['Spend', 'Total Spent', 'Amount Spent', 'Cost', 'Budget used', 'Investment'],
+                'impressions': ['Impressions', 'Impr', 'Views', 'Impression'],
+                'clicks': ['Clicks', 'Link Clicks', 'Click'],
+                'conversions': ['Conversions', 'Results', 'Purchases', 'Site Visit', 'Total Conversions', 'Leads', 'Installs', 'Sales'],
+                'platform': ['Platform', 'Source', 'Publisher', 'Network'],
+                'channel': ['Channel', 'Medium'],
+                'ctr': ['CTR', 'Click Through Rate', 'C.T.R.'],
+                'cpc': ['CPC', 'Cost Per Click', 'C.P.C.'],
+                'roas': ['ROAS', 'Return on Ad Spend', 'R.O.A.S.'],
+                'date': ['Date', 'Day', 'Timestamp']
             }
 
-            def get_val(row, aliases, default=0):
+            # Map columns to standard names
+            mapped_df = pd.DataFrame(index=df.index)
+            for target_col, aliases in column_aliases.items():
                 for alias in aliases:
-                    if alias in row and pd.notna(row[alias]):
-                        return row[alias]
-                    # Case insensitive check
-                    for col in row.index:
-                        if col.lower() == alias.lower() and pd.notna(row[col]):
-                            return row[col]
-                return default
+                    if alias in df.columns:
+                        mapped_df[target_col] = df[alias]
+                        break
+                    # Case-insensitive fallback
+                    for actual_col in df.columns:
+                        if actual_col.lower() == alias.lower():
+                            mapped_df[target_col] = df[actual_col]
+                            break
+                    if target_col in mapped_df.columns:
+                        break
 
-            def clean_numeric(value):
-                """Clean numeric string (strip currency, %, commas)."""
-                if isinstance(value, (int, float)):
-                    return float(value)
-                if pd.isna(value) or value is None:
-                    return 0.0
-                
-                s_val = str(value).strip()
-                # Remove common currency symbols and commas
-                s_val = s_val.replace('$', '').replace('£', '').replace('€', '').replace('₹', '').replace(',', '')
-                # Handle percentage
-                if '%' in s_val:
-                    try:
-                        return float(s_val.replace('%', '')) / 100.0 if '.' not in s_val else float(s_val.replace('%', '')) / 100.0 
-                        # Actually often 50% is 50 in some exports or 0.5 in others. 
-                        # Let's assume standard 12.5% -> 0.125 convention if < 1? No, 12.5 -> 12.5 usually means 12.5
-                        # Let's just strip % for now and treat as raw number if column is metric like CTR.
-                        # But for Spend, % shouldn't exist.
-                        # For CTR: 0.5% -> 0.005? Or 0.5?
-                        # Let's just strip symbols for now.
-                        return float(s_val.replace('%', ''))
-                    except:
-                        pass
-                
-                try:
-                    return float(s_val)
-                except:
-                    return 0.0
+            # Fill missing required columns with defaults
+            for col in ['spend', 'impressions', 'clicks', 'conversions', 'ctr', 'cpc', 'cpa', 'roas']:
+                if col not in mapped_df.columns:
+                    mapped_df[col] = 0.0
+            
+            for col in ['campaign_name', 'platform', 'channel']:
+                if col not in mapped_df.columns:
+                    mapped_df[col] = 'Unknown'
 
+            # 4. VECTORIZED Numeric Cleaning (10-100x faster than row-by-row)
+            def vectorize_clean_numeric(series):
+                """Clean numeric column using vectorized operations."""
+                if series.dtype == object:
+                    # Remove currency symbols, commas, and % in one pass
+                    series = series.astype(str).str.replace(r'[$,£€₹%]', '', regex=True)
+                return pd.to_numeric(series, errors='coerce').fillna(0.0)
+
+            for col in ['spend', 'impressions', 'clicks', 'conversions', 'ctr', 'cpc', 'roas']:
+                if col in mapped_df.columns:
+                    mapped_df[col] = vectorize_clean_numeric(mapped_df[col])
+            
+            # Ensure integer types for count columns
+            for col in ['impressions', 'clicks', 'conversions']:
+                mapped_df[col] = mapped_df[col].astype(int)
+
+            # 5. VECTORIZED Date Parsing
+            if 'date' in mapped_df.columns:
+                mapped_df['date'] = pd.to_datetime(mapped_df['date'], errors='coerce')
+            else:
+                mapped_df['date'] = pd.NaT
+
+            # 6. VECTORIZED Metric Calculations
+            # Calculate CTR where missing/zero
+            mask_ctr = (mapped_df['ctr'] == 0) & (mapped_df['impressions'] > 0)
+            mapped_df.loc[mask_ctr, 'ctr'] = (mapped_df.loc[mask_ctr, 'clicks'] / mapped_df.loc[mask_ctr, 'impressions']) * 100
+
+            # Calculate CPC where missing/zero
+            mask_cpc = (mapped_df['cpc'] == 0) & (mapped_df['clicks'] > 0)
+            mapped_df.loc[mask_cpc, 'cpc'] = mapped_df.loc[mask_cpc, 'spend'] / mapped_df.loc[mask_cpc, 'clicks']
+
+            # Calculate CPA
+            if 'cpa' not in mapped_df.columns:
+                mapped_df['cpa'] = 0.0
+            mask_cpa = (mapped_df['conversions'] > 0)
+            mapped_df.loc[mask_cpa, 'cpa'] = mapped_df.loc[mask_cpa, 'spend'] / mapped_df.loc[mask_cpa, 'conversions']
+
+            # 7. Generate campaign IDs
+            mapped_df['campaign_id'] = [str(uuid.uuid4()) for _ in range(len(mapped_df))]
+            
+            # 8. Extract metadata columns (funnel_stage, objective, etc.)
+            # These are less critical for performance, so we can be flexible
+            def safe_get_col(df_orig, col_names, default='Unknown'):
+                """Get first matching column from list of names."""
+                for col in col_names:
+                    if col in df_orig.columns:
+                        return df_orig[col].fillna(default).astype(str)
+                return pd.Series([default] * len(df_orig), index=df_orig.index)
+
+            mapped_df['funnel_stage'] = safe_get_col(df, ['Funnel_Stage', 'Funnel', 'Stage'])
+            mapped_df['objective'] = safe_get_col(df, ['Objective', 'Campaign_Objective'])
+            mapped_df['audience'] = safe_get_col(df, ['Audience']) if 'Audience' in df.columns else None
+            mapped_df['creative_type'] = safe_get_col(df, ['Creative_Type', 'Creative']) if any(c in df.columns for c in ['Creative_Type', 'Creative']) else None
+            mapped_df['placement'] = safe_get_col(df, ['Placement']) if 'Placement' in df.columns else None
+
+            # 9. Convert to list of dicts for bulk insert
+            # Store original data for additional_data field
+            original_data_dicts = df.replace({pd.NA: None, pd.NaT: None}).to_dict(orient='records')
+            
             campaigns_data = []
-            skipped_rows = []
-            
-            for index, row in df.iterrows():
-                try:
-                    # Convert row to dict and handle Timestamp serialization
-                    row_dict = {}
-                    for key, value in row.items():
-                        if pd.isna(value):
-                            row_dict[key] = None
-                        elif isinstance(value, pd.Timestamp):
-                            row_dict[key] = value.isoformat()
-                        elif isinstance(value, (int, float, str, bool)):
-                            row_dict[key] = value
-                        else:
-                            row_dict[key] = str(value)
-                    
-                    # Robust Date Parsing
-                    date_val = None
-                    raw_date = row.get('Date')
-                    if pd.notna(raw_date):
-                        try:
-                            date_val = pd.to_datetime(raw_date)
-                        except:
-                            # Try manual formats if auto fails
-                            for fmt in ['%Y-%m-%d', '%d/%m/%Y', '%m/%d/%Y', '%Y.%m.%d', '%d-%m-%Y']:
-                                try:
-                                    date_val = datetime.strptime(str(raw_date), fmt)
-                                    break
-                                except:
-                                    pass
-                    
-                    # Core Data Extraction with Cleaning
-                    spend_val = clean_numeric(get_val(row, column_aliases['Spend'], 0))
-                    imps_val = int(clean_numeric(get_val(row, column_aliases['Impressions'], 0)))
-                    clicks_val = int(clean_numeric(get_val(row, column_aliases['Clicks'], 0)))
-                    conv_val = int(clean_numeric(get_val(row, column_aliases['Conversions'], 0)))
-                    
-                    # Recalculate derived metrics for consistency if missing or 0
-                    # CTR
-                    ctr_val = clean_numeric(get_val(row, column_aliases['CTR'], 0))
-                    if ctr_val == 0 and imps_val > 0:
-                        ctr_val = (clicks_val / imps_val) * 100
-                        
-                    # CPC
-                    cpc_val = clean_numeric(get_val(row, column_aliases['CPC'], 0))
-                    if cpc_val == 0 and clicks_val > 0:
-                        cpc_val = spend_val / clicks_val
-                        
-                    # ROAS
-                    roas_val = clean_numeric(get_val(row, column_aliases['ROAS'], 0))
-                    
-                    # CPA - Calculate if missing
-                    cpa_val = clean_numeric(get_val(row, list(['CPA', 'Cost Per Acquisition', 'Cost Per Conversion']), 0))
-                    if cpa_val == 0 and conv_val > 0:
-                        cpa_val = spend_val / conv_val
-
-                    campaign_data = {
-                        'campaign_id': str(row.get('Campaign_ID', uuid.uuid4())),
-                        'campaign_name': str(get_val(row, column_aliases['Campaign_Name'], 'Unknown')),
-                        'platform': str(get_val(row, column_aliases['Platform'], 'Unknown')),
-                        'channel': str(get_val(row, column_aliases['Channel'], 'Unknown')),
-                        'spend': spend_val,
-                        'impressions': imps_val,
-                        'clicks': clicks_val,
-                        'conversions': conv_val,
-                        'ctr': ctr_val,
-                        'cpc': cpc_val,
-                        'cpa': cpa_val,
-                        'roas': roas_val,
-                        'date': date_val,
-                        'funnel_stage': str(row.get('Funnel_Stage', row.get('Funnel', row.get('Stage')))),
-                        'objective': str(row.get('Objective', row.get('Campaign_Objective', 'Unknown'))),
-                        'audience': str(row.get('Audience')) if 'Audience' in row else None,
-                        'creative_type': str(row.get('Creative_Type', row.get('Creative'))) if 'Creative_Type' in row or 'Creative' in row else None,
-                        'placement': str(row.get('Placement')) if 'Placement' in row else None,
-                        'additional_data': row_dict  # Use serializable dict
+            for i, row in mapped_df.iterrows():
+                campaign_entry = {
+                    'campaign_id': row['campaign_id'],
+                    'campaign_name': str(row['campaign_name']),
+                    'platform': str(row['platform']),
+                    'channel': str(row['channel']),
+                    'spend': float(row['spend']),
+                    'impressions': int(row['impressions']),
+                    'clicks': int(row['clicks']),
+                    'conversions': int(row['conversions']),
+                    'ctr': float(row['ctr']),
+                    'cpc': float(row['cpc']),
+                    'cpa': float(row['cpa']),
+                    'roas': float(row['roas']),
+                    'date': row['date'].to_pydatetime() if pd.notna(row['date']) else None,
+                    'funnel_stage': str(row['funnel_stage']),
+                    # Store objective, audience, creative_type, placement in additional_data
+                    # to handle cases where these columns may not exist in older schemas
+                    'additional_data': {
+                        **original_data_dicts[i],
+                        'objective': str(row['objective']),
+                        'audience': str(row['audience']) if pd.notna(row.get('audience')) else None,
+                        'creative_type': str(row['creative_type']) if pd.notna(row.get('creative_type')) else None,
+                        'placement': str(row['placement']) if pd.notna(row.get('placement')) else None,
                     }
-                    campaigns_data.append(campaign_data)
-                    
-                except Exception as row_error:
-                    logger.warning(f"Skipping row {index}: {row_error}")
-                    skipped_rows.append({"index": index, "error": str(row_error)})
-            
+                }
+                
+                # Try to add optional fields if they exist in the model
+                # This allows backward compatibility with older database schemas
+                try:
+                    campaign_entry['objective'] = str(row['objective'])
+                    campaign_entry['audience'] = str(row['audience']) if pd.notna(row.get('audience')) else None
+                    campaign_entry['creative_type'] = str(row['creative_type']) if pd.notna(row.get('creative_type')) else None
+                    campaign_entry['placement'] = str(row['placement']) if pd.notna(row.get('placement')) else None
+                except:
+                    # Fields will be in additional_data instead
+                    pass
+                
+                campaigns_data.append(campaign_entry)
+
             if not campaigns_data:
                 return {
                     'success': False,
                     'imported_count': 0,
-                    'message': 'No valid campaigns found in file.',
-                    'skipped': len(skipped_rows)
+                    'message': 'No valid data to import.'
                 }
 
-            # Bulk insert
-            try:
-                campaigns = self.campaign_repo.create_bulk(campaigns_data)
-                self.campaign_repo.commit()
-            except Exception as e:
-                # Fallback: Insert one by one if bulk fails? Or just fail?
-                # For robust module, maybe try one by one? 
-                # Let's stick to fail but formatted response for now to keep it simple.
-                raise e
-            
-            logger.info(f"Imported {len(campaigns)} campaigns")
-            
-            # Calculate summary stats from Parsed Data (not raw DF, to use mapped columns)
-            # Create a DF from the parsed data to easily sum
-            parsed_df = pd.DataFrame(campaigns_data)
-            
-            summary = {
-                "total_spend": float(parsed_df['spend'].sum()) if not parsed_df.empty else 0,
-                "total_clicks": int(parsed_df['clicks'].sum()) if not parsed_df.empty else 0,
-                "total_impressions": int(parsed_df['impressions'].sum()) if not parsed_df.empty else 0,
-                "total_conversions": int(parsed_df['conversions'].sum()) if not parsed_df.empty else 0,
-            }
-            # Calculate CTR (weighted average)
-            summary["avg_ctr"] = (summary["total_clicks"] / summary["total_impressions"] * 100) if summary["total_impressions"] > 0 else 0
-            # Calculate overall CPA
-            summary["avg_cpa"] = (summary["total_spend"] / summary["total_conversions"]) if summary["total_conversions"] > 0 else 0
-            # Calculate conversion rate
-            summary["conversion_rate"] = (summary["total_conversions"] / summary["total_clicks"] * 100) if summary["total_clicks"] > 0 else 0
-            
-            # Generate Schema Info
-            schema_info = []
-            for col in df.columns:
-                schema_info.append({
-                    "column": col,
-                    "dtype": str(df[col].dtype),
-                    "null_count": int(df[col].isnull().sum())
-                })
+            # 10. Bulk Insert
+            campaigns = self.campaign_repo.create_bulk(campaigns_data)
+            self.campaign_repo.commit()
+            logger.info(f"✅ Imported {len(campaigns)} campaigns using vectorized processing")
 
-            # Generate Preview (first 5 rows)
-            pass # Preview generation kept same
-            preview = df.head(5).where(pd.notnull(df), None).to_dict(orient='records')
+            # 11. Summary Stats (Already Vectorized via Pandas)
+            summary = {
+                "total_spend": float(mapped_df['spend'].sum()),
+                "total_clicks": int(mapped_df['clicks'].sum()),
+                "total_impressions": int(mapped_df['impressions'].sum()),
+                "total_conversions": int(mapped_df['conversions'].sum()),
+            }
+            summary["avg_ctr"] = (summary["total_clicks"] / summary["total_impressions"] * 100) if summary["total_impressions"] > 0 else 0
+            summary["avg_cpa"] = (summary["total_spend"] / summary["total_conversions"]) if summary["total_conversions"] > 0 else 0
+            summary["conversion_rate"] = (summary["total_conversions"] / summary["total_clicks"] * 100) if summary["total_clicks"] > 0 else 0
 
             return {
                 'success': True,
-                'imported_count': len(campaigns),
-                'message': f'Successfully imported {len(campaigns)} campaigns' + (f". Skipped {len(skipped_rows)} rows." if skipped_rows else ""),
+                'imported_count': len(campaigns_data),
+                'message': f'Successfully imported {len(campaigns_data)} campaigns',
                 'summary': summary,
-                'schema': schema_info,
-                'preview': preview,
-                'skipped_rows': skipped_rows[:10] # Return first 10 skipped errors
+                'schema': [{"column": col, "dtype": str(df[col].dtype), "null_count": int(df[col].isnull().sum())} for col in df.columns],
+                'preview': df.head(5).where(pd.notnull(df), None).to_dict(orient='records')
             }
-            
+
         except Exception as e:
             self.campaign_repo.rollback()
             logger.error(f"Failed to import campaigns: {e}")
-            return {
-                'success': False,
-                'imported_count': 0,
-                'message': f'Import failed: {str(e)}'
-            }
+            return {'success': False, 'imported_count': 0, 'message': f'Import failed: {str(e)}'}
     
     def get_campaigns(
         self,

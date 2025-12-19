@@ -10,6 +10,8 @@ email-validator>=2.0.0  # Required by pydantic for email validation
 python-jose[cryptography]>=3.5.0  # JWT authentication
 slowapi>=0.1.9                     # Rate limiting
 passlib[bcrypt]>=1.7.4             # Password hashing
+pyotp>=2.9.0                       # MFA/TOTP implementation
+hvac>=2.1.0                        # HashiCorp Vault client
 
 # MCP (Model Context Protocol)
 mcp>=1.22.0
