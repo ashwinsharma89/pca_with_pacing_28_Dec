@@ -150,23 +150,22 @@ ORDER BY avg_roas DESC
     ),
     
     "monthly_trend": QueryTemplate(
-        name="Monthly Performance Trend",
-        patterns=["monthly trend", "month over month", "mom", "trend", "over time", "time series"],
+        name="Monthly Trend Analysis",
+        patterns=["monthly", "trend", "month", "over time", "by month"],
         sql="""
-SELECT
-    DATE_TRUNC('month', date) AS month,
-    SUM(spend) AS total_spend,
-    SUM(impressions) AS total_impressions,
-    SUM(clicks) AS total_clicks,
-    SUM(conversions) AS total_conversions,
-    ROUND((SUM(clicks) / NULLIF(SUM(impressions), 0)) * 100, 2) AS ctr,
-    AVG(roas) AS avg_roas
+SELECT 
+    DATE_TRUNC('month', CAST(date AS TIMESTAMP)) AS month,
+    SUM(spend) as total_spend,
+    SUM(conversions) as total_conversions,
+    SUM(clicks) as total_clicks,
+    SUM(impressions) as total_impressions
 FROM all_campaigns
-GROUP BY month
+WHERE date IS NOT NULL
+GROUP BY DATE_TRUNC('month', CAST(date AS TIMESTAMP))
 ORDER BY month DESC
 LIMIT 12
         """,
-        description="Monthly performance trends for the last 12 months"
+        description="Analyze campaign performance trends by month"
     ),
     
     "high_spend_low_conversion": QueryTemplate(

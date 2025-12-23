@@ -45,7 +45,12 @@ export function AppSidebar({ className }: SidebarProps) {
         {
             title: "Visualizations",
             href: "/visualizations",
-            icon: BarChart,
+            icon: BarChart3,
+        },
+        {
+            title: "Ads Overview",
+            href: "/visualizations-2",
+            icon: BarChart3,
         },
         {
             title: "Analysis",

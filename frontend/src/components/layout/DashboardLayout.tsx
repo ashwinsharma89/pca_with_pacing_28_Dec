@@ -20,7 +20,11 @@ import {
     FileText,
     Sparkles,
     Scale,
-    TrendingUp
+    TrendingUp,
+    Zap,
+    AlertTriangle,
+    Brain,
+    Palette
 } from 'lucide-react';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -50,8 +54,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         { href: '/upload', label: 'Upload Data', icon: Upload },
         { href: '/analysis', label: 'Analysis', icon: BarChart3 },
         { href: '/visualizations', label: 'Visualizations', icon: BarChart },
+        { href: '/visualizations-2', label: 'Executive Overview', icon: Palette },
         { href: '/in-depth-analysis', label: 'Analytics Studio', icon: Activity },
         { href: '/dashboard-builder', label: 'Dashboard Builder', icon: Layout },
+        { href: '/intelligence-studio', label: 'Intelligence Studio', icon: Brain },
+        { href: '/anomaly-detective', label: 'Anomaly Detective', icon: AlertTriangle },
+        { href: '/real-time-command', label: 'Real-Time Command', icon: Zap },
         { href: '/reports', label: 'Reports & Export', icon: FileText },
         { href: '/comparison', label: 'Comparison', icon: Scale },
         { href: '/ai-insights', label: 'AI Insights', icon: Sparkles },

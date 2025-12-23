@@ -43,21 +43,21 @@ def get_rate_limit_key(request: Request) -> str:
     return get_remote_address(request)
 
 
-def get_user_rate_limit(request: Request) -> str:
-    """
-    Get rate limit for user based on tier.
+from typing import Optional
+
+def get_user_rate_limit(request: Optional[Request] = None) -> str:
+    """Get rate limit string for the current user."""
+    if not RATE_LIMIT_ENABLED:
+        return "10000/minute"
     
-    Args:
-        request: FastAPI request
+    if request is None:
+        return RATE_LIMIT_DEFAULT
         
-    Returns:
-        Rate limit string (e.g., "10/minute")
-    """
     user = getattr(request.state, "user", None)
-    
     if user:
-        tier = user.get("tier", "free")
-        return RATE_LIMITS.get(tier, RATE_LIMIT_DEFAULT)
+        # User might be a dict or a model (if using real DB in some tests)
+        tier = user.get("tier") if isinstance(user, dict) else getattr(user, "tier", "free")
+        return RATE_LIMITS.get(tier or "free", RATE_LIMIT_DEFAULT)
     
     return RATE_LIMIT_DEFAULT
 
@@ -65,13 +65,12 @@ def get_user_rate_limit(request: Request) -> str:
 def setup_rate_limiter() -> Limiter:
     """
     Setup and configure rate limiter.
-    
-    Returns:
-        Configured Limiter instance
     """
+    # We use a custom key function that includes the user ID
+    # And we use get_user_rate_limit as the default limit provider
     limiter = Limiter(
         key_func=get_rate_limit_key,
-        default_limits=[RATE_LIMIT_DEFAULT] if RATE_LIMIT_ENABLED else []
+        default_limits=[get_user_rate_limit] if RATE_LIMIT_ENABLED else []
     )
     
     return limiter

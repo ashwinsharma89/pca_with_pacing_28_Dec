@@ -47,26 +47,102 @@ secrets = get_secrets_manager()
 # Initialize Audit Logger
 audit_logger = AuditLogger()
 
+# Tags metadata for Swagger UI
+tags_metadata = [
+    {
+        "name": "auth",
+        "description": "Authentication and MFA management.",
+    },
+    {
+        "name": "campaigns",
+        "description": "Campaign data management, analysis, and visualization.",
+    },
+    {
+        "name": "users",
+        "description": "User profile and organization management.",
+    },
+    {
+        "name": "Error Codes",
+        "description": "Legend of all structured error codes returned by the API.",
+    }
+]
+
 # Create FastAPI app
 app = FastAPI(
-    title="PCA Agent API v3.0",
-    description="Post Campaign Analysis - Production Ready with Structured Error Handling",
+    title="PCA Agent Enterprise API",
+    description="""
+## Post Campaign Analysis - Enterprise Edition
+Welcome to the PCA Agent API. This API provides robust endpoints for marketing data analysis, 
+automated insights, and multi-factor authentication.
+
+### Key Features:
+* **Tier-Based Rate Limiting**: Performance scales with your organization's subscription.
+* **Audit Logging**: All sensitive actions are logged for compliance.
+* **Structured Errors**: Consistent error responses for easier debugging.
+* **MFA Support**: Enhanced security for user accounts.
+
+[Download Example Client (Python)](/api/v1/docs/example-client)
+""",
     version="3.0.0",
+    openapi_tags=tags_metadata,
     docs_url="/api/docs",
     redoc_url="/api/redoc"
 )
 
+# Custom OpenAPI to add Error Codes section
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+        tags=tags_metadata
+    )
+    
+    # Custom attributes can be added here
+    # Add Error Codes to the description as a table
+    from .exceptions import ErrorCode
+    error_codes_table = """
+### API Error Codes Reference
+
+| Code | Category | Description |
+|------|----------|-------------|
+"""
+    for attr in dir(ErrorCode):
+        if not attr.startswith("__") and isinstance(getattr(ErrorCode, attr), str):
+            code = getattr(ErrorCode, attr)
+            category = attr.split("_")[0]
+            description = attr.replace("_", " ").title()
+            error_codes_table += f"| `{code}` | {category} | {description} |\n"
+            
+    openapi_schema["info"]["description"] += error_codes_table
+    
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+from fastapi.openapi.utils import get_openapi
+app.openapi = custom_openapi
+
 # Setup exception handlers (MUST be before other middleware)
 setup_exception_handlers(app)
+
+# User state population (lightweight auth for rate limiting/logging)
+from .middleware.auth import populate_user_state_middleware
+app.middleware("http")(populate_user_state_middleware)
+
+# Add rate limiter to app state and middleware
+from slowapi.middleware import SlowAPIMiddleware
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
 
 # Add Security Headers middleware
 app.add_middleware(SecurityHeadersMiddleware)
 
 # Setup OpenTelemetry (if enabled)
 setup_opentelemetry(app)
-
-# Add rate limiter to app state
-app.state.limiter = limiter
 
 # Custom rate limit exception handler
 @app.exception_handler(RateLimitExceeded)
@@ -139,7 +215,7 @@ async def audit_middleware(request: Request, call_next):
         # Get user from state (if authenticated)
         user = "anonymous"
         if hasattr(request.state, "user") and request.state.user:
-            user = request.state.user.id
+            user = request.state.user.get("username", "anonymous")
         
         severity = AuditSeverity.INFO
         if response.status_code >= 500:

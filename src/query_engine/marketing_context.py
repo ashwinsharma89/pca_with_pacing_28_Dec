@@ -55,16 +55,22 @@ QUERY_CONTEXT = """
 - Always include LIMIT for top/bottom queries (default: 10)
 
 ## Funnel Analysis:
+- Table name is 'all_campaigns'
+- Key columns: campaign_name, platform, channel, spend, impressions, clicks, conversions, ctr, cpc, cpa, roas, date, funnel_stage, objective, device_type
 - Group by funnel_stage column
 - Order: Awareness → Consideration → Conversion
 - Calculate drop-off rates between stages
 
 ## Time-based queries:
-- Use DATE_TRUNC('month', date) for monthly trends
+- Use DATE_TRUNC('month', CAST(date AS TIMESTAMP)) for monthly trends
 - Use DATE_TRUNC('week', date) for weekly trends
 - Always ORDER BY date/month DESC for trends
 
 ## Filters:
+- Use NULLIF() to avoid division by zero
+- Common metrics: CTR = (clicks/impressions)*100, CPC = spend/clicks, CPA = spend/conversions
+- Funnel stages: 'Awareness', 'Consideration', 'Conversion'
+- Device types are in additional_data JSON field, extract with: json_extract(additional_data, '$.device_type')
 - Exclude NULL or 'Unknown' values in funnel_stage for funnel analysis
 - For "wasting money" queries: spend > 5000 AND conversions < 100
 - For platform/channel comparison: GROUP BY platform or channel

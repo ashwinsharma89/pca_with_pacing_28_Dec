@@ -109,13 +109,6 @@ class NaturalLanguageQueryEngine:
             df: DataFrame with campaign data
             table_name: Name for the table
         """
-        """
-        Load data into DuckDB.
-        
-        Args:
-            df: DataFrame with campaign data
-            table_name: Name for the table
-        """
         # Convert Date-related columns to datetime if they exist
         df_copy = df.copy()
         
@@ -162,6 +155,46 @@ class NaturalLanguageQueryEngine:
         }
         
         logger.info(f"Loaded {len(df_copy)} rows into table '{table_name}'")
+
+    def load_parquet_data(self, parquet_path: str, table_name: str = "campaigns"):
+        """
+        Load data from Parquet file into DuckDB.
+        
+        Args:
+            parquet_path: Path to the Parquet file
+            table_name: Name for the table
+        """
+        if not os.path.exists(parquet_path):
+            raise FileNotFoundError(f"Parquet file not found at {parquet_path}")
+
+        self.conn = duckdb.connect(':memory:')
+        
+        # Register the parquet file as a view
+        self.conn.execute(f"CREATE VIEW {table_name} AS SELECT * FROM read_parquet('{parquet_path}')")
+        
+        # Initialize optimizer and multi-table manager
+        self.optimizer = QueryOptimizer(self.conn)
+        self.multi_table_manager = MultiTableManager(self.conn)
+        
+        # Get schema info from a sample
+        sample_df = self.conn.execute(f"SELECT * FROM {table_name} LIMIT 5").df()
+        
+        # Store schema information
+        self.schema_info = {
+            "table_name": table_name,
+            "columns": sample_df.columns.tolist(),
+            "dtypes": sample_df.dtypes.to_dict(),
+            "sample_data": sample_df.head(3).to_dict('records')
+        }
+        
+        # Also register with multi-table manager for complex queries
+        self.multi_table_manager.register_table(
+            name=table_name,
+            df=sample_df, # Just use sample for schema detection in manager
+            description=f"Persistent {table_name} table from Parquet"
+        )
+        
+        logger.info(f"Registered Parquet file {parquet_path} as table '{table_name}'")
     
     def load_additional_table(
         self,

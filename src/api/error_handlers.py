@@ -98,12 +98,22 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
     """Handle Pydantic validation errors"""
     logger.warning(f"Validation error: {exc.errors()}")
     
+    # Ensure errors are JSON serializable
+    def clean_errors(obj):
+        if isinstance(obj, dict):
+            return {k: clean_errors(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [clean_errors(item) for item in obj]
+        elif isinstance(obj, bytes):
+            return obj.decode('utf-8', errors='replace')
+        return obj
+
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={
             "error": "Validation failed",
             "code": "VALIDATION_ERROR",
-            "details": exc.errors(),
+            "details": clean_errors(exc.errors()),
             "path": str(request.url.path)
         }
     )

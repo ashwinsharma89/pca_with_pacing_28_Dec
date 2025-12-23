@@ -13,7 +13,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Constants
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+import os
+MAX_UPLOAD_SIZE_MB = int(os.getenv("MAX_UPLOAD_SIZE_MB", "200"))
+MAX_FILE_SIZE = MAX_UPLOAD_SIZE_MB * 1024 * 1024
 ALLOWED_FILE_EXTENSIONS = {'.csv', '.xlsx', '.xls'}
 ALLOWED_PLATFORMS = {'facebook', 'google', 'instagram', 'linkedin', 'twitter', 'tiktok', 'meta', 'youtube'}
 MAX_BUDGET = 10_000_000  # $10M

@@ -13,7 +13,7 @@ from src.api.middleware.auth import (
     create_user,
     get_user as get_user_compat
 )
-from src.api.middleware.rate_limit import limiter
+from src.api.middleware.rate_limit import limiter, get_user_rate_limit
 from src.enterprise.mfa import get_mfa_manager
 from src.database.connection import get_db_manager
 from src.services.user_service import UserService
@@ -231,7 +231,6 @@ async def register(request: Request, reg_req: RegisterRequest):
 
 
 @router.get("/me", response_model=Dict[str, Any])
-@limiter.limit("60/minute")
 async def get_me(request: Request, current_user: Dict[str, Any] = Depends(get_current_user)):
     """
     Get current user info.

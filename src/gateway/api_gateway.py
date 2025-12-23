@@ -30,6 +30,7 @@ class APIGateway:
         @self.app.middleware("http")
         async def gateway_middleware(request: Request, call_next):
             start_time = time.time()
+            logger.info(f"Incoming {request.method} {request.url.path} from {request.client.host if request.client else 'unknown'}")
             
             # Skip gateway for public endpoints
             if any(request.url.path.startswith(path) for path in self.public_paths):

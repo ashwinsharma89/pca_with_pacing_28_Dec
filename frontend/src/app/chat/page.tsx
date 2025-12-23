@@ -6,12 +6,21 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Send, Database, User, Bot, Table as TableIcon, Brain, Sparkles, BookOpen, BarChart3, PieChartIcon, TrendingUp, ChevronDown, ChevronRight, Download } from "lucide-react";
+import { Loader2, Send, Database, User, Bot, Table as TableIcon, Brain, Sparkles, BookOpen, BarChart3, PieChartIcon, TrendingUp, ChevronDown, ChevronRight, Download, Mic, MicOff, Globe } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 
 const CHART_COLORS = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6'];
+
+// Voice input language configurations
+const SUPPORTED_LANGUAGES = [
+    { code: 'en-US', label: 'English (US)', flag: '🇺🇸' },
+    { code: 'en-GB', label: 'English (UK)', flag: '🇬🇧' },
+    { code: 'en-IN', label: 'English (India)', flag: '🇮🇳' },
+    { code: 'en-AU', label: 'English (Australia)', flag: '🇦🇺' },
+    { code: 'hi-IN', label: 'हिंदी (Hindi)', flag: '🇮🇳' }
+];
 
 interface ChartData {
     type: 'bar' | 'pie' | 'line';
@@ -47,6 +56,14 @@ export default function GlobalChatPage() {
     const scrollRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
+    // Voice input state
+    const [isListening, setIsListening] = useState(false);
+    const [transcript, setTranscript] = useState("");
+    const [selectedLanguage, setSelectedLanguage] = useState('en-IN');
+    const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+    const [voiceSupported, setVoiceSupported] = useState(true);
+    const recognitionRef = useRef<any>(null);
+
     // Fetch suggested questions on mount
     useEffect(() => {
         const fetchSuggestions = async () => {
@@ -74,10 +91,135 @@ export default function GlobalChatPage() {
             if (e.key === 'Escape' && document.activeElement === inputRef.current) {
                 setInput("");
             }
+            // Ctrl/Cmd + M to toggle microphone
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
+                e.preventDefault();
+                toggleVoiceInput();
+            }
+            // Ctrl/Cmd + L to toggle language menu
+            if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+                e.preventDefault();
+                setShowLanguageMenu(prev => !prev);
+            }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
+
+    // Initialize speech recognition
+    useEffect(() => {
+        // Check if browser supports speech recognition
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            setVoiceSupported(false);
+            console.warn('Speech recognition not supported in this browser');
+            return;
+        }
+
+        // Initialize recognition
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = selectedLanguage;
+
+        recognition.onstart = () => {
+            setIsListening(true);
+            setTranscript("");
+        };
+
+        recognition.onresult = (event: any) => {
+            let interimTranscript = '';
+            let finalTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript + ' ';
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+
+            // Update transcript display
+            setTranscript(interimTranscript || finalTranscript);
+
+            // Auto-append final transcript to input
+            if (finalTranscript) {
+                setInput(prev => (prev + ' ' + finalTranscript).trim());
+                setTranscript("");
+            }
+        };
+
+        recognition.onerror = (event: any) => {
+            console.error('Speech recognition error:', event.error);
+            if (event.error === 'no-speech') {
+                // Silently handle no speech detected
+                return;
+            }
+            setIsListening(false);
+        };
+
+        recognition.onend = () => {
+            setIsListening(false);
+            setTranscript("");
+        };
+
+        recognitionRef.current = recognition;
+
+        return () => {
+            if (recognitionRef.current) {
+                recognitionRef.current.stop();
+            }
+        };
+    }, [selectedLanguage]);
+
+    // Voice input toggle function
+    const toggleVoiceInput = () => {
+        if (!voiceSupported) {
+            alert('Voice input is not supported in your browser. Please use Chrome, Edge, or Safari.');
+            return;
+        }
+
+        if (isListening) {
+            recognitionRef.current?.stop();
+        } else {
+            try {
+                recognitionRef.current?.start();
+            } catch (error) {
+                console.error('Failed to start recognition:', error);
+            }
+        }
+    };
+
+    // Language change handler
+    const handleLanguageChange = (langCode: string) => {
+        setSelectedLanguage(langCode);
+        setShowLanguageMenu(false);
+
+        // Restart recognition with new language if currently listening
+        if (isListening && recognitionRef.current) {
+            recognitionRef.current.stop();
+            setTimeout(() => {
+                recognitionRef.current.lang = langCode;
+                recognitionRef.current.start();
+            }, 100);
+        } else if (recognitionRef.current) {
+            recognitionRef.current.lang = langCode;
+        }
+
+        // Save preference to localStorage
+        localStorage.setItem('voiceLanguage', langCode);
+    };
+
+    // Load saved language preference
+    useEffect(() => {
+        const savedLang = localStorage.getItem('voiceLanguage');
+        if (savedLang && SUPPORTED_LANGUAGES.find(l => l.code === savedLang)) {
+            setSelectedLanguage(savedLang);
+        }
+    }, []);
+
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -271,21 +413,88 @@ export default function GlobalChatPage() {
                             e.preventDefault();
                             handleSend();
                         }}
-                        className="flex gap-2"
+                        className="space-y-2"
                     >
-                        <Input
-                            ref={inputRef}
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            placeholder={knowledgeMode
-                                ? "Ask about ROAS, benchmarks, best practices, pitfalls..."
-                                : "Ask about your campaigns data..."}
-                            disabled={loading}
-                            className="flex-1"
-                        />
-                        <Button type="submit" disabled={loading || !input.trim()}>
-                            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                        </Button>
+                        <div className="flex gap-2">
+                            <Input
+                                ref={inputRef}
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                placeholder={knowledgeMode
+                                    ? "Ask about ROAS, benchmarks, best practices, pitfalls..."
+                                    : "Ask about your campaigns data..."}
+                                disabled={loading}
+                                className="flex-1"
+                            />
+
+                            {/* Language Selector */}
+                            {voiceSupported && (
+                                <div className="relative">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+                                        title={`Current language: ${SUPPORTED_LANGUAGES.find(l => l.code === selectedLanguage)?.label}`}
+                                    >
+                                        <Globe className="h-4 w-4" />
+                                    </Button>
+
+                                    {showLanguageMenu && (
+                                        <div className="absolute bottom-full mb-2 right-0 bg-white dark:bg-slate-800 border rounded-lg shadow-lg p-2 min-w-[200px] z-50">
+                                            <div className="text-xs text-muted-foreground px-2 py-1 mb-1">Select Language</div>
+                                            {SUPPORTED_LANGUAGES.map((lang) => (
+                                                <button
+                                                    key={lang.code}
+                                                    type="button"
+                                                    onClick={() => handleLanguageChange(lang.code)}
+                                                    className={`w-full text-left px-3 py-2 rounded-md text-sm hover:bg-accent transition-colors ${selectedLanguage === lang.code ? 'bg-accent font-medium' : ''
+                                                        }`}
+                                                >
+                                                    <span className="mr-2">{lang.flag}</span>
+                                                    {lang.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Microphone Button */}
+                            {voiceSupported && (
+                                <Button
+                                    type="button"
+                                    variant={isListening ? "default" : "outline"}
+                                    size="icon"
+                                    onClick={toggleVoiceInput}
+                                    className={isListening ? "animate-pulse bg-red-500 hover:bg-red-600" : ""}
+                                    title={isListening ? "Stop recording (Ctrl+M)" : "Start voice input (Ctrl+M)"}
+                                >
+                                    {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                                </Button>
+                            )}
+
+                            <Button type="submit" disabled={loading || !input.trim()}>
+                                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                            </Button>
+                        </div>
+
+                        {/* Real-time Transcript Display */}
+                        {transcript && (
+                            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md">
+                                <Mic className="h-4 w-4 text-blue-600 animate-pulse" />
+                                <span className="text-sm text-blue-900 dark:text-blue-100 italic">
+                                    {transcript}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Voice Not Supported Message */}
+                        {!voiceSupported && (
+                            <div className="text-xs text-muted-foreground px-2">
+                                Voice input not supported in this browser. Use Chrome, Edge, or Safari for voice features.
+                            </div>
+                        )}
                     </form>
 
                     {/* Suggested Questions */}

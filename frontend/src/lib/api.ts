@@ -87,8 +87,55 @@ export const api = {
     async getCampaignVisualizations(campaignId: string): Promise<any> {
         return request<any>(`/campaigns/${campaignId}/visualizations`, 'GET');
     },
-    async getGlobalVisualizations(): Promise<any> {
-        return request<any>(`/campaigns/visualizations`, 'GET');
+    async getGlobalVisualizations(filters?: {
+        platforms?: string;
+        startDate?: string;
+        endDate?: string;
+        primaryMetric?: string;
+        secondaryMetric?: string;
+        funnelStages?: string;
+        channels?: string;
+        devices?: string;
+        placements?: string;
+        regions?: string;
+        adTypes?: string;
+    }): Promise<any> {
+        const params = new URLSearchParams();
+        if (filters?.platforms) {
+            params.append('platforms', filters.platforms);
+        }
+        if (filters?.startDate) {
+            params.append('start_date', filters.startDate);
+        }
+        if (filters?.endDate) {
+            params.append('end_date', filters.endDate);
+        }
+        if (filters?.primaryMetric) {
+            params.append('primary_metric', filters.primaryMetric);
+        }
+        if (filters?.secondaryMetric) {
+            params.append('secondary_metric', filters.secondaryMetric);
+        }
+        if (filters?.funnelStages) {
+            params.append('funnel_stages', filters.funnelStages);
+        }
+        if (filters?.channels) {
+            params.append('channels', filters.channels);
+        }
+        if (filters?.devices) {
+            params.append('devices', filters.devices);
+        }
+        if (filters?.placements) {
+            params.append('placements', filters.placements);
+        }
+        if (filters?.regions) {
+            params.append('regions', filters.regions);
+        }
+        if (filters?.adTypes) {
+            params.append('adTypes', filters.adTypes);
+        }
+        const queryString = params.toString();
+        return request<any>(`/campaigns/visualizations${queryString ? `?${queryString}` : ''}`, 'GET');
     },
     async chatGlobal(question: string, options?: { knowledge_mode?: boolean; use_rag_context?: boolean }): Promise<any> {
         return request<any>(`/campaigns/chat`, 'POST', {

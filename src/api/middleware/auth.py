@@ -9,7 +9,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
 
-from fastapi import HTTPException, Security, Depends, status
+from fastapi import HTTPException, Security, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 import bcrypt
@@ -61,58 +61,48 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_user(username: str, db=None) -> Optional[Dict[str, Any]]:
     """
-    Get user from database.
+    Get user from DuckDB.
     
     Args:
         username: Username
-        db: Database session (optional, for backward compatibility)
+        db: Database session (ignored, kept for compatibility)
         
     Returns:
         User dict or None
-        
-    Note:
-        This function is kept for backward compatibility.
-        For new code, use UserService from src/services/user_service.py
     """
-    if db is None:
-        # Fallback: Try to get database session
-        try:
-            from src.database.connection import get_db_manager
-            db_manager = get_db_manager()
-            db = db_manager.get_session_direct()
-        except Exception:
-            logger.warning("Could not get database session for user lookup")
-            return None
-    
     try:
-        from src.services.user_service import UserService
-        user_service = UserService(db)
-        user_model = user_service.get_user_by_username(username)
+        import duckdb
         
-        # If not found by username, try by email
-        if not user_model:
-            user_model = user_service.get_user_by_email(username)
+        logger.info(f"🔍 Looking up user in DuckDB: {username}")
         
-        if not user_model:
+        # Connect to DuckDB
+        conn = duckdb.connect('./data/campaigns.duckdb', read_only=True)
+        
+        # Query for user
+        result = conn.execute("""
+            SELECT username, email, hashed_password, role, tier
+            FROM users
+            WHERE username = ? OR email = ?
+        """, [username, username]).fetchone()
+        
+        conn.close()
+        
+        if not result:
+            logger.warning(f"❌ User not found in DuckDB: {username}")
             return None
         
-        # Convert to dict format for compatibility
+        logger.info(f"✅ User found in DuckDB: {username}, role={result[3]}")
+        
         return {
-            "username": user_model.username,
-            "email": user_model.email,
-            "hashed_password": user_model.hashed_password,
-            "role": user_model.role,
-            "tier": user_model.tier or "free"
+            "username": str(result[0]),
+            "email": str(result[1]),
+            "hashed_password": str(result[2]),
+            "role": str(result[3]),
+            "tier": str(result[4] or "free")
         }
     except Exception as e:
-        logger.error(f"Error getting user from database: {e}")
+        logger.error(f"Error getting user from DuckDB: {e}")
         return None
-    finally:
-        if db:
-            try:
-                db.close()
-            except:
-                pass
 
 
 def authenticate_user(username: str, password: str) -> Optional[Dict[str, Any]]:
@@ -165,6 +155,10 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     
+    # Ensure it's a string (python-jose can return bytes in some cases)
+    if isinstance(encoded_jwt, bytes):
+        encoded_jwt = encoded_jwt.decode('utf-8')
+        
     logger.info(f"Created access token for user: {data.get('sub')}")
     
     return encoded_jwt
@@ -255,6 +249,29 @@ async def get_current_active_admin(
         )
     
     return current_user
+
+
+async def populate_user_state_middleware(request: Request, call_next):
+    """Middleware to populate request.state.user from JWT token."""
+    auth_header = request.headers.get("Authorization")
+    request.state.user = None
+    
+    if auth_header and auth_header.startswith("Bearer "):
+        try:
+            token = auth_header.split(" ")[1]
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            username = payload.get("sub")
+            if username:
+                # Use a cached or lightweight lookup if possible, for now use get_user
+                user = get_user(username)
+                if user:
+                    request.state.user = user
+        except Exception as e:
+            # Don't fail the request here, let auth dependencies handle errors
+            logger.debug(f"Failed to populate user state: {e}")
+            
+    response = await call_next(request)
+    return response
 
 
 def create_user(username: str, email: str, password: str, role: str = "user", tier: str = "free", db=None) -> Dict[str, Any]:

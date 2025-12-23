@@ -1,80 +1,87 @@
-# Pre-commit hooks for code quality enforcement
-# Install: pip install pre-commit && pre-commit install
-
 repos:
-  # Code formatting with Black
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(.*\.md|.*\.txt)$
+      - id: end-of-file-fixer
+        exclude: ^(.*\.md|.*\.txt)$
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+
+  # Python code formatting with Black
   - repo: https://github.com/psf/black
-    rev: 24.4.2
+    rev: 23.12.1
     hooks:
       - id: black
         language_version: python3.11
-        args: ["--line-length=100"]
+        args: ['--line-length=120']
 
   # Import sorting with isort
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
     hooks:
       - id: isort
-        args: ["--profile=black", "--line-length=100"]
+        args: ['--profile', 'black', '--line-length', '120']
 
   # Linting with flake8
   - repo: https://github.com/pycqa/flake8
     rev: 7.0.0
     hooks:
       - id: flake8
-        args: ["--max-line-length=100", "--ignore=E501,W503"]
-        additional_dependencies:
-          - flake8-bugbear
-          - flake8-comprehensions
+        args: ['--max-line-length=120', '--extend-ignore=E203,W503']
+        exclude: ^(tests/|scripts/)
 
-  # Type checking with mypy
+  # Type checking with MyPy
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
+    rev: v1.8.0
     hooks:
       - id: mypy
-        args: ["--ignore-missing-imports", "--no-strict-optional"]
-        additional_dependencies:
-          - types-requests
-          - types-redis
+        additional_dependencies: [types-all]
+        args: ['--config-file=mypy.ini']
+        exclude: ^(tests/|scripts/|streamlit_)
+        pass_filenames: false
+        args: ['src/']
 
-  # Security scanning with Bandit
-  - repo: https://github.com/pycqa/bandit
-    rev: 1.7.8
+  # Security checks with bandit
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6
     hooks:
       - id: bandit
-        args: ["-c", "pyproject.toml", "-r", "src/"]
-        additional_dependencies: ["bandit[toml]"]
+        args: ['-c', 'pyproject.toml']
+        additional_dependencies: ['bandit[toml]']
+        exclude: ^(tests/|scripts/)
 
-  # General pre-commit hooks
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+  # Check for common security issues
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.3
     hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
-      - id: check-json
-      - id: check-added-large-files
-        args: ["--maxkb=1000"]
-      - id: check-merge-conflict
-      - id: detect-private-key
-      - id: check-case-conflict
+      - id: python-safety-dependencies-check
+        files: requirements.txt
 
-  # YAML linting
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.39.0
     hooks:
-      - id: yamllint
-        args: ["-d", "{extends: relaxed, rules: {line-length: {max: 150}}}"]
+      - id: markdownlint
+        args: ['--fix']
+        exclude: ^(node_modules/|\.next/)
 
-  # Dockerfile linting
-  - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
-    hooks:
-      - id: hadolint-docker
-        args: ["--ignore", "DL3008", "--ignore", "DL3013"]
+# Global settings
+default_language_version:
+  python: python3.11
 
-# CI configuration
+# CI settings
 ci:
-  autofix_commit_msg: "style: auto-fix by pre-commit hooks"
-  autoupdate_commit_msg: "chore: update pre-commit hooks"
-  skip: [mypy]  # Skip mypy in CI (run separately)
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit hooks
+  autofix_prs: true
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: [python-safety-dependencies-check]

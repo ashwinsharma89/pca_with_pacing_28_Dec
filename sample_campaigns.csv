@@ -1,0 +1,21 @@
+Campaign_ID,Campaign_Name,Platform,Spend,Impressions,Clicks,Conversions,CTR,CPC,CPA,ROAS,Date,Funnel_Stage,Objective,Device_Type
+camp_001,Summer Sale 2024,Google Ads,15000.00,500000,25000,1250,5.00,0.60,12.00,3.5,2024-09-15,Conversion,Sales,Mobile
+camp_002,Black Friday Promo,Meta Ads,12000.00,450000,22500,1350,5.00,0.53,8.89,4.2,2024-11-15,Conversion,Sales,Desktop
+camp_003,Holiday Campaign,LinkedIn Ads,8000.00,200000,10000,400,5.00,0.80,20.00,2.8,2024-12-15,Awareness,Brand,Mobile
+camp_004,New Year Launch,Google Ads,18000.00,600000,30000,1500,5.00,0.60,12.00,3.5,2024-10-16,Conversion,Sales,Desktop
+camp_005,Winter Collection,Meta Ads,10000.00,400000,20000,1200,5.00,0.50,8.33,4.5,2024-11-16,Consideration,Engagement,Mobile
+camp_006,Brand Awareness,TikTok Ads,6000.00,800000,40000,2000,5.00,0.15,3.00,6.0,2024-09-16,Awareness,Brand,Mobile
+camp_007,Product Launch,Google Ads,20000.00,700000,35000,1750,5.00,0.57,11.43,3.8,2024-10-17,Conversion,Sales,Tablet
+camp_008,Retargeting Campaign,Meta Ads,9000.00,350000,17500,1050,5.00,0.51,8.57,4.3,2024-11-17,Conversion,Sales,Desktop
+camp_009,Lead Generation,LinkedIn Ads,12000.00,300000,15000,600,5.00,0.80,20.00,2.9,2024-12-17,Consideration,Leads,Desktop
+camp_010,Flash Sale,Google Ads,16000.00,550000,27500,1375,5.00,0.58,11.64,3.6,2024-09-18,Conversion,Sales,Mobile
+camp_011,Video Campaign,YouTube Ads,14000.00,1000000,50000,2500,5.00,0.28,5.60,5.2,2024-10-18,Awareness,Brand,Mobile
+camp_012,Shopping Ads,Google Ads,22000.00,800000,40000,2000,5.00,0.55,11.00,3.7,2024-11-18,Conversion,Sales,Desktop
+camp_013,Instagram Stories,Meta Ads,11000.00,600000,30000,1800,5.00,0.37,6.11,5.1,2024-12-19,Consideration,Engagement,Mobile
+camp_014,Sponsored Content,LinkedIn Ads,9000.00,250000,12500,500,5.00,0.72,18.00,3.0,2024-09-19,Awareness,Brand,Desktop
+camp_015,Conversion Campaign,Google Ads,17000.00,650000,32500,1625,5.00,0.52,10.46,3.9,2024-10-19,Conversion,Sales,Tablet
+camp_016,Engagement Boost,TikTok Ads,7000.00,900000,45000,2250,5.00,0.16,3.11,6.2,2024-11-20,Consideration,Engagement,Mobile
+camp_017,Premium Targeting,Meta Ads,13000.00,500000,25000,1500,5.00,0.52,8.67,4.4,2024-12-20,Conversion,Sales,Desktop
+camp_018,B2B Campaign,LinkedIn Ads,10000.00,280000,14000,560,5.00,0.71,17.86,3.1,2024-09-20,Consideration,Leads,Desktop
+camp_019,Mobile App Install,Google Ads,19000.00,750000,37500,1875,5.00,0.51,10.13,4.0,2024-10-20,Conversion,Installs,Mobile
+camp_020,Influencer Collab,Meta Ads,15000.00,700000,35000,2100,5.00,0.43,7.14,4.8,2024-11-20,Awareness,Brand,Mobile

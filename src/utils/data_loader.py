@@ -22,9 +22,10 @@ class DataLoader:
     # Supported file extensions
     SUPPORTED_EXTENSIONS = ['.csv', '.xlsx', '.xls', '.json', '.parquet']
     
-    # Maximum file size (100MB)
-    MAX_FILE_SIZE = 100 * 1024 * 1024
-    
+    # Maximum file size (200MB)
+    import os
+    MAX_UPLOAD_SIZE_MB = int(os.getenv("MAX_UPLOAD_SIZE_MB", "200"))
+    MAX_FILE_SIZE = MAX_UPLOAD_SIZE_MB * 1024 * 1024
     # Minimum required rows
     MIN_ROWS = 1
     

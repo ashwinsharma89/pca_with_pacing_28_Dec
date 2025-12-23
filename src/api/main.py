@@ -16,6 +16,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from ..utils.logger import setup_logger
+logger = setup_logger(__name__)
+logger.info("=== SERVER STARTING ===")
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -29,14 +33,10 @@ from .v1 import router_v1
 from .exceptions import RateLimitExceededError
 from .error_handlers import setup_exception_handlers
 from .middleware.security_headers import SecurityHeadersMiddleware
-from ..utils.logger import setup_logger
 from ..database.connection import get_db_manager
 from ..utils.opentelemetry_config import instrument_app
 from src.gateway.api_gateway import APIGateway
 
-
-# Setup logging
-logger = setup_logger(__name__)
 
 # Initialize database
 db_manager = get_db_manager()
@@ -53,6 +53,7 @@ app = FastAPI(
 
 # Initialize API Gateway (security, rate limiting, etc.)
 try:
+    logger.info("Initializing API Gateway...")
     gateway = APIGateway(app)
     logger.info("✅ API Gateway initialized")
 except Exception as e:
@@ -211,7 +212,7 @@ async def detailed_health_check():
 # Startup event
 @app.on_event("startup")
 async def startup_event():
-    """Initialize application on startup."""
+    """Run startup tasks."""
     logger.info("=" * 60)
     logger.info("PCA Agent API v3.0 - Starting")
     logger.info("=" * 60)
@@ -225,8 +226,8 @@ async def startup_event():
     logger.info("=" * 60)
     
     if SECRET_KEY == "change-this-secret-key":
-        logger.warning("⚠️  WARNING: Using default JWT secret key!")
-        logger.warning("⚠️  Change JWT_SECRET_KEY in .env for production")
+        logger.warning("⚠️ WARNING: Using default JWT secret key!")
+        logger.warning("⚠️ Change JWT_SECRET_KEY in .env for production")
     
     logger.info("API ready at http://localhost:8000")
     logger.info("Docs available at http://localhost:8000/api/docs")
@@ -254,3 +255,7 @@ if __name__ == "__main__":
         port=settings.api_port,
         log_level="info"
     )
+
+# Triggering reload for CORS update
+
+# Triggering second reload for Host update

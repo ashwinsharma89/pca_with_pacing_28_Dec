@@ -32,7 +32,7 @@ export function LoginForm() {
             });
 
             login(response.access_token, response.user);
-            router.push('/campaigns');
+            router.push('/upload');
         } catch (err: any) {
             console.error(err);
             setError(err.message || 'Failed to login');

@@ -34,13 +34,18 @@ class DatabaseConfig:
         self.pool_timeout = int(os.getenv('DB_POOL_TIMEOUT', '30'))
         self.pool_recycle = int(os.getenv('DB_POOL_RECYCLE', '3600'))
         
-        # SQLite fallback for development
-        self.use_sqlite = os.getenv('USE_SQLITE', 'false').lower() == 'true'
+        # Connection pool settings
     
     def get_database_url(self) -> str:
         """Get database URL."""
-        if self.use_sqlite:
-            return 'sqlite:///./data/pca_agent.db'
+        # Check if SQLite should be used
+        use_sqlite = os.getenv('USE_SQLITE', 'false').lower() == 'true'
+        if use_sqlite:
+            return "sqlite:///./data/pca_agent.db"
+        
+        env_url = os.getenv('DATABASE_URL')
+        if env_url:
+            return env_url
         
         base_url = f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
         
@@ -71,22 +76,15 @@ class DatabaseManager:
             logger.info(f"Connecting to database: {database_url.split('@')[-1] if '@' in database_url else database_url}")
             
             # Create engine with connection pooling
-            if self.config.use_sqlite:
-                self.engine = create_engine(
-                    database_url,
-                    connect_args={"check_same_thread": False},
-                    echo=False
-                )
-            else:
-                self.engine = create_engine(
-                    database_url,
-                    poolclass=QueuePool,
-                    pool_size=self.config.pool_size,
-                    max_overflow=self.config.max_overflow,
-                    pool_timeout=self.config.pool_timeout,
-                    pool_recycle=self.config.pool_recycle,
-                    echo=False
-                )
+            self.engine = create_engine(
+                database_url,
+                poolclass=QueuePool,
+                pool_size=self.config.pool_size,
+                max_overflow=self.config.max_overflow,
+                pool_timeout=self.config.pool_timeout,
+                pool_recycle=self.config.pool_recycle,
+                echo=False
+            )
             
             # Add connection event listeners
             @event.listens_for(self.engine, "connect")
@@ -176,7 +174,10 @@ def get_db_manager() -> DatabaseManager:
     global _db_manager
     if _db_manager is None:
         _db_manager = DatabaseManager()
-        _db_manager.initialize()
+        try:
+            _db_manager.initialize()
+        except Exception as e:
+            logger.warning(f"PostgreSQL not available, continuing with DuckDB only: {e}")
     return _db_manager
 
 
@@ -200,5 +201,9 @@ def get_db():
     db = db_manager.get_session_direct()
     try:
         yield db
+        db.commit()  # Commit changes before closing
+    except Exception as e:
+        db.rollback()  # Rollback on error
+        raise
     finally:
         db.close()
