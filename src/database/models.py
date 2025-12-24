@@ -11,6 +11,9 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+# Import user models to ensure they are registered with Base
+from .user_models import User, PasswordResetToken
+
 
 class QueryHistory(Base):
     """Query history for Q&A feature."""

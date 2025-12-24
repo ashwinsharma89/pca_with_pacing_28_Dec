@@ -7,14 +7,10 @@ const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.Res
 const Treemap = dynamic(() => import('recharts').then(mod => mod.Treemap), { ssr: false });
 const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
 
-interface TreemapData {
-    name: string;
-    size?: number;
-    children?: TreemapData[];
-}
+
 
 interface TreemapChartProps {
-    data: any[];
+    data: Record<string, any>[];
     dataKey?: string;
     onDrillDown?: (platform: string) => void;
 }
@@ -24,7 +20,18 @@ const COLORS = [
     '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'
 ];
 
-const CustomContent = ({ root, depth, x, y, width, height, index, name, value, onDrillDown }: any) => {
+interface CustomContentProps {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    index: number;
+    name: string;
+    value: number;
+    onDrillDown?: (name: string) => void;
+}
+
+const CustomContent = ({ x, y, width, height, index, name, value, onDrillDown }: CustomContentProps) => {
     if (width < 50 || height < 30) return null;
 
     return (
@@ -86,10 +93,10 @@ export function TreemapChart({ data, dataKey = 'spend', onDrillDown }: TreemapCh
                 aspectRatio={4 / 3}
                 stroke="#fff"
                 fill="#3b82f6"
-                content={<CustomContent onDrillDown={onDrillDown} />}
+                content={<CustomContent onDrillDown={onDrillDown} /> as any}
             >
                 <Tooltip
-                    formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Spend']}
+                    formatter={((value: any) => [`$${Number(value).toLocaleString()}`, 'Spend']) as any}
                     contentStyle={{
                         backgroundColor: 'hsl(var(--card))',
                         border: '1px solid hsl(var(--border))',

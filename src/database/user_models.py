@@ -8,7 +8,7 @@ from sqlalchemy import Column, String, Boolean, DateTime, Integer
 from sqlalchemy.sql import func
 from datetime import datetime
 
-from .connection import Base
+from .models import Base
 
 
 class User(Base):

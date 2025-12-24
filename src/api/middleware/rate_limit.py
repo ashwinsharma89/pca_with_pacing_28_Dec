@@ -78,3 +78,12 @@ def setup_rate_limiter() -> Limiter:
 
 # Create limiter instance
 limiter = setup_rate_limiter()
+
+# Truly disable rate limiting if the flag is set to false
+# This prevents @limiter.limit decorators from doing anything during tests
+if not RATE_LIMIT_ENABLED:
+    def disabled_limit(limit_value, **kwargs):
+        def decorator(f):
+            return f
+        return decorator
+    limiter.limit = disabled_limit

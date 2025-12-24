@@ -159,11 +159,11 @@ class DuckDBManager:
                 for col in filter_columns:
                     try:
                         query = f"""
-                            SELECT DISTINCT "{col}" as val
+                            SELECT DISTINCT CAST("{col}" AS VARCHAR) as val
                             FROM '{CAMPAIGNS_PARQUET}'
                             WHERE "{col}" IS NOT NULL 
-                            AND "{col}" != 'Unknown'
-                            AND "{col}" != ''
+                            AND CAST("{col}" AS VARCHAR) != 'Unknown'
+                            AND CAST("{col}" AS VARCHAR) != ''
                             ORDER BY val
                             LIMIT 100
                         """
@@ -373,7 +373,7 @@ class DuckDBManager:
         
         try:
             with self.connection() as conn:
-                result = conn.execute(f"SELECT COUNT(*) FROM '{CAMPAIGNS_PARQUET}'").fetchone()
+                result = conn.execute(f"SELECT COUNT(*) FROM '{CAMPAIGNS_PARQUET}'").fetchone()  # nosec B608
                 return result[0] if result else 0
         except Exception as e:
             logger.error(f"Failed to get count: {e}")

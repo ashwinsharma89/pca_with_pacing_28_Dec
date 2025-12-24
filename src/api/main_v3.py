@@ -26,6 +26,7 @@ from loguru import logger
 from .middleware.auth import SECRET_KEY
 from .middleware.rate_limit import limiter, RATE_LIMIT_ENABLED
 from .middleware.security_headers import SecurityHeadersMiddleware
+from .middleware.csrf import CSRFMiddleware
 from .v1 import router_v1
 from .error_handlers import setup_exception_handlers
 from .exceptions import RateLimitExceededError
@@ -144,6 +145,9 @@ app.add_middleware(SlowAPIMiddleware)
 
 # Add Security Headers middleware
 app.add_middleware(SecurityHeadersMiddleware)
+
+# Add CSRF protection
+app.add_middleware(CSRFMiddleware)
 
 # Add Request Size Limit middleware (prevent DoS)
 from .middleware.request_size_limit import RequestSizeLimitMiddleware
@@ -340,7 +344,7 @@ async def startup_event():
     logger.info("✅ Specific exception handling enabled")
     logger.info("=" * 60)
     # Security validation - ensure JWT secret is properly configured
-    if SECRET_KEY == "change-this-secret-key" or not SECRET_KEY:
+    if SECRET_KEY == "change-this-secret-key" or not SECRET_KEY:  # nosec B105
         raise ValueError(
             "🔴 SECURITY ERROR: JWT_SECRET_KEY must be set to a secure value!\n"
             "Generate one with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"

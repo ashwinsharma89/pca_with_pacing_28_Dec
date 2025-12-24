@@ -335,7 +335,7 @@ def retry(
                     delay = min(base_delay * (exponential_base ** attempt), max_delay)
                     
                     if jitter:
-                        delay = delay * (0.5 + random.random())
+                        delay = delay * (0.5 + random.random())  # nosec B311
                     
                     logger.warning(
                         f"Retry {attempt + 1}/{max_retries} for {func.__name__} "
@@ -375,7 +375,7 @@ async def async_retry(
                 break
             
             delay = min(base_delay * (2 ** attempt), 60.0)
-            delay = delay * (0.5 + random.random())
+            delay = delay * (0.5 + random.random())  # nosec B311
             
             logger.warning(f"Async retry {attempt + 1}/{max_retries} after {delay:.2f}s")
             await asyncio.sleep(delay)

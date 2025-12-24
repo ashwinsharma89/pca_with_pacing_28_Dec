@@ -11,6 +11,7 @@ from typing import Optional, Dict, Any
 from sqlalchemy.orm import Session
 
 from src.database.user_models import User, PasswordResetToken
+from src.utils.encryption import DataEncrypter
 from loguru import logger
 
 
@@ -57,6 +58,7 @@ class UserService:
     
     def __init__(self, db: Session):
         self.db = db
+        self.encrypter = DataEncrypter()
     
     def hash_password(self, password: str) -> str:
         """Hash password using bcrypt with explicit rounds (OWASP recommendation)."""
@@ -116,7 +118,6 @@ class UserService:
             hashed_password=self.hash_password(password),
             role=role,
             tier=tier,
-            must_change_password=must_change_password,
             password_changed_at=datetime.utcnow()
         )
         
@@ -130,7 +131,11 @@ class UserService:
     
     def get_user_by_username(self, username: str) -> Optional[User]:
         """Get user by username."""
-        return self.db.query(User).filter(User.username == username).first()
+        logger.debug(f"UserService.get_user_by_username searching for {username}")
+        user = self.db.query(User).filter(User.username == username).first()
+        if user:
+            logger.debug(f"UserService found user: {user.username} (ID: {user.id})")
+        return user
     
     def get_user_by_email(self, email: str) -> Optional[User]:
         """Get user by email."""
@@ -363,7 +368,7 @@ class UserService:
             return False
         
         user.mfa_enabled = True
-        user.mfa_secret = secret
+        user.mfa_secret = self.encrypter.encrypt(secret)
         self.db.commit()
         
         logger.info(f"MFA enabled for user: {user.username}")

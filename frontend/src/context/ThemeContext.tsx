@@ -16,13 +16,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
-        // Load theme from localStorage
-        const savedTheme = localStorage.getItem("theme") as Theme | null;
-        if (savedTheme) {
-            setTheme(savedTheme);
-            document.documentElement.classList.toggle("light", savedTheme === "light");
-        }
+        const raf = requestAnimationFrame(() => {
+            // Load theme from localStorage
+            const savedTheme = localStorage.getItem("theme") as Theme | null;
+            if (savedTheme) {
+                setTheme(savedTheme);
+                document.documentElement.classList.toggle("light", savedTheme === "light");
+            }
+            setMounted(true);
+        });
+        return () => cancelAnimationFrame(raf);
     }, []);
 
     const toggleTheme = () => {

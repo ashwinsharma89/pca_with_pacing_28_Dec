@@ -13,7 +13,7 @@ const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr
 const Legend = dynamic(() => import('recharts').then(mod => mod.Legend), { ssr: false });
 
 interface StackedPercentageAreaProps {
-    data: any[];
+    data: Record<string, any>[];
     dataKeys: string[];
     xKey?: string;
     colors?: string[];
@@ -33,10 +33,10 @@ export function StackedPercentageArea({
 
     // Normalize data to percentages
     const normalizedData = data.map(item => {
-        const total = dataKeys.reduce((sum, key) => sum + (item[key] || 0), 0);
-        const normalized: any = { [xKey]: item[xKey] };
+        const total = dataKeys.reduce((sum, key) => sum + (Number(item[key]) || 0), 0);
+        const normalized: Record<string, any> = { [xKey]: item[xKey] };
         dataKeys.forEach(key => {
-            normalized[key] = total > 0 ? ((item[key] || 0) / total) * 100 : 0;
+            normalized[key] = total > 0 ? ((Number(item[key]) || 0) / total) * 100 : 0;
         });
         return normalized;
     });
@@ -77,7 +77,7 @@ export function StackedPercentageArea({
                             border: '1px solid hsl(var(--border))',
                             borderRadius: '8px'
                         }}
-                        formatter={(value: any, name: any) => [`${value.toFixed(1)}%`, name]}
+                        formatter={((value: number, name: string) => [`${value.toFixed(1)}%`, name]) as any}
                     />
                     <Legend />
                     {dataKeys.map((key, idx) => (

@@ -17,10 +17,14 @@ from datetime import datetime, timedelta
 from enum import Enum
 import numpy as np
 from scipy import stats
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Import your existing modules
 from src.database.connection import get_db_manager
 from src.api.middleware.auth import get_current_user
+from src.database.duckdb_manager import get_duckdb_manager, CAMPAIGNS_PARQUET
 
 router = APIRouter(prefix="/anomaly-detective", tags=["anomaly-detective"])
 
@@ -344,25 +348,32 @@ async def get_anomalies(
     
     try:
         # Fetch time-series data from database
-        db = get_db_connection()
-        cursor = db.cursor()
-        
+        duckdb_mgr = get_duckdb_manager()
+        if not duckdb_mgr.has_data():
+            return []
+
         # Query for metrics over time
-        query = """
+        conn = duckdb_mgr.get_connection()
+        cutoff_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+        
+        query = f"""  # nosec B608
             SELECT 
-                DATE(date) as date,
-                AVG(cpc) as avg_cpc,
-                AVG(ctr) as avg_ctr,
-                SUM(conversions) / NULLIF(SUM(clicks), 0) * 100 as conversion_rate,
-                AVG(cpa) as avg_cpa
-            FROM campaigns
-            WHERE date >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
-            GROUP BY DATE(date)
+                "Date" as date,
+                SUM(COALESCE("Spend_USD", 0)) / NULLIF(SUM(COALESCE("Clicks", 0)), 0) as avg_cpc,
+                SUM(COALESCE("Clicks", 0)) / NULLIF(SUM(COALESCE("Impressions", 0)), 0) * 100 as avg_ctr,
+                SUM(COALESCE("Conversions", 0)) / NULLIF(SUM(COALESCE("Clicks", 0)), 0) * 100 as conversion_rate,
+                SUM(COALESCE("Spend_USD", 0)) / NULLIF(SUM(COALESCE("Conversions", 0)), 0) as avg_cpa
+            FROM '{CAMPAIGNS_PARQUET}'
+            WHERE "Date" >= '{cutoff_date}'
+            GROUP BY "Date"
             ORDER BY date ASC
         """
         
-        cursor.execute(query)
-        rows = cursor.fetchall()
+        result_df = conn.execute(query).df()
+        conn.close()
+        
+        # Convert to list of tuples for compatibility
+        rows = result_df.itertuples(index=False, name=None)
         
         # Organize data by metric
         metrics_data = {
@@ -478,6 +489,7 @@ async def get_anomalies(
         return filtered[:limit]
         
     except Exception as e:
+        logger.error(f"Anomaly detection failed: {e}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail=f"Anomaly detection failed: {str(e)}"

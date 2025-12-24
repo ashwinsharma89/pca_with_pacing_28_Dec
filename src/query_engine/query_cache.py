@@ -5,7 +5,7 @@ Addresses: key naming, invalidation, monitoring, and distributed locking
 import redis
 import hashlib
 import json
-import pickle
+import pickle  # nosec B403
 import time
 from typing import Optional, Any, Callable, Dict, List
 from functools import wraps
@@ -57,7 +57,7 @@ class CacheKeyBuilder:
             parts.append(identifier)
         
         if params:
-            param_hash = hashlib.md5(
+            param_hash = hashlib.sha256(
                 json.dumps(params, sort_keys=True).encode()
             ).hexdigest()[:12]
             parts.append(param_hash)
@@ -385,7 +385,7 @@ class EnhancedQueryCache:
             if cached:
                 self.metrics.hits += 1
                 logger.debug(f"Cache HIT: {key[:50]}")
-                return pickle.loads(cached)
+                return pickle.loads(cached)  # nosec B301
             
             self.metrics.misses += 1
             logger.debug(f"Cache MISS: {key[:50]}")

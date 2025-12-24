@@ -1,0 +1,53 @@
+
+[DEBUG] conftest.py loading. SQLITE_URL: sqlite:////Users/ashwin/Desktop/pca_agent copy/test_pca.db
+[32m2025-12-24 10:58:23[0m | [1mINFO    [0m | [36msrc.utils.logger[0m:[36msetup_logger[0m:[36m131[0m - [1mLogger initialized with production features[0m
+[32m2025-12-24 10:58:24[0m | [1mINFO    [0m | [36msrc.utils.resilience[0m:[36m<module>[0m:[36m864[0m - [1mResilience module loaded successfully[0m
+[32m2025-12-24 10:58:24[0m | [1mINFO    [0m | [36msrc.utils.observability[0m:[36m<module>[0m:[36m1180[0m - [1mObservability module loaded successfully[0m
+[32m2025-12-24 10:58:24[0m | [33m[1mWARNING [0m | [36msrc.utils.opentelemetry_config[0m:[36m<module>[0m:[36m40[0m - [33m[1mOpenTelemetry not installed. Distributed tracing disabled.[0m
+[32m2025-12-24 10:58:24[0m | [1mINFO    [0m | [36msrc.utils.logger[0m:[36msetup_logger[0m:[36m131[0m - [1mLogger initialized with production features[0m
+[32m2025-12-24 10:58:24[0m | [1mINFO    [0m | [36msrc.utils.opentelemetry_config[0m:[36minstrument_app[0m:[36m129[0m - [1mOpenTelemetry disabled or not available[0m
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-7.4.0, pluggy-1.6.0 -- /Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13
+cachedir: .pytest_cache
+rootdir: /Users/ashwin/Desktop/pca_agent copy
+configfile: pytest.ini
+plugins: mock-3.15.1, anyio-4.12.0, asyncio-0.23.4, timeout-2.4.0, typeguard-4.4.4, cov-7.0.0
+asyncio: mode=Mode.STRICT
+collecting ... collected 1 item
+
+tests/integration/api/test_auth.py::TestUserRegistration::test_register_success 
+[DEBUG] Creating engine for: sqlite:////Users/ashwin/Desktop/pca_agent copy/test_pca.db
+
+[DEBUG] db_session fixture started
+
+[DEBUG] Database cleaned. Users remaining: []
+
+[DIAGNOSTIC] Register endpoint start. DB users: ['newuser', 'email_check_first', 'user_ValidPass123', 'user_AnotherGood1', '', 'login_test_unique']
+[32m2025-12-24 10:58:24[0m | [34m[1mDEBUG   [0m | [36msrc.api.middleware.auth[0m:[36mget_user[0m:[36m95[0m - [34m[1mget_user connecting to DB: sqlite:////Users/ashwin/Desktop/pca_agent copy/test_pca.db (Size: 77824 bytes)[0m
+[32m2025-12-24 10:58:24[0m | [34m[1mDEBUG   [0m | [36msrc.api.middleware.auth[0m:[36mget_user[0m:[36m104[0m - [34m[1mUserService imported from: src.services.user_service at unknown[0m
+[32m2025-12-24 10:58:24[0m | [34m[1mDEBUG   [0m | [36msrc.services.user_service[0m:[36mget_user_by_username[0m:[36m133[0m - [34m[1mUserService.get_user_by_username searching for newuser[0m
+[32m2025-12-24 10:58:24[0m | [34m[1mDEBUG   [0m | [36msrc.services.user_service[0m:[36mget_user_by_username[0m:[36m136[0m - [34m[1mUserService found user: newuser (ID: 1)[0m
+[32m2025-12-24 10:58:24[0m | [34m[1mDEBUG   [0m | [36msrc.api.middleware.auth[0m:[36mget_user[0m:[36m117[0m - [34m[1mget_user found user object type: src.database.user_models.User at 0x129e72360[0m
+[32m2025-12-24 10:58:24[0m | [34m[1mDEBUG   [0m | [36msrc.api.middleware.auth[0m:[36mget_user[0m:[36m118[0m - [34m[1mget_user found user: newuser (ID: 1)[0m
+
+[DEBUG] Registering newuser. get_user returned: {'id': 1, 'username': 'newuser', 'email': 'newuser@example.com', 'hashed_password': '$2b$12$Ole8jU3Puzw./kVZ9dP1oeAhH2AEZZKMecp4YBY9xrD3Hr9bc4k1m', 'role': 'user', 'tier': 'free'}
+[32m2025-12-24 10:58:24[0m | [33m[1mWARNING [0m | [36msrc.enterprise.audit[0m:[36mlog_event[0m:[36m102[0m - [33m[1m[AUDIT] anonymous - POST /api/v1/auth/register[0m
+
+Registration failed with 400: {'detail': 'Username already registered'}
+FAILED
+
+=================================== FAILURES ===================================
+__________________ TestUserRegistration.test_register_success __________________
+tests/integration/api/test_auth.py:35: in test_register_success
+    assert response.status_code in [
+E   assert 400 in [200, 201]
+E    +  where 400 = <Response [400 Bad Request]>.status_code
+=============================== warnings summary ===============================
+src/database/models.py:12
+  /Users/ashwin/Desktop/pca_agent copy/src/database/models.py:12: MovedIn20Warning: The ``declarative_base()`` function is now available as sqlalchemy.orm.declarative_base(). (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    Base = declarative_base()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/integration/api/test_auth.py::TestUserRegistration::test_register_success
+========================= 1 failed, 1 warning in 0.10s =========================

@@ -28,13 +28,9 @@ if not SECRET_KEY:
 
 if SECRET_KEY in ["change-this-secret-key", "your-secure-random-secret-here-change-this"]:
     logger.error("🔴 CRITICAL: Using default/insecure JWT_SECRET_KEY!")
-    logger.error("This is a SECURITY VULNERABILITY. Generate a secure secret immediately.")
-    if os.getenv("PRODUCTION_MODE", "false").lower() == "true":
-        logger.error("Refusing to start in production mode with insecure secret.")
-        sys.exit(1)
-    else:
-        logger.warning("⚠️  Allowing insecure secret in development mode only.")
-        logger.warning("⚠️  DO NOT deploy to production with this configuration!")
+    logger.error("This is a MAJOR SECURITY VULNERABILITY. Generate a secure secret immediately.")
+    logger.error("Refusing to start with insecure secret. Use 'python -c \"import secrets; print(secrets.token_urlsafe(32))\"' to generate one.")
+    sys.exit(1)
 
 # Security scheme
 security = HTTPBearer()
@@ -61,48 +57,72 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_user(username: str, db=None) -> Optional[Dict[str, Any]]:
     """
-    Get user from DuckDB.
+    Get user from database (PostgreSQL).
     
     Args:
-        username: Username
-        db: Database session (ignored, kept for compatibility)
+        username: Username or Email
+        db: Optional database session
         
     Returns:
         User dict or None
     """
-    try:
-        import duckdb
-        
-        logger.info(f"🔍 Looking up user in DuckDB: {username}")
-        
-        # Connect to DuckDB
-        conn = duckdb.connect('./data/campaigns.duckdb', read_only=True)
-        
-        # Query for user
-        result = conn.execute("""
-            SELECT username, email, hashed_password, role, tier
-            FROM users
-            WHERE username = ? OR email = ?
-        """, [username, username]).fetchone()
-        
-        conn.close()
-        
-        if not result:
-            logger.warning(f"❌ User not found in DuckDB: {username}")
-            return None
-        
-        logger.info(f"✅ User found in DuckDB: {username}, role={result[3]}")
-        
-        return {
-            "username": str(result[0]),
-            "email": str(result[1]),
-            "hashed_password": str(result[2]),
-            "role": str(result[3]),
-            "tier": str(result[4] or "free")
-        }
-    except Exception as e:
-        logger.error(f"Error getting user from DuckDB: {e}")
+    if not username:
         return None
+        
+    db_session = db
+    should_close = False
+    
+    if db_session is None:
+        try:
+            from src.database.connection import get_db_manager
+            db_manager = get_db_manager()
+            # Log the database URL to verify it's the test DB
+            db_url = os.getenv("DATABASE_URL")
+            
+            # Check file size if it's a local sqlite file
+            file_info = ""
+            if db_url and "sqlite:///" in db_url:
+                path = db_url.replace("sqlite:///", "")
+                if os.path.exists(path):
+                    file_info = f" (Size: {os.path.getsize(path)} bytes)"
+                else:
+                    file_info = " (File NOT found!)"
+                    
+            logger.debug(f"get_user connecting to DB: {db_url}{file_info}")
+            db_session = db_manager.get_session_direct()
+            should_close = True
+        except Exception as e:
+            logger.error(f"Could not get DB session for user lookup: {e}")
+            return None
+            
+    try:
+        from src.services.user_service import UserService
+        logger.debug(f"UserService imported from: {UserService.__module__} at {getattr(UserService, '__file__', 'unknown')}")
+        user_service = UserService(db_session)
+        
+        # Try username first
+        user_model = user_service.get_user_by_username(username)
+        
+        # Then try email
+        if not user_model:
+            user_model = user_service.get_user_by_email(username)
+            
+        if user_model:
+            return {
+                "id": getattr(user_model, 'id', None),
+                "username": getattr(user_model, 'username', None),
+                "email": getattr(user_model, 'email', None),
+                "hashed_password": getattr(user_model, 'hashed_password', None),
+                "role": getattr(user_model, 'role', 'user'),
+                "tier": getattr(user_model, 'tier', 'free') or "free"
+            }
+        return None
+    except Exception as e:
+        logger.error(f"Error in get_user: {e}")
+        return None
+    finally:
+        if should_close and db_session:
+            db_session.close()
 
 
 def authenticate_user(username: str, password: str) -> Optional[Dict[str, Any]]:
@@ -337,5 +357,5 @@ def create_user(username: str, email: str, password: str, role: str = "user", ti
         if db:
             try:
                 db.close()
-            except:
-                pass
+            except Exception as e:
+                logger.debug(f"Error closing DB session: {e}")

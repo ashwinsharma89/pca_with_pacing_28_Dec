@@ -292,7 +292,7 @@ class StructuredQueryLogger:
         # Group by query hash
         query_counts = {}
         for log in logs:
-            query_hash = hashlib.md5(log["natural_language_query"].lower().encode()).hexdigest()[:8]
+            query_hash = hashlib.sha256(log["natural_language_query"].lower().encode()).hexdigest()[:8]
             if query_hash not in query_counts:
                 query_counts[query_hash] = {
                     "query": log["natural_language_query"],

@@ -119,7 +119,7 @@ class ABTestingFramework:
     def _assign_variant(self, user_id: str, experiment: Experiment) -> str:
         """Deterministically assign a variant based on user_id hash"""
         hash_input = f"{experiment.id}:{user_id}"
-        hash_value = int(hashlib.md5(hash_input.encode()).hexdigest(), 16)
+        hash_value = int(hashlib.sha256(hash_input.encode()).hexdigest(), 16)
         bucket = (hash_value % 1000) / 1000
         
         cumulative = 0

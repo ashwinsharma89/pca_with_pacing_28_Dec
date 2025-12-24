@@ -39,7 +39,7 @@ class CachingStrategy:
         """
         # Hash based on shape and column names
         hash_input = f"{df.shape}_{','.join(df.columns.tolist())}"
-        return hashlib.md5(hash_input.encode()).hexdigest()
+        return hashlib.sha256(hash_input.encode()).hexdigest()
     
     @staticmethod
     def cache_with_ttl(ttl_seconds: int = 3600):

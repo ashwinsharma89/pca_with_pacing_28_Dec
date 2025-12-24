@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { motion, useSpring, useTransform } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, useSpring, useMotionValue } from 'framer-motion';
 
 interface AnimatedCounterProps {
     value: number;
@@ -24,19 +24,18 @@ export function AnimatedCounter({
     trend,
     trendValue
 }: AnimatedCounterProps) {
-    const [displayValue, setDisplayValue] = useState(0);
-    const prevValue = useRef(0);
+    const [displayValue, setDisplayValue] = useState(value);
+    const motionValue = useMotionValue(value);
 
-    const spring = useSpring(prevValue.current, {
+    const spring = useSpring(motionValue, {
         stiffness: 100,
         damping: 30,
         duration: duration * 1000
     });
 
     useEffect(() => {
-        spring.set(value);
-        prevValue.current = value;
-    }, [value, spring]);
+        motionValue.set(value);
+    }, [value, motionValue]);
 
     useEffect(() => {
         const unsubscribe = spring.on('change', (v) => {

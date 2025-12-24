@@ -3,7 +3,7 @@ Authentication endpoints (v1).
 """
 
 from fastapi import APIRouter, HTTPException, Depends, status, Request
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Dict, Any, Optional, List
 
 from src.api.middleware.auth import (
@@ -13,10 +13,13 @@ from src.api.middleware.auth import (
     create_user,
     get_user as get_user_compat
 )
+from src.utils.encryption import DataEncrypter
 from src.api.middleware.rate_limit import limiter, get_user_rate_limit
 from src.enterprise.mfa import get_mfa_manager
-from src.database.connection import get_db_manager
+from sqlalchemy.orm import Session
+from src.database.connection import get_db_manager, get_db
 from src.services.user_service import UserService
+from datetime import timedelta
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -38,13 +41,13 @@ class LoginResponse(BaseModel):
 
 class RegisterRequest(BaseModel):
     """Registration request model."""
-    username: str
+    username: str = Field(..., min_length=1)
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=6)
 
 
 @router.post("/login", response_model=LoginResponse)
-@limiter.limit("10/minute")
+@limiter.limit("100/minute")
 async def login(request: Request, login_req: LoginRequest):
     """
     Login endpoint.
@@ -146,7 +149,10 @@ async def verify_mfa(
                 if not user_model or not user_model.mfa_enabled:
                     raise HTTPException(status_code=400, detail="MFA not enabled or user not found")
                 
-                if not mfa.verify_totp(user_model.mfa_secret, verify_req.token):
+                encrypter = DataEncrypter()
+                decrypted_secret = encrypter.decrypt(user_model.mfa_secret)
+                
+                if not mfa.verify_totp(decrypted_secret, verify_req.token):
                     raise HTTPException(status_code=401, detail="Invalid token")
                 
                 # Success - Create full token
@@ -191,24 +197,24 @@ async def enable_mfa(
 
 
 @router.post("/register", response_model=Dict[str, Any])
-@limiter.limit("5/minute")
-async def register(request: Request, reg_req: RegisterRequest):
+@limiter.limit("20/minute")
+async def register(request: Request, reg_req: RegisterRequest, db: Session = Depends(get_db)):
     """
     Register new user.
     
     Args:
         request: Registration data
+        reg_req: User registration details
+        db: Database session
         
     Returns:
         Created user info
-        
-    Raises:
-        HTTPException: If username already exists
     """
     # Check if user exists
     from ..middleware.auth import get_user
     
-    if get_user(reg_req.username):
+    existing_user = get_user(reg_req.username, db=db)
+    if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already registered"
@@ -218,7 +224,8 @@ async def register(request: Request, reg_req: RegisterRequest):
     user = create_user(
         username=reg_req.username,
         email=reg_req.email,
-        password=reg_req.password
+        password=reg_req.password,
+        db=db
     )
     
     # Remove sensitive data

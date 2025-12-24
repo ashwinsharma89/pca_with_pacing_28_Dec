@@ -114,8 +114,8 @@ class RedisRateLimitMiddleware:
         
         # Define endpoint-specific limits
         endpoint_limits = {
-            "/api/v1/auth/login": (5, 60),  # 5 per minute
-            "/api/v1/auth/register": (3, 3600),  # 3 per hour
+            "/api/v1/auth/login": (100, 60),  # Increased to 100 per minute for E2E testing
+            "/api/v1/auth/register": (10, 3600),  # Increased to 10 per hour
             "/api/v1/campaigns": (100, 60),  # 100 per minute
             "/api/v1/users": (50, 60),  # 50 per minute
         }

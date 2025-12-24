@@ -1,5 +1,4 @@
 # Core
-streamlit
 fastapi>=0.109.1  # CVE-2024-24762 fix
 uvicorn>=0.38.0
 pydantic>=2.10.0
@@ -141,10 +140,6 @@ pytest-asyncio>=0.21.0
 pytest-mock>=3.11.0
 bandit>=1.7.5
 safety>=2.3.0
-
-# Streamlit Extensions
-streamlit-aggrid
-streamlit-option-menu
 
 # Web Scraping - NO VERSION PINS (fixes lxml build error)
 beautifulsoup4

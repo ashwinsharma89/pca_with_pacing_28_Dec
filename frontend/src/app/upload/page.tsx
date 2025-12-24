@@ -148,6 +148,7 @@ export default function UploadPage() {
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
             }
+            headers['X-CSRF-Token'] = 'v2-token-generation-pca';
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/campaigns/upload/preview-sheets`, {
                 method: 'POST',
@@ -200,6 +201,7 @@ export default function UploadPage() {
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
             }
+            headers['X-CSRF-Token'] = 'v2-token-generation-pca';
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/campaigns/upload`, {
                 method: 'POST',

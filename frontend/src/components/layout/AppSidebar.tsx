@@ -7,26 +7,26 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
-    LayoutDashboard,
     Upload,
-    BarChart,
     BarChart3,
     MessageSquare,
     Settings,
     List,
-    LineChart,
     Activity,
     TrendingUp
 } from "lucide-react";
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
+type SidebarProps = React.HTMLAttributes<HTMLDivElement>;
 
 export function AppSidebar({ className }: SidebarProps) {
     const pathname = usePathname();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
+        const raf = requestAnimationFrame(() => {
+            setMounted(true);
+        });
+        return () => cancelAnimationFrame(raf);
     }, []);
 
     if (pathname === "/login") return null;

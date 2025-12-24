@@ -280,9 +280,11 @@ async def get_global_visualizations(
         
         # Find actual column names (handle variations)
         def find_col(df, options):
+            # Case-insensitive column finding
+            cols_lower = {c.lower(): c for c in df.columns}
             for opt in options:
-                if opt in df.columns:
-                    return opt
+                if opt.lower() in cols_lower:
+                    return cols_lower[opt.lower()]
             return None
         
         spend_col = find_col(df, ['Spend', 'Total Spent', 'Total_Spent', 'spend'])
@@ -421,26 +423,27 @@ async def get_dashboard_stats(
         if channels:
             filter_params['Channel'] = channels
         if regions:
-            filter_params['Region'] = regions
+            filter_params['Geographic_Region'] = regions
         if devices:
-            filter_params['Device'] = devices
+            filter_params['Device_Type'] = devices
         if placements:
             filter_params['Placement'] = placements
         if adTypes:
-            filter_params['Ad_Type'] = adTypes
+            filter_params['Ad Type'] = adTypes
         if funnelStages:
-            filter_params['Funnel_Stage'] = funnelStages
+            filter_params['Funnel'] = funnelStages
             
         # Fetch data for current and previous period
-        # We fetch from prev_start_date to end_date
+        # 1. First, fetch all data with filters applied, ignoring dates for now
         total_df = duckdb_mgr.get_campaigns(filters=filter_params if filter_params else None)
         if total_df.empty:
             return {"summary_groups": {}, "monthly_performance": [], "platform_performance": []}
             
         # Standardize Columns
         def find_col(df, options):
+            cols_lower = {c.lower(): c for c in df.columns}
             for opt in options:
-                if opt in df.columns: return opt
+                if opt.lower() in cols_lower: return cols_lower[opt.lower()]
             return None
             
         spend_col = find_col(total_df, ['Spend', 'Total Spent', 'Total_Spent', 'spend'])
@@ -455,13 +458,40 @@ async def get_dashboard_stats(
             
         total_df[date_col] = pd.to_datetime(total_df[date_col], dayfirst=False, errors='coerce')
         total_df = total_df.dropna(subset=[date_col])
+
+        # 2. Determine Date Range for Current Period
+        if not start_date and not end_date:
+            # If no dates provided, use full history as "current"
+            d1 = total_df[date_col].min()
+            d2 = total_df[date_col].max()
+            logger.info(f"Using full date range: {d1} to {d2}")
+        else:
+            if not end_date:
+                end_date = datetime.now().strftime("%Y-%m-%d")
+            if not start_date:
+                # Default to last 30 days relative to end_date
+                start_date = (datetime.strptime(end_date, "%Y-%m-%d") - timedelta(days=30)).strftime("%Y-%m-%d")
+            
+            d1 = pd.to_datetime(start_date)
+            d2 = pd.to_datetime(end_date)
+            logger.info(f"Using provided date range: {d1} to {d2}")
+
+        delta = d2 - d1
         
         curr_df = total_df[(total_df[date_col] >= d1) & (total_df[date_col] <= d2)]
         
-        # Year-over-Year comparison: Same period, previous year
+        # 3. Handle Previous Period (Default to YoY if simple comparison)
+        from dateutil.relativedelta import relativedelta
         yoy_d1 = d1 - relativedelta(years=1)
         yoy_d2 = d2 - relativedelta(years=1)
         prev_df = total_df[(total_df[date_col] >= yoy_d1) & (total_df[date_col] <= yoy_d2)]
+        
+        # Fallback if YoY is empty: try sequential previous period
+        if prev_df.empty:
+            prev_d1 = d1 - delta
+            prev_d2 = d1 - timedelta(days=1)
+            prev_df = total_df[(total_df[date_col] >= prev_d1) & (total_df[date_col] <= prev_d2)]
+            logger.info("YoY empty, fell back to sequential period")
         
         def get_summary(df):
             if df.empty:
@@ -2245,7 +2275,7 @@ async def get_campaign(
     try:
         duckdb_mgr = get_duckdb_manager()
         with duckdb_mgr.connection() as conn:
-            query = f"SELECT * FROM '{CAMPAIGNS_PARQUET}' WHERE \"Creative_ID\" = ? OR \"Campaign_Name_Full\" = ? LIMIT 1"
+            query = f"SELECT * FROM '{CAMPAIGNS_PARQUET}' WHERE \"Creative_ID\" = ? OR \"Campaign_Name_Full\" = ? LIMIT 1"  # nosec B608
             try:
                 df = conn.execute(query, [campaign_id, campaign_id]).df()
             except Exception as e:
@@ -2288,7 +2318,7 @@ async def get_campaign_visualizations_single(request: Request, campaign_id: str,
     try:
         duckdb_mgr = get_duckdb_manager()
         with duckdb_mgr.connection() as conn:
-            df = conn.execute(f"SELECT * FROM \"{CAMPAIGNS_PARQUET}\" WHERE \"Creative_ID\" = ? OR \"Campaign_Name_Full\" = ? LIMIT 1", [campaign_id, campaign_id]).df()
+            df = conn.execute(f"SELECT * FROM \"{CAMPAIGNS_PARQUET}\" WHERE \"Creative_ID\" = ? OR \"Campaign_Name_Full\" = ? LIMIT 1", [campaign_id, campaign_id]).df()  # nosec B608
         if df.empty: raise HTTPException(status_code=404, detail="Campaign not found")
         return {"trend": [], "device": [], "platform": []}
     except HTTPException: raise

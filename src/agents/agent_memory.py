@@ -77,7 +77,7 @@ class AgentMemory:
         self._load_user_context()
     
     def _generate_session_id(self) -> str:
-        return hashlib.md5(f"{self.user_id}:{datetime.utcnow().isoformat()}".encode()).hexdigest()[:16]
+        return hashlib.sha256(f"{self.user_id}:{datetime.utcnow().isoformat()}".encode()).hexdigest()[:16]
     
     def _init_redis(self):
         if REDIS_AVAILABLE and self.REDIS_URL:
@@ -124,7 +124,7 @@ class AgentMemory:
             ttl_hours: Time to live in hours
         """
         entry = MemoryEntry(
-            id=hashlib.md5(f"{self.user_id}:{datetime.utcnow().isoformat()}:{memory_type}".encode()).hexdigest()[:16],
+            id=hashlib.sha256(f"{self.user_id}:{datetime.utcnow().isoformat()}:{memory_type}".encode()).hexdigest()[:16],
             user_id=self.user_id,
             session_id=self.session_id,
             memory_type=memory_type,

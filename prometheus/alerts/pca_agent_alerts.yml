@@ -103,3 +103,73 @@ groups:
         annotations:
           summary: "Disk space is low"
           description: "Only {{ $value | humanizePercentage }} disk space remaining"
+      
+      # Critical Disk Space - More severe threshold
+      - alert: DiskSpaceCritical
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk space critically low"
+          description: "Only {{ $value | humanizePercentage }} disk space remaining - immediate action required"
+      
+      # PostgreSQL Down
+      - alert: PostgreSQLDown
+        expr: up{job="postgresql"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "PostgreSQL instance {{ $labels.instance }} is not responding for more than 1 minute"
+      
+      # Redis Down
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis instance {{ $labels.instance }} is not responding for more than 1 minute"
+      
+      # High P99 Latency
+      - alert: HighP99Latency
+        expr: histogram_quantile(0.99, rate(pca_agent_api_response_time_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API P99 latency is very high"
+          description: "P99 response time is {{ $value }}s (threshold: 5s)"
+      
+      # Rate Limiting Triggered
+      - alert: RateLimitingTriggered
+        expr: rate(pca_agent_rate_limit_exceeded_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High rate of rate-limited requests"
+          description: "{{ $value }} requests/sec are being rate limited"
+      
+      # High 5xx Error Rate
+      - alert: High5xxErrorRate
+        expr: rate(pca_agent_http_responses_total{status=~"5.."}[5m]) / rate(pca_agent_http_responses_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP 5xx error rate"
+          description: "{{ $value | humanizePercentage }} of requests are returning 5xx errors"
+      
+      # Prometheus Target Missing
+      - alert: PrometheusTargetMissing
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus target is missing"
+          description: "Target {{ $labels.job }}/{{ $labels.instance }} is down"

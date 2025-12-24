@@ -7,15 +7,16 @@ interface ApiRequestOptions extends RequestInit {
 }
 
 export class ApiError extends Error {
-    constructor(public status: number, public message: string, public data?: any) {
+    constructor(public status: number, public message: string, public data?: unknown) {
         super(message);
         this.name = 'ApiError';
     }
 }
 
-async function request<T>(endpoint: string, method: RequestMethod, body?: any, options?: ApiRequestOptions): Promise<T> {
+async function request<T>(endpoint: string, method: RequestMethod, body?: unknown, options?: ApiRequestOptions): Promise<T> {
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
+        'X-CSRF-Token': 'v2-token-generation-pca', // Add static CSRF token for defense-in-depth
         ...(options?.headers as Record<string, string>),
     };
 
@@ -50,7 +51,7 @@ async function request<T>(endpoint: string, method: RequestMethod, body?: any, o
                 const errorBody = await response.json();
                 errorMessage = errorBody.detail || errorBody.message || errorMessage;
                 errorData = errorBody;
-            } catch (e) {
+            } catch {
                 // Ignore JSON parse error for error responses
             }
             throw new ApiError(response.status, errorMessage, errorData);
@@ -70,24 +71,36 @@ async function request<T>(endpoint: string, method: RequestMethod, body?: any, o
     }
 }
 
-// Assuming RegenerateReportResponse is defined elsewhere or can be `any` for this context
-type RegenerateReportResponse = any;
+export interface ChatResponse {
+    response: string;
+    suggestedQueries?: string[];
+    data?: unknown;
+}
+
+export interface Insight {
+    id: string;
+    title: string;
+    description: string;
+    severity: 'info' | 'warning' | 'error';
+    metric?: string;
+    change?: number;
+}
 
 export const api = {
     get: <T>(endpoint: string, options?: ApiRequestOptions) => request<T>(endpoint, 'GET', undefined, options),
-    async regenerateReport(campaignId: string, template: string = 'default'): Promise<RegenerateReportResponse> {
-        return request<RegenerateReportResponse>(`/campaigns/${campaignId}/report/regenerate`, 'POST', { template });
+    async regenerateReport<T = unknown>(campaignId: string, template: string = 'default'): Promise<T> {
+        return request<T>(`/campaigns/${campaignId}/report/regenerate`, 'POST', { template });
     },
-    async chatWithCampaign(campaignId: string, question: string): Promise<any> {
-        return request<any>(`/campaigns/${campaignId}/chat`, 'POST', { question });
+    async chatWithCampaign(campaignId: string, question: string): Promise<ChatResponse> {
+        return request<ChatResponse>(`/campaigns/${campaignId}/chat`, 'POST', { question });
     },
-    async getCampaignInsights(campaignId: string): Promise<any> {
-        return request<any>(`/campaigns/${campaignId}/insights`, 'GET');
+    async getCampaignInsights(campaignId: string): Promise<Insight[]> {
+        return request<Insight[]>(`/campaigns/${campaignId}/insights`, 'GET');
     },
-    async getCampaignVisualizations(campaignId: string): Promise<any> {
-        return request<any>(`/campaigns/${campaignId}/visualizations`, 'GET');
+    async getCampaignVisualizations<T = unknown>(campaignId: string): Promise<T> {
+        return request<T>(`/campaigns/${campaignId}/visualizations`, 'GET');
     },
-    async getGlobalVisualizations(filters?: {
+    async getGlobalVisualizations<T = unknown>(filters?: {
         platforms?: string;
         startDate?: string;
         endDate?: string;
@@ -99,7 +112,7 @@ export const api = {
         placements?: string;
         regions?: string;
         adTypes?: string;
-    }): Promise<any> {
+    }): Promise<T> {
         const params = new URLSearchParams();
         if (filters?.platforms) {
             params.append('platforms', filters.platforms);
@@ -135,20 +148,20 @@ export const api = {
             params.append('adTypes', filters.adTypes);
         }
         const queryString = params.toString();
-        return request<any>(`/campaigns/visualizations${queryString ? `?${queryString}` : ''}`, 'GET');
+        return request<T>(`/campaigns/visualizations${queryString ? `?${queryString}` : ''}`, 'GET');
     },
-    async chatGlobal(question: string, options?: { knowledge_mode?: boolean; use_rag_context?: boolean }): Promise<any> {
-        return request<any>(`/campaigns/chat`, 'POST', {
+    async chatGlobal(question: string, options?: { knowledge_mode?: boolean; use_rag_context?: boolean }): Promise<ChatResponse> {
+        return request<ChatResponse>(`/campaigns/chat`, 'POST', {
             question,
             knowledge_mode: options?.knowledge_mode ?? false,
             use_rag_context: options?.use_rag_context ?? true
         });
     },
-    async analyzeGlobal(): Promise<any> {
-        return request<any>(`/campaigns/analyze/global`, 'POST');
+    async analyzeGlobal<T = unknown>(): Promise<T> {
+        return request<T>(`/campaigns/analyze/global`, 'POST');
     },
 
-    async uploadCampaigns(file: File): Promise<any> {
+    async uploadCampaigns<T = unknown>(file: File): Promise<T> {
         const formData = new FormData();
         formData.append('file', file);
 
@@ -157,6 +170,7 @@ export const api = {
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
+        headers['X-CSRF-Token'] = 'v2-token-generation-pca';
         // Note: Content-Type is set automatically by fetch when using FormData
 
         const response = await fetch(`${API_URL}/campaigns/upload`, {
@@ -177,8 +191,8 @@ export const api = {
 
         return response.json();
     },
-    post: <T>(endpoint: string, body: any, options?: ApiRequestOptions) => request<T>(endpoint, 'POST', body, options),
-    put: <T>(endpoint: string, body: any, options?: ApiRequestOptions) => request<T>(endpoint, 'PUT', body, options),
+    post: <T>(endpoint: string, body: unknown, options?: ApiRequestOptions) => request<T>(endpoint, 'POST', body, options),
+    put: <T>(endpoint: string, body: unknown, options?: ApiRequestOptions) => request<T>(endpoint, 'PUT', body, options),
     delete: <T>(endpoint: string, options?: ApiRequestOptions) => request<T>(endpoint, 'DELETE', undefined, options),
-    patch: <T>(endpoint: string, body: any, options?: ApiRequestOptions) => request<T>(endpoint, 'PATCH', body, options),
+    patch: <T>(endpoint: string, body: unknown, options?: ApiRequestOptions) => request<T>(endpoint, 'PATCH', body, options),
 };

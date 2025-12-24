@@ -177,7 +177,7 @@ class BackupManager:
         
         # Execute pg_dump
         try:
-            subprocess.run(
+            subprocess.run(  # nosec B603
                 cmd,
                 env=env,
                 check=True,
@@ -346,7 +346,7 @@ class BackupManager:
         
         # Execute psql
         try:
-            subprocess.run(
+            subprocess.run(  # nosec B603
                 cmd,
                 env=env,
                 check=True,

@@ -109,8 +109,8 @@ class MediaDataProcessor:
                     if numeric_values.notna().sum() > len(df) * 0.8:  # 80% threshold
                         df[col] = numeric_values
                         logger.debug(f"Converted {col} to numeric")
-                except:
-                    pass
+                except Exception as e:
+                    logger.debug(f"Type detection failed for {col}: {e}")
         
         return df
     
@@ -136,7 +136,8 @@ class MediaDataProcessor:
                         df['Year_Week'] = df[col].dt.to_period('W').astype(str)
                         
                         break
-                except:
+                except Exception as e:
+                    logger.debug(f"Date conversion failed for {col}: {e}")
                     continue
         
         return df

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { Flag, Star, AlertTriangle, Zap, Calendar } from 'lucide-react';
+import { Flag, AlertTriangle, Zap, Calendar } from 'lucide-react';
 
 interface Annotation {
     date: string;

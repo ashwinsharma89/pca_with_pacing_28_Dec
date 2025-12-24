@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { api, ApiError } from '@/lib/api';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,9 +33,10 @@ export function LoginForm() {
 
             login(response.access_token, response.user);
             router.push('/upload');
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
-            setError(err.message || 'Failed to login');
+            const message = err instanceof Error ? err.message : 'Failed to login';
+            setError(message);
         } finally {
             setIsLoading(false);
         }

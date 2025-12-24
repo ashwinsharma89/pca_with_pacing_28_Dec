@@ -146,3 +146,106 @@ class LLMUsageRepository(BaseRepository):
 
 
 
+
+from src.database.models import Campaign, Analysis, CampaignContext
+
+class CampaignRepository(BaseRepository):
+    """Repository for Campaign operations."""
+    
+    def create(self, data: Dict[str, Any]) -> Campaign:
+        """Create a new campaign."""
+        campaign = Campaign(**data)
+        self.session.add(campaign)
+        self.session.flush()
+        return campaign
+    
+    def create_bulk(self, data_list: List[Dict[str, Any]]) -> List[Campaign]:
+        """Bulk create campaigns."""
+        campaigns = [Campaign(**data) for data in data_list]
+        self.session.add_all(campaigns)
+        self.session.flush()
+        return campaigns
+    
+    def get_by_campaign_id(self, campaign_id: str) -> Optional[Campaign]:
+        """Get campaign by its unique ID string."""
+        return self.session.query(Campaign).filter(
+            Campaign.campaign_id == campaign_id
+        ).first()
+    
+    def get_all(self, limit: int = 100, offset: int = 0) -> List[Campaign]:
+        """Get all campaigns with pagination."""
+        return self.session.query(Campaign).order_by(
+            desc(Campaign.created_at)
+        ).offset(offset).limit(limit).all()
+    
+    def search(self, filters: Dict[str, Any], limit: int = 100) -> List[Campaign]:
+        """Search campaigns with filters."""
+        query = self.session.query(Campaign)
+        
+        if filters:
+            for key, value in filters.items():
+                if hasattr(Campaign, key) and value is not None:
+                    query = query.filter(getattr(Campaign, key) == value)
+        
+        return query.order_by(desc(Campaign.created_at)).limit(limit).all()
+    
+    def get_aggregated_metrics(self, filters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Get aggregated metrics across campaigns."""
+        from sqlalchemy import func
+        
+        query = self.session.query(
+            func.sum(Campaign.spend).label('total_spend'),
+            func.sum(Campaign.impression).label('total_impressions'),
+            func.sum(Campaign.clicks).label('total_clicks'),
+            func.sum(Campaign.conversions).label('total_conversions')
+        )
+        
+        if filters:
+            for key, value in filters.items():
+                if hasattr(Campaign, key) and value is not None:
+                    query = query.filter(getattr(Campaign, key) == value)
+        
+        result = query.first()
+        
+        return {
+            "total_spend": float(result.total_spend or 0),
+            "total_impressions": int(result.total_impressions or 0),
+            "total_clicks": int(result.total_clicks or 0),
+            "total_conversions": int(result.total_conversions or 0)
+        }
+
+
+class AnalysisRepository(BaseRepository):
+    """Repository for Analysis operations."""
+    
+    def create(self, data: Dict[str, Any]) -> Analysis:
+        """Create a new analysis."""
+        analysis = Analysis(**data)
+        self.session.add(analysis)
+        self.session.flush()
+        return analysis
+    
+    def get_by_campaign(self, campaign_id: int, limit: int = 10) -> List[Analysis]:
+        """Get analyses for a specific campaign."""
+        return self.session.query(Analysis).filter(
+            Analysis.campaign_id == campaign_id
+        ).order_by(desc(Analysis.created_at)).limit(limit).all()
+
+
+class CampaignContextRepository(BaseRepository):
+    """Repository for Campaign Context operations."""
+    
+    def update(self, campaign_id: int, data: Dict[str, Any]) -> CampaignContext:
+        """Update or create campaign context."""
+        context = self.session.query(CampaignContext).filter(
+            CampaignContext.campaign_id == campaign_id
+        ).first()
+        
+        if context:
+            context.context_data = data
+        else:
+            context = CampaignContext(campaign_id=campaign_id, context_data=data)
+            self.session.add(context)
+        
+        self.session.flush()
+        return context

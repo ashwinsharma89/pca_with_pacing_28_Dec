@@ -1,0 +1,1000 @@
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 20
+}
+, retry_delay {
+  seconds: 55
+}
+]
+2025-12-23 13:23:14.676 | INFO     | src.api.middleware.auth:authenticate_user:119 - Authenticating user: ashwin
+2025-12-23 13:23:14.677 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:23:14.693 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:23:14.694 | INFO     | src.api.middleware.auth:authenticate_user:126 - User found: ashwin, Role: admin
+2025-12-23 13:23:14.883 | INFO     | src.api.middleware.auth:authenticate_user:133 - Password verified for user: ashwin
+2025-12-23 13:23:14.883 | INFO     | src.api.middleware.auth:create_access_token:162 - Created access token for user: ashwin
+2025-12-23 13:23:14.889 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:23:14.893 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:23:14.894 | INFO     | src.api.v1.campaigns:chat_global:828 - Chat using persistent Parquet: data/campaigns.parquet
+2025-12-23 13:23:14.897 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:182 - Loading parquet from: data/campaigns.parquet
+2025-12-23 13:23:14.911 | INFO     | src.query_engine.multi_table_manager:register_table:100 - Registered table 'all_campaigns' with 5 rows and 41 columns
+2025-12-23 13:23:14.912 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:223 - Registered Parquet file data/campaigns.parquet as table 'all_campaigns'
+2025-12-23 13:23:14.912 | INFO     | src.api.v1.campaigns:chat_global:833 - 🤖 Using NL-to-SQL for question: What was the incremental impact of each channel on conversions?
+2025-12-23 13:23:14.921 | INFO     | src.query_engine.nl_to_sql:generate_sql:736 - === GENERATING SQL FOR QUESTION: What was the incremental impact of each channel on conversions? ===
+2025-12-23 13:23:14.921 | INFO     | src.query_engine.nl_to_sql:generate_sql:739 - Schema info available: True
+2025-12-23 13:23:14.921 | INFO     | src.query_engine.nl_to_sql:generate_sql:741 - Columns: ['Channel', 'Placement', 'Funnel', 'Ad Type', 'Total Spent', 'Site Visit', 'Impressions', 'Clicks', 'Platform', 'Campaign_Name_Full', 'Placement_Name_Full', 'Creative_Name_Full', 'Audience_Segment', 'Device_Type', 'Geographic_Region', 'Age_Group', 'Campaign_Objective', 'Targeting_Type', 'Creative_Format', 'Creative_Elements', 'Creative_ID', 'Budget_Type', 'Bid_Strategy', 'Landing_Page_Type', 'Attribution_Window', 'Frequency_Cap', 'Dayparting_Schedule', 'Gender_Targeting', 'Language_Targeting', 'Customer_Lifecycle_Stage', 'Seasonality_Factor', 'Competitive_Strategy', 'Revenue_2024', 'Revenue_2025', 'Reach_2024', 'Reach_2025', 'Video_Plays_2024', 'Video_Plays_2025', 'Video_Completes_2024', 'Video_Completes_2025', 'Date']
+2025-12-23 13:23:14.921 | INFO     | src.query_engine.nl_to_sql:generate_sql:742 - Schema description length: 8214 chars
+2025-12-23 13:23:14.921 | INFO     | src.query_engine.nl_to_sql:generate_sql:743 - Schema description preview: 🚨🚨🚨 CRITICAL - USE EXACT COLUMN NAMES BELOW 🚨🚨🚨
+You MUST use ONLY these exact column names (case-sensitive). DO NOT invent or normalize column names!
+
+Available columns:
+  - "Channel"
+  - "Placement"
+  - "Funnel"
+  - "Ad Type"
+  - "Total Spent"
+  - "Site Visit"
+  - "Impressions"
+  - "Clicks"
+  - "Pl...
+2025-12-23 13:23:14.921 | INFO     | src.query_engine.nl_to_sql:generate_sql:976 - FULL PROMPT LENGTH: 42489 chars
+2025-12-23 13:23:14.921 | INFO     | src.query_engine.nl_to_sql:generate_sql:977 - PROMPT PREVIEW (first 500 chars):
+You are a SQL expert specializing in marketing campaign analytics. Convert the following natural language question into a DuckDB SQL query.
+
+
+
+# Marketing Analytics Glossary
+
+## Key Metrics
+- **ROAS (Return on Ad Spend)**: Revenue generated per dollar spent. Formula: Revenue / Spend
+- **CPA (Cost Per Acquisition)**: Cost to acquire one customer. Formula: Spend / Conversions
+- **CTR (Click-Through Rate)**: Percentage of impressions that result in clicks. Formula: (Clicks / Impressions) * 100
+- **
+2025-12-23 13:23:14.921 | INFO     | src.query_engine.nl_to_sql:generate_sql:978 - PROMPT END (last 200 chars):
+names - only use values explicitly shown in the schema
+- Platform names are case-sensitive and must match exactly
+
+Question: What was the incremental impact of each channel on conversions?
+
+SQL Query:
+2025-12-23 13:23:14.921 | INFO     | src.query_engine.nl_to_sql:generate_sql:986 - Attempting to use gemini (gemini-2.5-flash)...
+2025-12-23 13:23:15.451 | WARNING  | src.query_engine.nl_to_sql:generate_sql:1064 - ❌ gemini failed: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash
+Please retry in 44.89306368s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 20
+}
+, retry_delay {
+  seconds: 44
+}
+]
+2025-12-23 13:23:15.455 | INFO     | src.query_engine.nl_to_sql:generate_sql:986 - Attempting to use openai (gpt-4o)...
+2025-12-23 13:23:30.289 | INFO     | src.query_engine.nl_to_sql:generate_sql:1029 - ✅ Successfully used openai
+2025-12-23 13:23:30.291 | INFO     | src.query_engine.nl_to_sql:generate_sql:1070 - RAW LLM RESPONSE: ```sql
+WITH channel_conversions AS (
+    SELECT 
+        Channel,
+        SUM("Site Visit") AS total_conversions
+    FROM all_campaigns
+    GROUP BY Channel
+),
+total_conversions AS (
+    SELECT 
+        SUM("Site Visit") AS overall_conversions
+    FROM all_campaigns
+)
+SELECT 
+    cc.Channel,
+    cc.total_conversions,
+    ROUND((cc.total_conversions / NULLIF(tc.overall_conversions, 0)) * 100, 2) AS incremental_impact_pct
+FROM channel_conversions cc, total_conversions tc
+ORDER BY incremental_impact_pct DESC;
+```
+2025-12-23 13:23:30.292 | INFO     | src.query_engine.nl_to_sql:generate_sql:1074 - AFTER CLEANUP: WITH channel_conversions AS (
+    SELECT 
+        Channel,
+        SUM("Site Visit") AS total_conversions
+    FROM all_campaigns
+    GROUP BY Channel
+),
+total_conversions AS (
+    SELECT 
+        SUM("Site Visit") AS overall_conversions
+    FROM all_campaigns
+)
+SELECT 
+    cc.Channel,
+    cc.total_conversions,
+    ROUND((cc.total_conversions / NULLIF(tc.overall_conversions, 0)) * 100, 2) AS incremental_impact_pct
+FROM channel_conversions cc, total_conversions tc
+ORDER BY incremental_impact_pct DESC;
+2025-12-23 13:23:30.292 | INFO     | src.query_engine.nl_to_sql:generate_sql:1078 - AFTER SANITIZE: WITH channel_conversions AS (
+    SELECT 
+        Channel,
+        SUM("Site Visit") AS total_conversions
+    FROM all_campaigns
+    GROUP BY Channel
+),
+total_conversions AS (
+    SELECT 
+        SUM("Site Visit") AS overall_conversions
+    FROM all_campaigns
+)
+SELECT 
+    cc.Channel,
+    cc.total_conversions,
+    ROUND((cc.total_conversions / NULLIF(tc.overall_conversions, 0)) * 100, 2) AS incremental_impact_pct
+FROM channel_conversions cc, total_conversions tc
+ORDER BY incremental_impact_pct DESC;
+2025-12-23 13:23:30.296 | INFO     | src.query_engine.nl_to_sql:_validate_and_fix_sql:712 - Auto-fixed SQL issues: ['\'(?<![\\"\\w])channel(?![\\"\\w])\' → \'Channel\' (3x)', "Resolved: 'channel_conversions' → 'Channel'"]
+2025-12-23 13:23:30.296 | INFO     | src.query_engine.nl_to_sql:generate_sql:1083 - AFTER VALIDATION: WITH "Channel" AS (
+    SELECT 
+        "Channel",
+        SUM("Site Visit") AS total_conversions
+    FROM all_campaigns
+    GROUP BY "Channel"
+),
+total_conversions AS (
+    SELECT 
+        SUM("Site Visit") AS overall_conversions
+    FROM all_campaigns
+)
+SELECT 
+    cc."Channel",
+    cc.total_conversions,
+    ROUND((cc.total_conversions / NULLIF(tc.overall_conversions, 0)) * 100, 2) AS incremental_impact_pct
+FROM "Channel" cc, total_conversions tc
+ORDER BY incremental_impact_pct DESC;
+2025-12-23 13:23:30.297 | INFO     | src.query_engine.nl_to_sql:generate_sql:1084 - Auto-fixes applied: ['\'(?<![\\"\\w])channel(?![\\"\\w])\' → \'Channel\' (3x)', "Resolved: 'channel_conversions' → 'Channel'"]
+2025-12-23 13:23:30.305 | INFO     | src.query_engine.nl_to_sql:execute_query:1175 - Query executed successfully, returned 2 rows
+2025-12-23 13:23:30.811 | WARNING  | src.query_engine.nl_to_sql:_generate_answer:1472 - Insights generation failed with gemini: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash
+Please retry in 29.581681822s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 20
+}
+, retry_delay {
+  seconds: 29
+}
+]
+2025-12-23 13:23:36.223 | INFO     | src.api.main:shutdown_event:240 - PCA Agent API v3.0 - Shutting down
+2025-12-23 13:23:39.484 | WARNING  | src.utils.opentelemetry_config:<module>:40 - OpenTelemetry not installed. Distributed tracing disabled.
+2025-12-23 13:23:39.491 | INFO     | src.api.main:<module>:56 - Initializing API Gateway...
+2025-12-23 13:23:39.491 | INFO     | src.api.main:<module>:58 - ✅ API Gateway initialized
+2025-12-23 13:23:39.491 | INFO     | src.utils.opentelemetry_config:instrument_app:129 - OpenTelemetry disabled or not available
+2025-12-23 13:23:39.491 | INFO     | src.api.main:<module>:116 - CORS allowed origins: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3001', 'http://127.0.0.1:3001', 'http://localhost:3002', 'http://127.0.0.1:3002']
+2025-12-23 13:23:39.518 | INFO     | src.api.main:<module>:134 - ✅ Prometheus metrics enabled at /metrics
+2025-12-23 13:23:39.519 | INFO     | src.api.main:startup_event:216 - ============================================================
+2025-12-23 13:23:39.519 | INFO     | src.api.main:startup_event:217 - PCA Agent API v3.0 - Starting
+2025-12-23 13:23:39.519 | INFO     | src.api.main:startup_event:218 - ============================================================
+2025-12-23 13:23:39.519 | INFO     | src.api.main:startup_event:219 - ✅ Database persistence enabled
+2025-12-23 13:23:39.519 | INFO     | src.api.main:startup_event:220 - ✅ JWT authentication enabled
+2025-12-23 13:23:39.520 | INFO     | src.api.main:startup_event:221 - ✅ Rate limiting: True
+2025-12-23 13:23:39.520 | INFO     | src.api.main:startup_event:222 - ✅ API versioning: /api/v1/
+2025-12-23 13:23:39.520 | INFO     | src.api.main:startup_event:223 - ✅ Report regeneration implemented
+2025-12-23 13:23:39.520 | INFO     | src.api.main:startup_event:224 - ✅ Structured error codes enabled
+2025-12-23 13:23:39.520 | INFO     | src.api.main:startup_event:225 - ✅ Specific exception handling enabled
+2025-12-23 13:23:39.520 | INFO     | src.api.main:startup_event:226 - ============================================================
+2025-12-23 13:23:39.520 | INFO     | src.api.main:startup_event:232 - API ready at http://localhost:8000
+2025-12-23 13:23:39.520 | INFO     | src.api.main:startup_event:233 - Docs available at http://localhost:8000/api/docs
+2025-12-23 13:23:41.281 | WARNING  | src.utils.opentelemetry_config:<module>:40 - OpenTelemetry not installed. Distributed tracing disabled.
+2025-12-23 13:23:41.285 | INFO     | src.api.main:<module>:56 - Initializing API Gateway...
+2025-12-23 13:23:41.285 | INFO     | src.api.main:<module>:58 - ✅ API Gateway initialized
+2025-12-23 13:23:41.285 | INFO     | src.utils.opentelemetry_config:instrument_app:129 - OpenTelemetry disabled or not available
+2025-12-23 13:23:41.285 | INFO     | src.api.main:<module>:116 - CORS allowed origins: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3001', 'http://127.0.0.1:3001', 'http://localhost:3002', 'http://127.0.0.1:3002']
+2025-12-23 13:23:41.308 | INFO     | src.api.main:<module>:134 - ✅ Prometheus metrics enabled at /metrics
+2025-12-23 13:23:41.309 | INFO     | src.api.main:startup_event:216 - ============================================================
+2025-12-23 13:23:41.309 | INFO     | src.api.main:startup_event:217 - PCA Agent API v3.0 - Starting
+2025-12-23 13:23:41.309 | INFO     | src.api.main:startup_event:218 - ============================================================
+2025-12-23 13:23:41.309 | INFO     | src.api.main:startup_event:219 - ✅ Database persistence enabled
+2025-12-23 13:23:41.309 | INFO     | src.api.main:startup_event:220 - ✅ JWT authentication enabled
+2025-12-23 13:23:41.310 | INFO     | src.api.main:startup_event:221 - ✅ Rate limiting: True
+2025-12-23 13:23:41.310 | INFO     | src.api.main:startup_event:222 - ✅ API versioning: /api/v1/
+2025-12-23 13:23:41.310 | INFO     | src.api.main:startup_event:223 - ✅ Report regeneration implemented
+2025-12-23 13:23:41.310 | INFO     | src.api.main:startup_event:224 - ✅ Structured error codes enabled
+2025-12-23 13:23:41.310 | INFO     | src.api.main:startup_event:225 - ✅ Specific exception handling enabled
+2025-12-23 13:23:41.310 | INFO     | src.api.main:startup_event:226 - ============================================================
+2025-12-23 13:23:41.310 | INFO     | src.api.main:startup_event:232 - API ready at http://localhost:8000
+2025-12-23 13:23:41.310 | INFO     | src.api.main:startup_event:233 - Docs available at http://localhost:8000/api/docs
+2025-12-23 13:23:41.313 | INFO     | src.api.middleware.auth:authenticate_user:119 - Authenticating user: ashwin
+2025-12-23 13:23:41.313 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:23:41.319 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:23:41.319 | INFO     | src.api.middleware.auth:authenticate_user:126 - User found: ashwin, Role: admin
+2025-12-23 13:23:41.495 | INFO     | src.api.middleware.auth:authenticate_user:133 - Password verified for user: ashwin
+2025-12-23 13:23:41.496 | INFO     | src.api.middleware.auth:create_access_token:162 - Created access token for user: ashwin
+2025-12-23 13:23:41.499 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:23:41.503 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:23:41.508 | INFO     | src.api.v1.campaigns:chat_global:828 - Chat using persistent Parquet: data/campaigns.parquet
+2025-12-23 13:23:41.578 | ERROR    | src.knowledge.vector_store:__init__:338 - Vector retriever unavailable: Vector index not found at data/vector_store/faiss.index. Build it first.
+2025-12-23 13:23:41.579 | ERROR    | src.knowledge.vector_store:__init__:344 - Keyword retriever unavailable: rank_bm25 is not installed. Install with `pip install rank-bm25`.
+2025-12-23 13:23:41.579 | ERROR    | src.knowledge.vector_store:__init__:350 - Cohere reranker unavailable: COHERE_API_KEY not set. Cannot enable reranking.
+2025-12-23 13:23:41.579 | INFO     | src.query_engine.nl_to_sql:__init__:64 - Tier 1: Gemini 2.5 Flash (FREE)
+2025-12-23 13:23:41.579 | INFO     | src.query_engine.nl_to_sql:__init__:79 - Tier 3: OpenAI GPT-4o
+2025-12-23 13:23:41.579 | WARNING  | src.utils.anthropic_helpers:_log_client_error:33 - Anthropic client failed due to an unsupported 'proxies' argument. Set ANTHROPIC_API_KEY only when the SDK supports proxies in this environment.
+2025-12-23 13:23:41.579 | WARNING  | src.query_engine.nl_to_sql:__init__:89 - Anthropic client unavailable. Skipping Claude tier.
+2025-12-23 13:23:41.579 | INFO     | src.query_engine.nl_to_sql:__init__:98 - Available models: ['gemini', 'openai']
+2025-12-23 13:23:41.579 | INFO     | src.query_engine.nl_to_sql:__init__:105 - Initialized NaturalLanguageQueryEngine
+2025-12-23 13:23:41.583 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:182 - Loading parquet from: data/campaigns.parquet
+2025-12-23 13:23:41.598 | INFO     | src.query_engine.multi_table_manager:register_table:100 - Registered table 'all_campaigns' with 5 rows and 41 columns
+2025-12-23 13:23:41.598 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:223 - Registered Parquet file data/campaigns.parquet as table 'all_campaigns'
+2025-12-23 13:23:41.598 | INFO     | src.api.v1.campaigns:chat_global:833 - 🤖 Using NL-to-SQL for question: Based on this campaign, how should we re-plan the next flight?
+2025-12-23 13:23:41.603 | INFO     | src.query_engine.nl_to_sql:generate_sql:736 - === GENERATING SQL FOR QUESTION: Based on this campaign, how should we re-plan the next flight? ===
+2025-12-23 13:23:41.604 | INFO     | src.query_engine.nl_to_sql:generate_sql:739 - Schema info available: True
+2025-12-23 13:23:41.604 | INFO     | src.query_engine.nl_to_sql:generate_sql:741 - Columns: ['Channel', 'Placement', 'Funnel', 'Ad Type', 'Total Spent', 'Site Visit', 'Impressions', 'Clicks', 'Platform', 'Campaign_Name_Full', 'Placement_Name_Full', 'Creative_Name_Full', 'Audience_Segment', 'Device_Type', 'Geographic_Region', 'Age_Group', 'Campaign_Objective', 'Targeting_Type', 'Creative_Format', 'Creative_Elements', 'Creative_ID', 'Budget_Type', 'Bid_Strategy', 'Landing_Page_Type', 'Attribution_Window', 'Frequency_Cap', 'Dayparting_Schedule', 'Gender_Targeting', 'Language_Targeting', 'Customer_Lifecycle_Stage', 'Seasonality_Factor', 'Competitive_Strategy', 'Revenue_2024', 'Revenue_2025', 'Reach_2024', 'Reach_2025', 'Video_Plays_2024', 'Video_Plays_2025', 'Video_Completes_2024', 'Video_Completes_2025', 'Date']
+2025-12-23 13:23:41.604 | INFO     | src.query_engine.nl_to_sql:generate_sql:742 - Schema description length: 8214 chars
+2025-12-23 13:23:41.604 | INFO     | src.query_engine.nl_to_sql:generate_sql:743 - Schema description preview: 🚨🚨🚨 CRITICAL - USE EXACT COLUMN NAMES BELOW 🚨🚨🚨
+You MUST use ONLY these exact column names (case-sensitive). DO NOT invent or normalize column names!
+
+Available columns:
+  - "Channel"
+  - "Placement"
+  - "Funnel"
+  - "Ad Type"
+  - "Total Spent"
+  - "Site Visit"
+  - "Impressions"
+  - "Clicks"
+  - "Pl...
+2025-12-23 13:23:41.604 | INFO     | src.query_engine.nl_to_sql:generate_sql:976 - FULL PROMPT LENGTH: 42488 chars
+2025-12-23 13:23:41.604 | INFO     | src.query_engine.nl_to_sql:generate_sql:977 - PROMPT PREVIEW (first 500 chars):
+You are a SQL expert specializing in marketing campaign analytics. Convert the following natural language question into a DuckDB SQL query.
+
+
+
+# Marketing Analytics Glossary
+
+## Key Metrics
+- **ROAS (Return on Ad Spend)**: Revenue generated per dollar spent. Formula: Revenue / Spend
+- **CPA (Cost Per Acquisition)**: Cost to acquire one customer. Formula: Spend / Conversions
+- **CTR (Click-Through Rate)**: Percentage of impressions that result in clicks. Formula: (Clicks / Impressions) * 100
+- **
+2025-12-23 13:23:41.604 | INFO     | src.query_engine.nl_to_sql:generate_sql:978 - PROMPT END (last 200 chars):
+ names - only use values explicitly shown in the schema
+- Platform names are case-sensitive and must match exactly
+
+Question: Based on this campaign, how should we re-plan the next flight?
+
+SQL Query:
+2025-12-23 13:23:41.604 | INFO     | src.query_engine.nl_to_sql:generate_sql:986 - Attempting to use gemini (gemini-2.5-flash)...
+2025-12-23 13:23:42.448 | WARNING  | src.query_engine.nl_to_sql:generate_sql:1064 - ❌ gemini failed: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash
+Please retry in 17.825033026s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 20
+}
+, retry_delay {
+  seconds: 17
+}
+]
+2025-12-23 13:23:42.448 | INFO     | src.query_engine.nl_to_sql:generate_sql:986 - Attempting to use openai (gpt-4o)...
+2025-12-23 13:23:57.142 | INFO     | src.query_engine.nl_to_sql:generate_sql:1029 - ✅ Successfully used openai
+2025-12-23 13:23:57.144 | INFO     | src.query_engine.nl_to_sql:generate_sql:1070 - RAW LLM RESPONSE: ```sql
+WITH campaign_performance AS (
+    SELECT 
+        "Campaign_Name_Full",
+        SUM("Total Spent") AS total_spent,
+        SUM("Revenue_2024") AS total_revenue,
+        SUM("Site Visit") AS total_conversions,
+        SUM("Clicks") AS total_clicks,
+        SUM("Impressions") AS total_impressions,
+        ROUND((SUM("Clicks") / NULLIF(SUM("Impressions"), 0)) * 100, 2) AS ctr,
+        ROUND(SUM("Total Spent") / NULLIF(SUM("Clicks"), 0), 2) AS cpc,
+        ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa,
+        ROUND(SUM("Revenue_2024") / NULLIF(SUM("Total Spent"), 0), 2) AS roas,
+        ROUND((SUM("Site Visit") / NULLIF(SUM("Clicks"), 0)) * 100, 2) AS conversion_rate
+    FROM all_campaigns
+    GROUP BY "Campaign_Name_Full"
+)
+SELECT 
+    "Campaign_Name_Full",
+    total_spent,
+    total_revenue,
+    total_conversions,
+    total_clicks,
+    total_impressions,
+    ctr,
+    cpc,
+    cpa,
+    roas,
+    conversion_rate
+FROM campaign_performance
+ORDER BY roas DESC
+LIMIT 10;
+```
+2025-12-23 13:23:57.145 | INFO     | src.query_engine.nl_to_sql:generate_sql:1074 - AFTER CLEANUP: WITH campaign_performance AS (
+    SELECT 
+        "Campaign_Name_Full",
+        SUM("Total Spent") AS total_spent,
+        SUM("Revenue_2024") AS total_revenue,
+        SUM("Site Visit") AS total_conversions,
+        SUM("Clicks") AS total_clicks,
+        SUM("Impressions") AS total_impressions,
+        ROUND((SUM("Clicks") / NULLIF(SUM("Impressions"), 0)) * 100, 2) AS ctr,
+        ROUND(SUM("Total Spent") / NULLIF(SUM("Clicks"), 0), 2) AS cpc,
+        ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa,
+        ROUND(SUM("Revenue_2024") / NULLIF(SUM("Total Spent"), 0), 2) AS roas,
+        ROUND((SUM("Site Visit") / NULLIF(SUM("Clicks"), 0)) * 100, 2) AS conversion_rate
+    FROM all_campaigns
+    GROUP BY "Campaign_Name_Full"
+)
+SELECT 
+    "Campaign_Name_Full",
+    total_spent,
+    total_revenue,
+    total_conversions,
+    total_clicks,
+    total_impressions,
+    ctr,
+    cpc,
+    cpa,
+    roas,
+    conversion_rate
+FROM campaign_performance
+ORDER BY roas DESC
+LIMIT 10;
+2025-12-23 13:23:57.146 | INFO     | src.query_engine.nl_to_sql:generate_sql:1078 - AFTER SANITIZE: WITH campaign_performance AS (
+    SELECT 
+        "Campaign_Name_Full",
+        SUM("Total Spent") AS "Total Spent",
+        SUM("Revenue_2024") AS total_revenue,
+        SUM("Site Visit") AS total_conversions,
+        SUM("Clicks") AS total_clicks,
+        SUM("Impressions") AS total_impressions,
+        ROUND((SUM("Clicks") / NULLIF(SUM("Impressions"), 0)) * 100, 2) AS ctr,
+        ROUND(SUM("Total Spent") / NULLIF(SUM("Clicks"), 0), 2) AS cpc,
+        ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa,
+        ROUND(SUM("Revenue_2024") / NULLIF(SUM("Total Spent"), 0), 2) AS roas,
+        ROUND((SUM("Site Visit") / NULLIF(SUM("Clicks"), 0)) * 100, 2) AS conversion_rate
+    FROM all_campaigns
+    GROUP BY "Campaign_Name_Full"
+)
+SELECT 
+    "Campaign_Name_Full",
+    "Total Spent",
+    total_revenue,
+    total_conversions,
+    total_clicks,
+    total_impressions,
+    ctr,
+    cpc,
+    cpa,
+    roas,
+    conversion_rate
+FROM campaign_performance
+ORDER BY roas DESC
+LIMIT 10;
+2025-12-23 13:23:57.154 | INFO     | src.query_engine.nl_to_sql:_validate_and_fix_sql:712 - Auto-fixed SQL issues: ["Resolved: 'campaign_performance' → 'Campaign_Objective'"]
+2025-12-23 13:23:57.155 | INFO     | src.query_engine.nl_to_sql:generate_sql:1083 - AFTER VALIDATION: WITH "Campaign_Objective" AS (
+    SELECT 
+        "Campaign_Name_Full",
+        SUM("Total Spent") AS "Total Spent",
+        SUM("Revenue_2024") AS total_revenue,
+        SUM("Site Visit") AS total_conversions,
+        SUM("Clicks") AS total_clicks,
+        SUM("Impressions") AS total_impressions,
+        ROUND((SUM("Clicks") / NULLIF(SUM("Impressions"), 0)) * 100, 2) AS ctr,
+        ROUND(SUM("Total Spent") / NULLIF(SUM("Clicks"), 0), 2) AS cpc,
+        ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa,
+        ROUND(SUM("Revenue_2024") / NULLIF(SUM("Total Spent"), 0), 2) AS roas,
+        ROUND((SUM("Site Visit") / NULLIF(SUM("Clicks"), 0)) * 100, 2) AS conversion_rate
+    FROM all_campaigns
+    GROUP BY "Campaign_Name_Full"
+)
+SELECT 
+    "Campaign_Name_Full",
+    "Total Spent",
+    total_revenue,
+    total_conversions,
+    total_clicks,
+    total_impressions,
+    ctr,
+    cpc,
+    cpa,
+    roas,
+    conversion_rate
+FROM "Campaign_Objective"
+ORDER BY roas DESC
+LIMIT 10;
+2025-12-23 13:23:57.155 | INFO     | src.query_engine.nl_to_sql:generate_sql:1084 - Auto-fixes applied: ["Resolved: 'campaign_performance' → 'Campaign_Objective'"]
+2025-12-23 13:23:57.161 | INFO     | src.query_engine.nl_to_sql:execute_query:1175 - Query executed successfully, returned 5 rows
+2025-12-23 13:23:57.522 | WARNING  | src.query_engine.nl_to_sql:_generate_answer:1472 - Insights generation failed with gemini: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash
+Please retry in 2.726654557s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 20
+}
+, retry_delay {
+  seconds: 2
+}
+]
+2025-12-23 13:34:52.442 | INFO     | src.api.main:shutdown_event:240 - PCA Agent API v3.0 - Shutting down
+2025-12-23 13:35:17.755 | WARNING  | src.utils.opentelemetry_config:<module>:40 - OpenTelemetry not installed. Distributed tracing disabled.
+2025-12-23 13:35:17.765 | INFO     | src.api.main:<module>:56 - Initializing API Gateway...
+2025-12-23 13:35:17.765 | INFO     | src.api.main:<module>:58 - ✅ API Gateway initialized
+2025-12-23 13:35:17.765 | INFO     | src.utils.opentelemetry_config:instrument_app:129 - OpenTelemetry disabled or not available
+2025-12-23 13:35:17.765 | INFO     | src.api.main:<module>:116 - CORS allowed origins: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3001', 'http://127.0.0.1:3001', 'http://localhost:3002', 'http://127.0.0.1:3002']
+2025-12-23 13:35:17.805 | INFO     | src.api.main:<module>:134 - ✅ Prometheus metrics enabled at /metrics
+2025-12-23 13:35:17.806 | INFO     | src.api.main:startup_event:216 - ============================================================
+2025-12-23 13:35:17.806 | INFO     | src.api.main:startup_event:217 - PCA Agent API v3.0 - Starting
+2025-12-23 13:35:17.807 | INFO     | src.api.main:startup_event:218 - ============================================================
+2025-12-23 13:35:17.807 | INFO     | src.api.main:startup_event:219 - ✅ Database persistence enabled
+2025-12-23 13:35:17.807 | INFO     | src.api.main:startup_event:220 - ✅ JWT authentication enabled
+2025-12-23 13:35:17.807 | INFO     | src.api.main:startup_event:221 - ✅ Rate limiting: True
+2025-12-23 13:35:17.807 | INFO     | src.api.main:startup_event:222 - ✅ API versioning: /api/v1/
+2025-12-23 13:35:17.807 | INFO     | src.api.main:startup_event:223 - ✅ Report regeneration implemented
+2025-12-23 13:35:17.807 | INFO     | src.api.main:startup_event:224 - ✅ Structured error codes enabled
+2025-12-23 13:35:17.807 | INFO     | src.api.main:startup_event:225 - ✅ Specific exception handling enabled
+2025-12-23 13:35:17.807 | INFO     | src.api.main:startup_event:226 - ============================================================
+2025-12-23 13:35:17.807 | INFO     | src.api.main:startup_event:232 - API ready at http://localhost:8000
+2025-12-23 13:35:17.807 | INFO     | src.api.main:startup_event:233 - Docs available at http://localhost:8000/api/docs
+2025-12-23 13:35:23.263 | WARNING  | src.utils.opentelemetry_config:<module>:40 - OpenTelemetry not installed. Distributed tracing disabled.
+2025-12-23 13:35:23.272 | INFO     | src.api.main:<module>:56 - Initializing API Gateway...
+2025-12-23 13:35:23.272 | INFO     | src.api.main:<module>:58 - ✅ API Gateway initialized
+2025-12-23 13:35:23.272 | INFO     | src.utils.opentelemetry_config:instrument_app:129 - OpenTelemetry disabled or not available
+2025-12-23 13:35:23.272 | INFO     | src.api.main:<module>:116 - CORS allowed origins: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3001', 'http://127.0.0.1:3001', 'http://localhost:3002', 'http://127.0.0.1:3002']
+2025-12-23 13:35:23.300 | INFO     | src.api.main:<module>:134 - ✅ Prometheus metrics enabled at /metrics
+2025-12-23 13:35:23.301 | INFO     | src.api.main:startup_event:216 - ============================================================
+2025-12-23 13:35:23.301 | INFO     | src.api.main:startup_event:217 - PCA Agent API v3.0 - Starting
+2025-12-23 13:35:23.301 | INFO     | src.api.main:startup_event:218 - ============================================================
+2025-12-23 13:35:23.301 | INFO     | src.api.main:startup_event:219 - ✅ Database persistence enabled
+2025-12-23 13:35:23.301 | INFO     | src.api.main:startup_event:220 - ✅ JWT authentication enabled
+2025-12-23 13:35:23.301 | INFO     | src.api.main:startup_event:221 - ✅ Rate limiting: True
+2025-12-23 13:35:23.301 | INFO     | src.api.main:startup_event:222 - ✅ API versioning: /api/v1/
+2025-12-23 13:35:23.301 | INFO     | src.api.main:startup_event:223 - ✅ Report regeneration implemented
+2025-12-23 13:35:23.301 | INFO     | src.api.main:startup_event:224 - ✅ Structured error codes enabled
+2025-12-23 13:35:23.301 | INFO     | src.api.main:startup_event:225 - ✅ Specific exception handling enabled
+2025-12-23 13:35:23.301 | INFO     | src.api.main:startup_event:226 - ============================================================
+2025-12-23 13:35:23.301 | INFO     | src.api.main:startup_event:232 - API ready at http://localhost:8000
+2025-12-23 13:35:23.302 | INFO     | src.api.main:startup_event:233 - Docs available at http://localhost:8000/api/docs
+2025-12-23 13:35:25.774 | INFO     | src.api.middleware.auth:authenticate_user:119 - Authenticating user: ashwin
+2025-12-23 13:35:25.774 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:35:25.836 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:35:25.839 | INFO     | src.api.middleware.auth:authenticate_user:126 - User found: ashwin, Role: admin
+2025-12-23 13:35:26.154 | INFO     | src.api.middleware.auth:authenticate_user:133 - Password verified for user: ashwin
+2025-12-23 13:35:26.162 | INFO     | src.api.middleware.auth:create_access_token:162 - Created access token for user: ashwin
+2025-12-23 13:35:26.165 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:35:26.169 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:35:26.174 | INFO     | src.api.v1.campaigns:chat_global:828 - Chat using persistent Parquet: data/campaigns.parquet
+2025-12-23 13:35:26.245 | ERROR    | src.knowledge.vector_store:__init__:338 - Vector retriever unavailable: Vector index not found at data/vector_store/faiss.index. Build it first.
+2025-12-23 13:35:26.246 | ERROR    | src.knowledge.vector_store:__init__:344 - Keyword retriever unavailable: rank_bm25 is not installed. Install with `pip install rank-bm25`.
+2025-12-23 13:35:26.246 | ERROR    | src.knowledge.vector_store:__init__:350 - Cohere reranker unavailable: COHERE_API_KEY not set. Cannot enable reranking.
+2025-12-23 13:35:26.246 | INFO     | src.query_engine.nl_to_sql:__init__:64 - Tier 1: Gemini 2.5 Flash (FREE)
+2025-12-23 13:35:26.246 | INFO     | src.query_engine.nl_to_sql:__init__:79 - Tier 3: OpenAI GPT-4o
+2025-12-23 13:35:26.246 | WARNING  | src.utils.anthropic_helpers:_log_client_error:33 - Anthropic client failed due to an unsupported 'proxies' argument. Set ANTHROPIC_API_KEY only when the SDK supports proxies in this environment.
+2025-12-23 13:35:26.246 | WARNING  | src.query_engine.nl_to_sql:__init__:89 - Anthropic client unavailable. Skipping Claude tier.
+2025-12-23 13:35:26.246 | INFO     | src.query_engine.nl_to_sql:__init__:98 - Available models: ['gemini', 'openai']
+2025-12-23 13:35:26.246 | INFO     | src.query_engine.nl_to_sql:__init__:105 - Initialized NaturalLanguageQueryEngine
+2025-12-23 13:35:26.250 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:182 - Loading parquet from: data/campaigns.parquet
+2025-12-23 13:35:26.286 | INFO     | src.query_engine.multi_table_manager:register_table:100 - Registered table 'all_campaigns' with 5 rows and 41 columns
+2025-12-23 13:35:26.286 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:223 - Registered Parquet file data/campaigns.parquet as table 'all_campaigns'
+2025-12-23 13:35:26.287 | INFO     | src.api.v1.campaigns:chat_global:833 - 🤖 Using NL-to-SQL for question: Which channels delivered the lowest cost per conversion for this campaign?
+2025-12-23 13:35:26.324 | INFO     | src.query_engine.nl_to_sql:generate_sql:751 - === GENERATING SQL FOR QUESTION: Which channels delivered the lowest cost per conversion for this campaign? ===
+2025-12-23 13:35:26.325 | INFO     | src.query_engine.nl_to_sql:generate_sql:754 - Schema info available: True
+2025-12-23 13:35:26.326 | INFO     | src.query_engine.nl_to_sql:generate_sql:756 - Columns: ['Channel', 'Placement', 'Funnel', 'Ad Type', 'Total Spent', 'Site Visit', 'Impressions', 'Clicks', 'Platform', 'Campaign_Name_Full', 'Placement_Name_Full', 'Creative_Name_Full', 'Audience_Segment', 'Device_Type', 'Geographic_Region', 'Age_Group', 'Campaign_Objective', 'Targeting_Type', 'Creative_Format', 'Creative_Elements', 'Creative_ID', 'Budget_Type', 'Bid_Strategy', 'Landing_Page_Type', 'Attribution_Window', 'Frequency_Cap', 'Dayparting_Schedule', 'Gender_Targeting', 'Language_Targeting', 'Customer_Lifecycle_Stage', 'Seasonality_Factor', 'Competitive_Strategy', 'Revenue_2024', 'Revenue_2025', 'Reach_2024', 'Reach_2025', 'Video_Plays_2024', 'Video_Plays_2025', 'Video_Completes_2024', 'Video_Completes_2025', 'Date']
+2025-12-23 13:35:26.326 | INFO     | src.query_engine.nl_to_sql:generate_sql:757 - Schema description length: 8214 chars
+2025-12-23 13:35:26.326 | INFO     | src.query_engine.nl_to_sql:generate_sql:758 - Schema description preview: 🚨🚨🚨 CRITICAL - USE EXACT COLUMN NAMES BELOW 🚨🚨🚨
+You MUST use ONLY these exact column names (case-sensitive). DO NOT invent or normalize column names!
+
+Available columns:
+  - "Channel"
+  - "Placement"
+  - "Funnel"
+  - "Ad Type"
+  - "Total Spent"
+  - "Site Visit"
+  - "Impressions"
+  - "Clicks"
+  - "Pl...
+2025-12-23 13:35:26.327 | INFO     | src.query_engine.nl_to_sql:generate_sql:998 - FULL PROMPT LENGTH: 43250 chars
+2025-12-23 13:35:26.327 | INFO     | src.query_engine.nl_to_sql:generate_sql:999 - PROMPT PREVIEW (first 500 chars):
+You are a SQL expert specializing in marketing campaign analytics. Convert the following natural language question into a DuckDB SQL query.
+
+
+
+# Marketing Analytics Glossary
+
+## Key Metrics
+- **ROAS (Return on Ad Spend)**: Revenue generated per dollar spent. Formula: Revenue / Spend
+- **CPA (Cost Per Acquisition)**: Cost to acquire one customer. Formula: Spend / Conversions
+- **CTR (Click-Through Rate)**: Percentage of impressions that result in clicks. Formula: (Clicks / Impressions) * 100
+- **
+2025-12-23 13:35:26.327 | INFO     | src.query_engine.nl_to_sql:generate_sql:1000 - PROMPT END (last 200 chars):
+y use values explicitly shown in the schema
+- Platform names are case-sensitive and must match exactly
+
+Question: Which channels delivered the lowest cost per conversion for this campaign?
+
+SQL Query:
+2025-12-23 13:35:26.328 | INFO     | src.query_engine.nl_to_sql:generate_sql:1008 - Attempting to use gemini (gemini-2.5-flash)...
+2025-12-23 13:35:33.159 | INFO     | src.query_engine.nl_to_sql:generate_sql:1036 - ✅ Successfully used gemini (FREE)
+2025-12-23 13:35:33.160 | INFO     | src.query_engine.nl_to_sql:generate_sql:1092 - RAW LLM RESPONSE: SELECT
+  Channel,
+  SUM("Total Spent") AS Total_Spend,
+  SUM(Impressions) AS Total_Impressions,
+  SUM(Clicks) AS Total_Clicks,
+  SUM("Site Visit") AS Total_Conversions,
+  ROUND((SUM(Clicks) / NULLIF(SUM(Impressions), 0)) * 100, 2) AS CTR,
+  ROUND(SUM("Total Spent") / NULLIF(SUM(Clicks), 0), 2) AS CPC,
+  ROUND((SUM("Total Spent") / NULLIF(SUM(Impressions), 0)) * 1000, 2) AS CPM,
+  ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS CPA,
+  ROUND((SUM("Site Visit") / NULLIF(SUM(Clicks), 0)) * 100, 2) AS Conversion_Rate
+2025-12-23 13:35:33.161 | INFO     | src.query_engine.nl_to_sql:generate_sql:1096 - AFTER CLEANUP: SELECT
+  Channel,
+  SUM("Total Spent") AS Total_Spend,
+  SUM(Impressions) AS Total_Impressions,
+  SUM(Clicks) AS Total_Clicks,
+  SUM("Site Visit") AS Total_Conversions,
+  ROUND((SUM(Clicks) / NULLIF(SUM(Impressions), 0)) * 100, 2) AS CTR,
+  ROUND(SUM("Total Spent") / NULLIF(SUM(Clicks), 0), 2) AS CPC,
+  ROUND((SUM("Total Spent") / NULLIF(SUM(Impressions), 0)) * 1000, 2) AS CPM,
+  ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS CPA,
+  ROUND((SUM("Site Visit") / NULLIF(SUM(Clicks), 0)) * 100, 2) AS Conversion_Rate
+2025-12-23 13:35:33.162 | INFO     | src.query_engine.nl_to_sql:generate_sql:1100 - AFTER SANITIZE: SELECT
+  Channel,
+  SUM("Total Spent") AS Total_Spend,
+  SUM(Impressions) AS Total_Impressions,
+  SUM(Clicks) AS Total_Clicks,
+  SUM("Site Visit") AS Total_Conversions,
+  ROUND((SUM(Clicks) / NULLIF(SUM(Impressions), 0)) * 100, 2) AS CTR,
+  ROUND(SUM("Total Spent") / NULLIF(SUM(Clicks), 0), 2) AS CPC,
+  ROUND((SUM("Total Spent") / NULLIF(SUM(Impressions), 0)) * 1000, 2) AS CPM,
+  ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS CPA,
+  ROUND((SUM("Site Visit") / NULLIF(SUM(Clicks), 0)) * 100, 2) AS Conversion_Rate
+2025-12-23 13:35:33.174 | INFO     | src.query_engine.nl_to_sql:_validate_and_fix_sql:727 - Auto-fixed SQL issues: ['\'(?<![\\"\\w])clicks?(?![\\"\\w])\' → \'Clicks\' (4x)', '\'(?<![\\"\\w])impressions?(?![\\"\\w])\' → \'Impressions\' (3x)', '\'(?<![\\"\\w])channel(?![\\"\\w])\' → \'Channel\' (1x)']
+2025-12-23 13:35:33.175 | INFO     | src.query_engine.nl_to_sql:generate_sql:1105 - AFTER VALIDATION: SELECT
+  "Channel",
+  SUM("Total Spent") AS Total_Spend,
+  SUM("Impressions") AS Total_Impressions,
+  SUM("Clicks") AS Total_Clicks,
+  SUM("Site Visit") AS Total_Conversions,
+  ROUND((SUM("Clicks") / NULLIF(SUM("Impressions"), 0)) * 100, 2) AS CTR,
+  ROUND(SUM("Total Spent") / NULLIF(SUM("Clicks"), 0), 2) AS CPC,
+  ROUND((SUM("Total Spent") / NULLIF(SUM("Impressions"), 0)) * 1000, 2) AS CPM,
+  ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS CPA,
+  ROUND((SUM("Site Visit") / NULLIF(SUM("Clicks"), 0)) * 100, 2) AS Conversion_Rate
+2025-12-23 13:35:33.175 | INFO     | src.query_engine.nl_to_sql:generate_sql:1106 - Auto-fixes applied: ['\'(?<![\\"\\w])clicks?(?![\\"\\w])\' → \'Clicks\' (4x)', '\'(?<![\\"\\w])impressions?(?![\\"\\w])\' → \'Impressions\' (3x)', '\'(?<![\\"\\w])channel(?![\\"\\w])\' → \'Channel\' (1x)']
+2025-12-23 13:35:33.181 | ERROR    | src.query_engine.nl_to_sql:execute_query:1199 - Error executing query: Binder Error: Referenced column "Channel" was not found because the FROM clause is missing
+
+LINE 2:   "Channel",
+          ^
+2025-12-23 13:35:33.181 | INFO     | src.query_engine.nl_to_sql:execute_query:1203 - Attempting to auto-fix column names and retry...
+2025-12-23 13:35:33.186 | ERROR    | src.query_engine.nl_to_sql:ask:1285 - Error processing question: Binder Error: Referenced column "Channel" was not found because the FROM clause is missing
+
+LINE 2:   "Channel",
+          ^
+2025-12-23 13:35:33.186 | INFO     | src.api.v1.campaigns:chat_global:838 - NL-to-SQL failed, trying templates as fallback...
+2025-12-23 13:35:33.187 | INFO     | src.api.v1.campaigns:chat_global:843 - ✅ Using template fallback: Channel Performance Comparison
+2025-12-23 13:35:33.194 | INFO     | src.api.v1.campaigns:chat_global:852 - Loading parquet from: data/campaigns.parquet
+2025-12-23 13:35:35.222 | INFO     | src.api.middleware.auth:authenticate_user:119 - Authenticating user: ashwin
+2025-12-23 13:35:35.223 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:35:35.238 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:35:35.239 | INFO     | src.api.middleware.auth:authenticate_user:126 - User found: ashwin, Role: admin
+2025-12-23 13:35:35.431 | INFO     | src.api.middleware.auth:authenticate_user:133 - Password verified for user: ashwin
+2025-12-23 13:35:35.431 | INFO     | src.api.middleware.auth:create_access_token:162 - Created access token for user: ashwin
+2025-12-23 13:35:35.436 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:35:35.441 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:35:35.442 | INFO     | src.api.v1.campaigns:chat_global:828 - Chat using persistent Parquet: data/campaigns.parquet
+2025-12-23 13:35:35.445 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:182 - Loading parquet from: data/campaigns.parquet
+2025-12-23 13:35:35.453 | INFO     | src.query_engine.multi_table_manager:register_table:100 - Registered table 'all_campaigns' with 5 rows and 41 columns
+2025-12-23 13:35:35.453 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:223 - Registered Parquet file data/campaigns.parquet as table 'all_campaigns'
+2025-12-23 13:35:35.453 | INFO     | src.api.v1.campaigns:chat_global:833 - 🤖 Using NL-to-SQL for question: Did our planned channel mix align with actual performance?
+2025-12-23 13:35:35.458 | INFO     | src.query_engine.nl_to_sql:generate_sql:751 - === GENERATING SQL FOR QUESTION: Did our planned channel mix align with actual performance? ===
+2025-12-23 13:35:35.458 | INFO     | src.query_engine.nl_to_sql:generate_sql:754 - Schema info available: True
+2025-12-23 13:35:35.458 | INFO     | src.query_engine.nl_to_sql:generate_sql:756 - Columns: ['Channel', 'Placement', 'Funnel', 'Ad Type', 'Total Spent', 'Site Visit', 'Impressions', 'Clicks', 'Platform', 'Campaign_Name_Full', 'Placement_Name_Full', 'Creative_Name_Full', 'Audience_Segment', 'Device_Type', 'Geographic_Region', 'Age_Group', 'Campaign_Objective', 'Targeting_Type', 'Creative_Format', 'Creative_Elements', 'Creative_ID', 'Budget_Type', 'Bid_Strategy', 'Landing_Page_Type', 'Attribution_Window', 'Frequency_Cap', 'Dayparting_Schedule', 'Gender_Targeting', 'Language_Targeting', 'Customer_Lifecycle_Stage', 'Seasonality_Factor', 'Competitive_Strategy', 'Revenue_2024', 'Revenue_2025', 'Reach_2024', 'Reach_2025', 'Video_Plays_2024', 'Video_Plays_2025', 'Video_Completes_2024', 'Video_Completes_2025', 'Date']
+2025-12-23 13:35:35.458 | INFO     | src.query_engine.nl_to_sql:generate_sql:757 - Schema description length: 8214 chars
+2025-12-23 13:35:35.458 | INFO     | src.query_engine.nl_to_sql:generate_sql:758 - Schema description preview: 🚨🚨🚨 CRITICAL - USE EXACT COLUMN NAMES BELOW 🚨🚨🚨
+You MUST use ONLY these exact column names (case-sensitive). DO NOT invent or normalize column names!
+
+Available columns:
+  - "Channel"
+  - "Placement"
+  - "Funnel"
+  - "Ad Type"
+  - "Total Spent"
+  - "Site Visit"
+  - "Impressions"
+  - "Clicks"
+  - "Pl...
+2025-12-23 13:35:35.458 | INFO     | src.query_engine.nl_to_sql:generate_sql:998 - FULL PROMPT LENGTH: 43234 chars
+2025-12-23 13:35:35.458 | INFO     | src.query_engine.nl_to_sql:generate_sql:999 - PROMPT PREVIEW (first 500 chars):
+You are a SQL expert specializing in marketing campaign analytics. Convert the following natural language question into a DuckDB SQL query.
+
+
+
+# Marketing Analytics Glossary
+
+## Key Metrics
+- **ROAS (Return on Ad Spend)**: Revenue generated per dollar spent. Formula: Revenue / Spend
+- **CPA (Cost Per Acquisition)**: Cost to acquire one customer. Formula: Spend / Conversions
+- **CTR (Click-Through Rate)**: Percentage of impressions that result in clicks. Formula: (Clicks / Impressions) * 100
+- **
+2025-12-23 13:35:35.458 | INFO     | src.query_engine.nl_to_sql:generate_sql:1000 - PROMPT END (last 200 chars):
+nnel names - only use values explicitly shown in the schema
+- Platform names are case-sensitive and must match exactly
+
+Question: Did our planned channel mix align with actual performance?
+
+SQL Query:
+2025-12-23 13:35:35.459 | INFO     | src.query_engine.nl_to_sql:generate_sql:1008 - Attempting to use gemini (gemini-2.5-flash)...
+2025-12-23 13:35:43.395 | INFO     | src.query_engine.nl_to_sql:generate_sql:1036 - ✅ Successfully used gemini (FREE)
+2025-12-23 13:35:43.399 | INFO     | src.query_engine.nl_to_sql:generate_sql:1092 - RAW LLM RESPONSE: ```sql
+SELECT
+    Channel,
+    Budget_Type,
+    SUM("Total Spent") AS Total_Spend,
+    SUM(Impressions) AS Total_Impressions,
+2025-12-23 13:35:43.400 | INFO     | src.query_engine.nl_to_sql:generate_sql:1096 - AFTER CLEANUP: SELECT
+    Channel,
+    Budget_Type,
+    SUM("Total Spent") AS Total_Spend,
+    SUM(Impressions) AS Total_Impressions,
+2025-12-23 13:35:43.400 | INFO     | src.query_engine.nl_to_sql:generate_sql:1100 - AFTER SANITIZE: SELECT
+    Channel,
+    Budget_Type,
+    SUM("Total Spent") AS Total_Spend,
+    SUM(Impressions) AS Total_Impressions,
+2025-12-23 13:35:43.402 | INFO     | src.query_engine.nl_to_sql:_validate_and_fix_sql:727 - Auto-fixed SQL issues: ['\'(?<![\\"\\w])impressions?(?![\\"\\w])\' → \'Impressions\' (1x)', '\'(?<![\\"\\w])channel(?![\\"\\w])\' → \'Channel\' (1x)']
+2025-12-23 13:35:43.402 | INFO     | src.query_engine.nl_to_sql:generate_sql:1105 - AFTER VALIDATION: SELECT
+    "Channel",
+    Budget_Type,
+    SUM("Total Spent") AS Total_Spend,
+    SUM("Impressions") AS Total_Impressions,
+2025-12-23 13:35:43.403 | INFO     | src.query_engine.nl_to_sql:generate_sql:1106 - Auto-fixes applied: ['\'(?<![\\"\\w])impressions?(?![\\"\\w])\' → \'Impressions\' (1x)', '\'(?<![\\"\\w])channel(?![\\"\\w])\' → \'Channel\' (1x)']
+2025-12-23 13:35:43.403 | ERROR    | src.query_engine.nl_to_sql:execute_query:1199 - Error executing query: Binder Error: Referenced column "Channel" was not found because the FROM clause is missing
+
+LINE 2:     "Channel",
+            ^
+2025-12-23 13:35:43.404 | INFO     | src.query_engine.nl_to_sql:execute_query:1203 - Attempting to auto-fix column names and retry...
+2025-12-23 13:35:43.405 | ERROR    | src.query_engine.nl_to_sql:ask:1285 - Error processing question: Binder Error: Referenced column "Channel" was not found because the FROM clause is missing
+
+LINE 2:     "Channel",
+            ^
+2025-12-23 13:35:43.406 | INFO     | src.api.v1.campaigns:chat_global:838 - NL-to-SQL failed, trying templates as fallback...
+2025-12-23 13:35:45.420 | INFO     | src.api.middleware.auth:authenticate_user:119 - Authenticating user: ashwin
+2025-12-23 13:35:45.421 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:35:45.435 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:35:45.435 | INFO     | src.api.middleware.auth:authenticate_user:126 - User found: ashwin, Role: admin
+2025-12-23 13:35:45.628 | INFO     | src.api.middleware.auth:authenticate_user:133 - Password verified for user: ashwin
+2025-12-23 13:35:45.629 | INFO     | src.api.middleware.auth:create_access_token:162 - Created access token for user: ashwin
+2025-12-23 13:35:45.631 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:35:45.636 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:35:45.636 | INFO     | src.api.v1.campaigns:chat_global:828 - Chat using persistent Parquet: data/campaigns.parquet
+2025-12-23 13:35:45.639 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:182 - Loading parquet from: data/campaigns.parquet
+2025-12-23 13:35:45.647 | INFO     | src.query_engine.multi_table_manager:register_table:100 - Registered table 'all_campaigns' with 5 rows and 41 columns
+2025-12-23 13:35:45.647 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:223 - Registered Parquet file data/campaigns.parquet as table 'all_campaigns'
+2025-12-23 13:35:45.647 | INFO     | src.api.v1.campaigns:chat_global:833 - 🤖 Using NL-to-SQL for question: At what spend level did performance start to plateau for each channel?
+2025-12-23 13:35:45.652 | INFO     | src.query_engine.nl_to_sql:generate_sql:751 - === GENERATING SQL FOR QUESTION: At what spend level did performance start to plateau for each channel? ===
+2025-12-23 13:35:45.652 | INFO     | src.query_engine.nl_to_sql:generate_sql:754 - Schema info available: True
+2025-12-23 13:35:45.652 | INFO     | src.query_engine.nl_to_sql:generate_sql:756 - Columns: ['Channel', 'Placement', 'Funnel', 'Ad Type', 'Total Spent', 'Site Visit', 'Impressions', 'Clicks', 'Platform', 'Campaign_Name_Full', 'Placement_Name_Full', 'Creative_Name_Full', 'Audience_Segment', 'Device_Type', 'Geographic_Region', 'Age_Group', 'Campaign_Objective', 'Targeting_Type', 'Creative_Format', 'Creative_Elements', 'Creative_ID', 'Budget_Type', 'Bid_Strategy', 'Landing_Page_Type', 'Attribution_Window', 'Frequency_Cap', 'Dayparting_Schedule', 'Gender_Targeting', 'Language_Targeting', 'Customer_Lifecycle_Stage', 'Seasonality_Factor', 'Competitive_Strategy', 'Revenue_2024', 'Revenue_2025', 'Reach_2024', 'Reach_2025', 'Video_Plays_2024', 'Video_Plays_2025', 'Video_Completes_2024', 'Video_Completes_2025', 'Date']
+2025-12-23 13:35:45.652 | INFO     | src.query_engine.nl_to_sql:generate_sql:757 - Schema description length: 8214 chars
+2025-12-23 13:35:45.652 | INFO     | src.query_engine.nl_to_sql:generate_sql:758 - Schema description preview: 🚨🚨🚨 CRITICAL - USE EXACT COLUMN NAMES BELOW 🚨🚨🚨
+You MUST use ONLY these exact column names (case-sensitive). DO NOT invent or normalize column names!
+
+Available columns:
+  - "Channel"
+  - "Placement"
+  - "Funnel"
+  - "Ad Type"
+  - "Total Spent"
+  - "Site Visit"
+  - "Impressions"
+  - "Clicks"
+  - "Pl...
+2025-12-23 13:35:45.652 | INFO     | src.query_engine.nl_to_sql:generate_sql:998 - FULL PROMPT LENGTH: 43246 chars
+2025-12-23 13:35:45.652 | INFO     | src.query_engine.nl_to_sql:generate_sql:999 - PROMPT PREVIEW (first 500 chars):
+You are a SQL expert specializing in marketing campaign analytics. Convert the following natural language question into a DuckDB SQL query.
+
+
+
+# Marketing Analytics Glossary
+
+## Key Metrics
+- **ROAS (Return on Ad Spend)**: Revenue generated per dollar spent. Formula: Revenue / Spend
+- **CPA (Cost Per Acquisition)**: Cost to acquire one customer. Formula: Spend / Conversions
+- **CTR (Click-Through Rate)**: Percentage of impressions that result in clicks. Formula: (Clicks / Impressions) * 100
+- **
+2025-12-23 13:35:45.653 | INFO     | src.query_engine.nl_to_sql:generate_sql:1000 - PROMPT END (last 200 chars):
+ only use values explicitly shown in the schema
+- Platform names are case-sensitive and must match exactly
+
+Question: At what spend level did performance start to plateau for each channel?
+
+SQL Query:
+2025-12-23 13:35:45.653 | INFO     | src.query_engine.nl_to_sql:generate_sql:1008 - Attempting to use gemini (gemini-2.5-flash)...
+2025-12-23 13:35:53.636 | INFO     | src.query_engine.nl_to_sql:generate_sql:1036 - ✅ Successfully used gemini (FREE)
+2025-12-23 13:35:53.637 | INFO     | src.query_engine.nl_to_sql:generate_sql:1092 - RAW LLM RESPONSE: WITH ChannelPerformance AS (
+    SELECT
+        Channel,
+        SUM("Total Spent") AS Total_Spend,
+        SUM(Impressions) AS Total_Impressions,
+        SUM
+2025-12-23 13:35:53.638 | INFO     | src.query_engine.nl_to_sql:generate_sql:1096 - AFTER CLEANUP: WITH ChannelPerformance AS (
+    SELECT
+        Channel,
+        SUM("Total Spent") AS Total_Spend,
+        SUM(Impressions) AS Total_Impressions,
+        SUM
+2025-12-23 13:35:53.638 | INFO     | src.query_engine.nl_to_sql:generate_sql:1100 - AFTER SANITIZE: WITH ChannelPerformance AS (
+    SELECT
+        Channel,
+        SUM("Total Spent") AS Total_Spend,
+        SUM(Impressions) AS Total_Impressions,
+        SUM
+2025-12-23 13:35:53.639 | INFO     | src.query_engine.nl_to_sql:_validate_and_fix_sql:727 - Auto-fixed SQL issues: ['\'(?<![\\"\\w])impressions?(?![\\"\\w])\' → \'Impressions\' (1x)', '\'(?<![\\"\\w])channel(?![\\"\\w])\' → \'Channel\' (1x)']
+2025-12-23 13:35:53.639 | INFO     | src.query_engine.nl_to_sql:generate_sql:1105 - AFTER VALIDATION: WITH ChannelPerformance AS (
+    SELECT
+        "Channel",
+        SUM("Total Spent") AS Total_Spend,
+        SUM("Impressions") AS Total_Impressions,
+        SUM
+2025-12-23 13:35:53.640 | INFO     | src.query_engine.nl_to_sql:generate_sql:1106 - Auto-fixes applied: ['\'(?<![\\"\\w])impressions?(?![\\"\\w])\' → \'Impressions\' (1x)', '\'(?<![\\"\\w])channel(?![\\"\\w])\' → \'Channel\' (1x)']
+2025-12-23 13:35:53.641 | ERROR    | src.query_engine.nl_to_sql:execute_query:1199 - Error executing query: Parser Error: syntax error at end of input
+2025-12-23 13:35:53.642 | ERROR    | src.query_engine.nl_to_sql:ask:1285 - Error processing question: Parser Error: syntax error at end of input
+2025-12-23 13:35:53.642 | INFO     | src.api.v1.campaigns:chat_global:838 - NL-to-SQL failed, trying templates as fallback...
+2025-12-23 13:35:55.656 | INFO     | src.api.middleware.auth:authenticate_user:119 - Authenticating user: ashwin
+2025-12-23 13:35:55.657 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:35:55.666 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:35:55.667 | INFO     | src.api.middleware.auth:authenticate_user:126 - User found: ashwin, Role: admin
+2025-12-23 13:35:55.860 | INFO     | src.api.middleware.auth:authenticate_user:133 - Password verified for user: ashwin
+2025-12-23 13:35:55.860 | INFO     | src.api.middleware.auth:create_access_token:162 - Created access token for user: ashwin
+2025-12-23 13:35:55.863 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:35:55.867 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:35:55.867 | INFO     | src.api.v1.campaigns:chat_global:828 - Chat using persistent Parquet: data/campaigns.parquet
+2025-12-23 13:35:55.871 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:182 - Loading parquet from: data/campaigns.parquet
+2025-12-23 13:35:55.878 | INFO     | src.query_engine.multi_table_manager:register_table:100 - Registered table 'all_campaigns' with 5 rows and 41 columns
+2025-12-23 13:35:55.878 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:223 - Registered Parquet file data/campaigns.parquet as table 'all_campaigns'
+2025-12-23 13:35:55.878 | INFO     | src.api.v1.campaigns:chat_global:833 - 🤖 Using NL-to-SQL for question: Which audiences responded best, and which were over-exposed?
+2025-12-23 13:35:55.882 | INFO     | src.query_engine.nl_to_sql:generate_sql:751 - === GENERATING SQL FOR QUESTION: Which audiences responded best, and which were over-exposed? ===
+2025-12-23 13:35:55.883 | INFO     | src.query_engine.nl_to_sql:generate_sql:754 - Schema info available: True
+2025-12-23 13:35:55.883 | INFO     | src.query_engine.nl_to_sql:generate_sql:756 - Columns: ['Channel', 'Placement', 'Funnel', 'Ad Type', 'Total Spent', 'Site Visit', 'Impressions', 'Clicks', 'Platform', 'Campaign_Name_Full', 'Placement_Name_Full', 'Creative_Name_Full', 'Audience_Segment', 'Device_Type', 'Geographic_Region', 'Age_Group', 'Campaign_Objective', 'Targeting_Type', 'Creative_Format', 'Creative_Elements', 'Creative_ID', 'Budget_Type', 'Bid_Strategy', 'Landing_Page_Type', 'Attribution_Window', 'Frequency_Cap', 'Dayparting_Schedule', 'Gender_Targeting', 'Language_Targeting', 'Customer_Lifecycle_Stage', 'Seasonality_Factor', 'Competitive_Strategy', 'Revenue_2024', 'Revenue_2025', 'Reach_2024', 'Reach_2025', 'Video_Plays_2024', 'Video_Plays_2025', 'Video_Completes_2024', 'Video_Completes_2025', 'Date']
+2025-12-23 13:35:55.883 | INFO     | src.query_engine.nl_to_sql:generate_sql:757 - Schema description length: 8214 chars
+2025-12-23 13:35:55.883 | INFO     | src.query_engine.nl_to_sql:generate_sql:758 - Schema description preview: 🚨🚨🚨 CRITICAL - USE EXACT COLUMN NAMES BELOW 🚨🚨🚨
+You MUST use ONLY these exact column names (case-sensitive). DO NOT invent or normalize column names!
+
+Available columns:
+  - "Channel"
+  - "Placement"
+  - "Funnel"
+  - "Ad Type"
+  - "Total Spent"
+  - "Site Visit"
+  - "Impressions"
+  - "Clicks"
+  - "Pl...
+2025-12-23 13:35:55.883 | INFO     | src.query_engine.nl_to_sql:generate_sql:998 - FULL PROMPT LENGTH: 43236 chars
+2025-12-23 13:35:55.883 | INFO     | src.query_engine.nl_to_sql:generate_sql:999 - PROMPT PREVIEW (first 500 chars):
+You are a SQL expert specializing in marketing campaign analytics. Convert the following natural language question into a DuckDB SQL query.
+
+
+
+# Marketing Analytics Glossary
+
+## Key Metrics
+- **ROAS (Return on Ad Spend)**: Revenue generated per dollar spent. Formula: Revenue / Spend
+- **CPA (Cost Per Acquisition)**: Cost to acquire one customer. Formula: Spend / Conversions
+- **CTR (Click-Through Rate)**: Percentage of impressions that result in clicks. Formula: (Clicks / Impressions) * 100
+- **
+2025-12-23 13:35:55.883 | INFO     | src.query_engine.nl_to_sql:generate_sql:1000 - PROMPT END (last 200 chars):
+el names - only use values explicitly shown in the schema
+- Platform names are case-sensitive and must match exactly
+
+Question: Which audiences responded best, and which were over-exposed?
+
+SQL Query:
+2025-12-23 13:35:55.883 | INFO     | src.query_engine.nl_to_sql:generate_sql:1008 - Attempting to use gemini (gemini-2.5-flash)...
+2025-12-23 13:36:05.182 | INFO     | src.query_engine.nl_to_sql:generate_sql:1036 - ✅ Successfully used gemini (FREE)
+2025-12-23 13:36:05.183 | INFO     | src.query_engine.nl_to_sql:generate_sql:1092 - RAW LLM RESPONSE: SELECT
+  Audience_Segment,
+  SUM("Total Spent") AS Total_Spend,
+  SUM(Impressions) AS Total_Impressions,
+  SUM(Clicks)
+2025-12-23 13:36:05.183 | INFO     | src.query_engine.nl_to_sql:generate_sql:1096 - AFTER CLEANUP: SELECT
+  Audience_Segment,
+  SUM("Total Spent") AS Total_Spend,
+  SUM(Impressions) AS Total_Impressions,
+  SUM(Clicks)
+2025-12-23 13:36:05.183 | INFO     | src.query_engine.nl_to_sql:generate_sql:1100 - AFTER SANITIZE: SELECT
+  Audience_Segment,
+  SUM("Total Spent") AS Total_Spend,
+  SUM(Impressions) AS Total_Impressions,
+  SUM(Clicks)
+2025-12-23 13:36:05.183 | INFO     | src.query_engine.nl_to_sql:_validate_and_fix_sql:727 - Auto-fixed SQL issues: ['\'(?<![\\"\\w])clicks?(?![\\"\\w])\' → \'Clicks\' (1x)', '\'(?<![\\"\\w])impressions?(?![\\"\\w])\' → \'Impressions\' (1x)']
+2025-12-23 13:36:05.183 | INFO     | src.query_engine.nl_to_sql:generate_sql:1105 - AFTER VALIDATION: SELECT
+  Audience_Segment,
+  SUM("Total Spent") AS Total_Spend,
+  SUM("Impressions") AS Total_Impressions,
+  SUM("Clicks")
+2025-12-23 13:36:05.184 | INFO     | src.query_engine.nl_to_sql:generate_sql:1106 - Auto-fixes applied: ['\'(?<![\\"\\w])clicks?(?![\\"\\w])\' → \'Clicks\' (1x)', '\'(?<![\\"\\w])impressions?(?![\\"\\w])\' → \'Impressions\' (1x)']
+2025-12-23 13:36:05.184 | ERROR    | src.query_engine.nl_to_sql:execute_query:1199 - Error executing query: Binder Error: Referenced column "Audience_Segment" was not found because the FROM clause is missing
+
+LINE 2:   Audience_Segment,
+          ^
+2025-12-23 13:36:05.184 | INFO     | src.query_engine.nl_to_sql:execute_query:1203 - Attempting to auto-fix column names and retry...
+2025-12-23 13:36:05.185 | ERROR    | src.query_engine.nl_to_sql:ask:1285 - Error processing question: Binder Error: Referenced column "Audience_Segment" was not found because the FROM clause is missing
+
+LINE 2:   Audience_Segment,
+          ^
+2025-12-23 13:36:05.185 | INFO     | src.api.v1.campaigns:chat_global:838 - NL-to-SQL failed, trying templates as fallback...
+2025-12-23 13:36:07.197 | INFO     | src.api.middleware.auth:authenticate_user:119 - Authenticating user: ashwin
+2025-12-23 13:36:07.198 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:36:07.212 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:36:07.212 | INFO     | src.api.middleware.auth:authenticate_user:126 - User found: ashwin, Role: admin
+2025-12-23 13:36:07.403 | INFO     | src.api.middleware.auth:authenticate_user:133 - Password verified for user: ashwin
+2025-12-23 13:36:07.404 | INFO     | src.api.middleware.auth:create_access_token:162 - Created access token for user: ashwin
+2025-12-23 13:36:07.406 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:36:07.410 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:36:07.411 | INFO     | src.api.v1.campaigns:chat_global:828 - Chat using persistent Parquet: data/campaigns.parquet
+2025-12-23 13:36:07.414 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:182 - Loading parquet from: data/campaigns.parquet
+2025-12-23 13:36:07.425 | INFO     | src.query_engine.multi_table_manager:register_table:100 - Registered table 'all_campaigns' with 5 rows and 41 columns
+2025-12-23 13:36:07.425 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:223 - Registered Parquet file data/campaigns.parquet as table 'all_campaigns'
+2025-12-23 13:36:07.425 | INFO     | src.api.v1.campaigns:chat_global:833 - 🤖 Using NL-to-SQL for question: Which geographies over- or under-performed relative to budget allocation?
+2025-12-23 13:36:07.425 | INFO     | src.query_engine.nl_to_sql:_preprocess_question:552 - Preprocessed question: 'Which geographies over- or under-performed relative to budget allocation?' → 'Which geographies over- or under-performed relative to spend allocation?'
+2025-12-23 13:36:07.430 | INFO     | src.query_engine.nl_to_sql:generate_sql:751 - === GENERATING SQL FOR QUESTION: Which geographies over- or under-performed relative to budget allocation? ===
+2025-12-23 13:36:07.430 | INFO     | src.query_engine.nl_to_sql:generate_sql:753 - === PREPROCESSED TO: Which geographies over- or under-performed relative to spend allocation? ===
+2025-12-23 13:36:07.430 | INFO     | src.query_engine.nl_to_sql:generate_sql:754 - Schema info available: True
+2025-12-23 13:36:07.430 | INFO     | src.query_engine.nl_to_sql:generate_sql:756 - Columns: ['Channel', 'Placement', 'Funnel', 'Ad Type', 'Total Spent', 'Site Visit', 'Impressions', 'Clicks', 'Platform', 'Campaign_Name_Full', 'Placement_Name_Full', 'Creative_Name_Full', 'Audience_Segment', 'Device_Type', 'Geographic_Region', 'Age_Group', 'Campaign_Objective', 'Targeting_Type', 'Creative_Format', 'Creative_Elements', 'Creative_ID', 'Budget_Type', 'Bid_Strategy', 'Landing_Page_Type', 'Attribution_Window', 'Frequency_Cap', 'Dayparting_Schedule', 'Gender_Targeting', 'Language_Targeting', 'Customer_Lifecycle_Stage', 'Seasonality_Factor', 'Competitive_Strategy', 'Revenue_2024', 'Revenue_2025', 'Reach_2024', 'Reach_2025', 'Video_Plays_2024', 'Video_Plays_2025', 'Video_Completes_2024', 'Video_Completes_2025', 'Date']
+2025-12-23 13:36:07.430 | INFO     | src.query_engine.nl_to_sql:generate_sql:757 - Schema description length: 8214 chars
+2025-12-23 13:36:07.430 | INFO     | src.query_engine.nl_to_sql:generate_sql:758 - Schema description preview: 🚨🚨🚨 CRITICAL - USE EXACT COLUMN NAMES BELOW 🚨🚨🚨
+You MUST use ONLY these exact column names (case-sensitive). DO NOT invent or normalize column names!
+
+Available columns:
+  - "Channel"
+  - "Placement"
+  - "Funnel"
+  - "Ad Type"
+  - "Total Spent"
+  - "Site Visit"
+  - "Impressions"
+  - "Clicks"
+  - "Pl...
+2025-12-23 13:36:07.430 | INFO     | src.query_engine.nl_to_sql:generate_sql:998 - FULL PROMPT LENGTH: 43248 chars
+2025-12-23 13:36:07.430 | INFO     | src.query_engine.nl_to_sql:generate_sql:999 - PROMPT PREVIEW (first 500 chars):
+You are a SQL expert specializing in marketing campaign analytics. Convert the following natural language question into a DuckDB SQL query.
+
+
+
+# Marketing Analytics Glossary
+
+## Key Metrics
+- **ROAS (Return on Ad Spend)**: Revenue generated per dollar spent. Formula: Revenue / Spend
+- **CPA (Cost Per Acquisition)**: Cost to acquire one customer. Formula: Spend / Conversions
+- **CTR (Click-Through Rate)**: Percentage of impressions that result in clicks. Formula: (Clicks / Impressions) * 100
+- **
+2025-12-23 13:36:07.430 | INFO     | src.query_engine.nl_to_sql:generate_sql:1000 - PROMPT END (last 200 chars):
+nly use values explicitly shown in the schema
+- Platform names are case-sensitive and must match exactly
+
+Question: Which geographies over- or under-performed relative to spend allocation?
+
+SQL Query:
+2025-12-23 13:36:07.431 | INFO     | src.query_engine.nl_to_sql:generate_sql:1008 - Attempting to use gemini (gemini-2.5-flash)...
+2025-12-23 13:36:15.447 | INFO     | src.query_engine.nl_to_sql:generate_sql:1036 - ✅ Successfully used gemini (FREE)
+2025-12-23 13:36:15.449 | INFO     | src.query_engine.nl_to_sql:generate_sql:1092 - RAW LLM RESPONSE: WITH overall_totals AS (
+    SELECT
+        SUM("Total Spent") AS total_overall_spend,
+        SUM(Revenue_2024) AS total_
+2025-12-23 13:36:15.452 | INFO     | src.query_engine.nl_to_sql:generate_sql:1096 - AFTER CLEANUP: WITH overall_totals AS (
+    SELECT
+        SUM("Total Spent") AS total_overall_spend,
+        SUM(Revenue_2024) AS total_
+2025-12-23 13:36:15.453 | INFO     | src.query_engine.nl_to_sql:generate_sql:1100 - AFTER SANITIZE: WITH overall_totals AS (
+    SELECT
+        SUM("Total Spent") AS total_overall_spend,
+        SUM(Revenue_2024) AS total_
+2025-12-23 13:36:15.455 | ERROR    | src.query_engine.nl_to_sql:execute_query:1199 - Error executing query: Parser Error: syntax error at end of input
+2025-12-23 13:36:15.456 | ERROR    | src.query_engine.nl_to_sql:ask:1285 - Error processing question: Parser Error: syntax error at end of input
+2025-12-23 13:36:15.457 | INFO     | src.api.v1.campaigns:chat_global:838 - NL-to-SQL failed, trying templates as fallback...
+2025-12-23 13:36:15.458 | INFO     | src.api.v1.campaigns:chat_global:843 - ✅ Using template fallback: Budget Pacing Analysis
+2025-12-23 13:36:15.483 | INFO     | src.api.v1.campaigns:chat_global:852 - Loading parquet from: data/campaigns.parquet
+2025-12-23 13:36:17.520 | INFO     | src.api.middleware.auth:authenticate_user:119 - Authenticating user: ashwin
+2025-12-23 13:36:17.521 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:36:17.538 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:36:17.539 | INFO     | src.api.middleware.auth:authenticate_user:126 - User found: ashwin, Role: admin
+2025-12-23 13:36:17.732 | INFO     | src.api.middleware.auth:authenticate_user:133 - Password verified for user: ashwin
+2025-12-23 13:36:17.732 | INFO     | src.api.middleware.auth:create_access_token:162 - Created access token for user: ashwin
+2025-12-23 13:36:17.737 | INFO     | src.api.middleware.auth:get_user:76 - 🔍 Looking up user in DuckDB: ashwin
+2025-12-23 13:36:17.741 | INFO     | src.api.middleware.auth:get_user:94 - ✅ User found in DuckDB: ashwin, role=admin
+2025-12-23 13:36:17.741 | INFO     | src.api.v1.campaigns:chat_global:828 - Chat using persistent Parquet: data/campaigns.parquet
+2025-12-23 13:36:17.745 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:182 - Loading parquet from: data/campaigns.parquet
+2025-12-23 13:36:17.753 | INFO     | src.query_engine.multi_table_manager:register_table:100 - Registered table 'all_campaigns' with 5 rows and 41 columns
+2025-12-23 13:36:17.753 | INFO     | src.query_engine.nl_to_sql:load_parquet_data:223 - Registered Parquet file data/campaigns.parquet as table 'all_campaigns'
+2025-12-23 13:36:17.753 | INFO     | src.api.v1.campaigns:chat_global:833 - 🤖 Using NL-to-SQL for question: Did device allocation align with how users actually converted?
+2025-12-23 13:36:17.758 | INFO     | src.query_engine.nl_to_sql:generate_sql:751 - === GENERATING SQL FOR QUESTION: Did device allocation align with how users actually converted? ===
+2025-12-23 13:36:17.758 | INFO     | src.query_engine.nl_to_sql:generate_sql:754 - Schema info available: True
+2025-12-23 13:36:17.758 | INFO     | src.query_engine.nl_to_sql:generate_sql:756 - Columns: ['Channel', 'Placement', 'Funnel', 'Ad Type', 'Total Spent', 'Site Visit', 'Impressions', 'Clicks', 'Platform', 'Campaign_Name_Full', 'Placement_Name_Full', 'Creative_Name_Full', 'Audience_Segment', 'Device_Type', 'Geographic_Region', 'Age_Group', 'Campaign_Objective', 'Targeting_Type', 'Creative_Format', 'Creative_Elements', 'Creative_ID', 'Budget_Type', 'Bid_Strategy', 'Landing_Page_Type', 'Attribution_Window', 'Frequency_Cap', 'Dayparting_Schedule', 'Gender_Targeting', 'Language_Targeting', 'Customer_Lifecycle_Stage', 'Seasonality_Factor', 'Competitive_Strategy', 'Revenue_2024', 'Revenue_2025', 'Reach_2024', 'Reach_2025', 'Video_Plays_2024', 'Video_Plays_2025', 'Video_Completes_2024', 'Video_Completes_2025', 'Date']
+2025-12-23 13:36:17.758 | INFO     | src.query_engine.nl_to_sql:generate_sql:757 - Schema description length: 8214 chars
+2025-12-23 13:36:17.758 | INFO     | src.query_engine.nl_to_sql:generate_sql:758 - Schema description preview: 🚨🚨🚨 CRITICAL - USE EXACT COLUMN NAMES BELOW 🚨🚨🚨
+You MUST use ONLY these exact column names (case-sensitive). DO NOT invent or normalize column names!
+
+Available columns:
+  - "Channel"
+  - "Placement"
+  - "Funnel"
+  - "Ad Type"
+  - "Total Spent"
+  - "Site Visit"
+  - "Impressions"
+  - "Clicks"
+  - "Pl...
+2025-12-23 13:36:17.758 | INFO     | src.query_engine.nl_to_sql:generate_sql:998 - FULL PROMPT LENGTH: 43238 chars
+2025-12-23 13:36:17.758 | INFO     | src.query_engine.nl_to_sql:generate_sql:999 - PROMPT PREVIEW (first 500 chars):
+You are a SQL expert specializing in marketing campaign analytics. Convert the following natural language question into a DuckDB SQL query.
+
+
+
+# Marketing Analytics Glossary
+
+## Key Metrics
+- **ROAS (Return on Ad Spend)**: Revenue generated per dollar spent. Formula: Revenue / Spend
+- **CPA (Cost Per Acquisition)**: Cost to acquire one customer. Formula: Spend / Conversions
+- **CTR (Click-Through Rate)**: Percentage of impressions that result in clicks. Formula: (Clicks / Impressions) * 100
+- **
+2025-12-23 13:36:17.758 | INFO     | src.query_engine.nl_to_sql:generate_sql:1000 - PROMPT END (last 200 chars):
+ names - only use values explicitly shown in the schema
+- Platform names are case-sensitive and must match exactly
+
+Question: Did device allocation align with how users actually converted?
+
+SQL Query:
+2025-12-23 13:36:17.759 | INFO     | src.query_engine.nl_to_sql:generate_sql:1008 - Attempting to use gemini (gemini-2.5-flash)...

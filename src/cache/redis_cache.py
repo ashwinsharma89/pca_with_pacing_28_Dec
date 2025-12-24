@@ -5,7 +5,7 @@ Redis caching layer for performance optimization.
 import os
 import json
 import logging
-import pickle
+import pickle  # nosec B403
 from typing import Any, Optional, Callable
 from functools import wraps
 import redis
@@ -98,9 +98,10 @@ class RedisCache:
             
             # Try to unpickle
             try:
-                return pickle.loads(value)
-            except:
+                return pickle.loads(value)  # nosec B301
+            except Exception as e:
                 # If unpickling fails, return as string
+                logger.debug(f"Unpickling failed for key '{key}': {e}")
                 return value.decode('utf-8') if isinstance(value, bytes) else value
                 
         except Exception as e:
@@ -131,7 +132,7 @@ class RedisCache:
         
         try:
             # Pickle the value
-            pickled_value = pickle.dumps(value)
+            pickled_value = pickle.dumps(value)  # nosec B301
             
             # Set with TTL
             if ex:

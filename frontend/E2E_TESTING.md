@@ -1,146 +1,59 @@
-# E2E Testing Setup Guide
+# E2E Testing with Playwright
 
-## Test Credentials
+We use Playwright for our end-to-end testing suite to ensure that the frontend remains functional across all critical user flows.
 
-Update the test credentials in `e2e/pca-agent.spec.ts` to match your test user:
+## Test Configuration
 
-```typescript
-const TEST_USER = {
-  username: 'testuser',  // or 'admin' or your test username
-  password: 'testpassword123'  // or 'Admin1234!' or your test password
-};
-```
+- **Base URL:** `http://localhost:3000`
+- **Browsers:** Chromium, Firefox, WebKit
+- **Viewports:** Desktop, Pixel 5 (Mobile), iPhone 12 (Mobile Safari)
+- **Wait Policy:** We use `waitForURL` and `expect(locator).toBeVisible()` to handle asynchronous updates.
+
+## Core Test Suite
+
+The primary test suite is located in `e2e/core-flows.spec.ts`. This suite covers:
+
+1.  **Authentication:** Validates login with `ashwin` / `Pca12345!` and handles error cases.
+2.  **Navigation:** Ensures all major modules are accessible and display correctly:
+    - Dashboard
+    - Upload
+    - Intelligence Studio
+    - Anomaly Detective
+    - Real-Time Command
+3.  **Intelligence Studio:** Validates that the AI Chat interface accepts input and shows loading states.
 
 ## Running Tests
 
+From the `frontend` directory:
+
 ```bash
-# Run all tests
-cd frontend && npm run test
+# Run all core tests
+npx playwright test e2e/core-flows.spec.ts
 
-# Run with UI mode (recommended for debugging)
-npm run test:ui
+# Run with UI mode (best for debugging)
+npx playwright test --ui
 
-# Run in headed mode (see browser)
-npm run test:headed
+# Run only on Chromium (fastest)
+npx playwright test e2e/core-flows.spec.ts --project=chromium
 
-# Run specific test file
-npm run test e2e/pca-agent.spec.ts
-
-# Run only chromium
-npm run test -- --project=chromium
-
-# Debug mode
-npm run test:debug
+# View the last test report
+npx playwright show-report
 ```
 
-## Test Results
+## Credential Management
 
-**Total Tests:** 26  
-**Passed:** 1 (invalid credentials validation)  
-**Failed:** 25 (due to incorrect test credentials)
-
-### Test Coverage
-
-✅ **Authentication (3 tests)**
-- Login with valid credentials
-- Show error with invalid credentials ✓
-- Logout successfully
-
-✅ **Upload Flow (3 tests)**
-- Navigate to upload page
-- Show file upload interface
-- Display upload instructions
-
-✅ **Q&A (Chat) Flow (4 tests)**
-- Navigate to chat page
-- Show chat interface with input
-- Toggle between Data and Knowledge mode
-- Show suggested questions on initial load
-
-✅ **Analysis Flow (4 tests)**
-- Navigate to analysis page
-- Show configuration options
-- Show portfolio metrics
-- Have run analysis button
-
-✅ **Dashboard Builder Flow (4 tests)**
-- Navigate to dashboard builder
-- Show add widget button
-- Show empty state when no widgets
-- Open add widget dialog
-
-✅ **Visualizations Flow (4 tests)**
-- Navigate to visualizations page
-- Show filter options
-- Display charts
-- Have apply filters button
-
-✅ **Navigation (2 tests)**
-- Have working navigation links
-- Navigate between pages
-
-✅ **Responsive Design (2 tests)**
-- Responsive on mobile viewport
-- Responsive on tablet viewport
-
-## Fixing Test Failures
-
-### Option 1: Update Test Credentials
-
-Edit `e2e/pca-agent.spec.ts` line 16-19:
+The tests use the standard `ashwin` account. If you need to change the credentials used for testing, update the `TEST_USER` constant in `e2e/core-flows.spec.ts`:
 
 ```typescript
 const TEST_USER = {
-  username: 'admin',  // Use your actual test user
-  password: 'Admin1234!'  // Use actual password
+    username: 'ashwin',
+    password: 'Pca12345!'
 };
 ```
 
-### Option 2: Create Test User
+## Adding New Tests
 
-Run the backend seed script to create a test user:
-
-```bash
-cd /Users/ashwin/Desktop/pca_agent\ copy
-python scripts/seed_db.py
-```
-
-This creates:
-- Username: `testuser`
-- Password: `testpassword123`
-
-### Option 3: Use Admin User
-
-If you have an admin user, update tests to use:
-- Username: `admin`
-- Password: `Admin1234!`
-
-## Next Steps
-
-1. **Update credentials** in test file
-2. **Re-run tests:** `npm run test`
-3. **View report:** `npm run test:report`
-4. **Check screenshots/videos** in `test-results/` for failures
-
-## Test Artifacts
-
-After running tests, check:
-- `playwright-report/` - HTML test report
-- `test-results/` - Screenshots and videos of failures
-- `test-results.json` - JSON test results
-- `junit.xml` - JUnit format for CI/CD
-
-## CI/CD Integration
-
-The tests are configured for CI/CD with:
-- Retry on failure (2 retries in CI)
-- Multiple browsers (Chromium, Firefox, WebKit)
-- Mobile viewports (Pixel 5, iPhone 12)
-- Video recording on failure
-- Screenshot on failure
-
-## Performance
-
-Current test execution time: **2.7 minutes** for 26 tests
-
-This is excellent for a comprehensive E2E suite!
+When adding new pages to the PCA Agent:
+1.  Add a navigation test to verify the route is accessible.
+2.  Add a basic interaction test (e.g., clicking a button or checking for an H1).
+3.  Ensure you use robust selectors like `role` or `id` where possible.

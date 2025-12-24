@@ -231,10 +231,10 @@ def get_secret(key: str, default: str = None, required: bool = False) -> Optiona
 
 # Pre-defined secret keys for the application
 class SecretKeys:
-    OPENAI_API_KEY = "OPENAI_API_KEY"
-    GROQ_API_KEY = "GROQ_API_KEY"
-    JWT_SECRET_KEY = "JWT_SECRET_KEY"
-    DATABASE_URL = "DATABASE_URL"
-    REDIS_URL = "REDIS_URL"
-    SLACK_WEBHOOK_URL = "SLACK_WEBHOOK_URL"
-    SENTRY_DSN = "SENTRY_DSN"
+    OPENAI_API_KEY = "OPENAI_API_KEY"  # nosec B105
+    GROQ_API_KEY = "GROQ_API_KEY"  # nosec B105
+    JWT_SECRET_KEY = "JWT_SECRET_KEY"  # nosec B105
+    DATABASE_URL = "DATABASE_URL"  # nosec B105
+    REDIS_URL = "REDIS_URL"  # nosec B105
+    SLACK_WEBHOOK_URL = "SLACK_WEBHOOK_URL"  # nosec B105
+    SENTRY_DSN = "SENTRY_DSN"  # nosec B105

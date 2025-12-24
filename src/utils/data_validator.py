@@ -185,7 +185,7 @@ class DataValidator:
             pd.to_datetime(sample.head(10), errors='coerce')
             success_rate = pd.to_datetime(sample, errors='coerce').notna().sum() / len(sample)
             return success_rate > 0.7
-        except:
+        except Exception:
             return False
     
     def _is_currency_column(self, sample: pd.Series) -> bool:
@@ -211,7 +211,7 @@ class DataValidator:
             pd.to_numeric(sample, errors='coerce')
             success_rate = pd.to_numeric(sample, errors='coerce').notna().sum() / len(sample)
             return success_rate > 0.7
-        except:
+        except Exception:
             return False
     
     def _normalize_dates(self, series: pd.Series, col_name: str) -> pd.Series:
@@ -248,7 +248,8 @@ class DataValidator:
                     logger.info(f"Successfully parsed dates with format: {date_format}")
                     self.validation_stats['conversions'][col_name] = f"Date ({date_format}, {success_rate:.1%} success)"
                     return result
-            except:
+            except Exception as e:
+                logger.debug(f"Date format {date_format} failed: {e}")
                 continue
         
         # Last resort: try to parse each value individually

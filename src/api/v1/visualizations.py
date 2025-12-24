@@ -68,7 +68,7 @@ async def get_visualization_data(request: VisualizationDataRequest, current_user
     """Get processed data optimized for visualization components."""
     # Simulated data generation
     labels = ["Category A", "Category B", "Category C", "Category D", "Category E"]
-    data = [random.randint(100, 1000) for _ in range(5)]
+    data = [random.randint(100, 1000) for _ in range(5)]  # nosec B311
     
     return {
         "metric": request.metric,

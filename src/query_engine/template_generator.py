@@ -90,13 +90,70 @@ ORDER BY
         WHEN 'Conversion' THEN 3
         ELSE 4
     END
-        """
+        """  # nosec B608
         
         return QueryTemplate(
             name="Marketing Funnel Analysis",
-            patterns=["funnel", "conversion funnel", "drop off", "drop-off", "funnel analysis", "marketing funnel", "awareness", "consideration"],
+            patterns=["funnel", "conversion funnel", "drop off", "drop-off", "funnel analysis", "marketing funnel", "awareness", "consideration", "funnel performance", "funnel stages"],
             sql=sql,
             description="Marketing funnel by stage (Awareness → Consideration → Conversion) with performance metrics"
+        )
+    
+    def generate_roas_analysis(self) -> Optional[QueryTemplate]:
+        """Generate ROAS analysis template."""
+        campaign_col = self._resolve('campaign')
+        spend_col = self._resolve('spend')
+        revenue_col = self._resolve('revenue') or self._resolve('conversion_value')
+        
+        if not all([campaign_col, spend_col, revenue_col]):
+            return None
+            
+        sql = f"""
+SELECT
+    {campaign_col} AS campaign_name,
+    SUM({spend_col}) AS total_spend,
+    SUM({revenue_col}) AS total_revenue,
+    ROUND(SUM({revenue_col}) / NULLIF(SUM({spend_col}), 0), 2) AS roas,
+    ROUND(SUM({revenue_col}) - SUM({spend_col}), 2) AS net_revenue
+FROM all_campaigns
+GROUP BY {campaign_col}
+HAVING total_spend > 0
+ORDER BY roas DESC
+        """  # nosec B608
+        
+        return QueryTemplate(
+            name="ROAS Performance Analysis",
+            patterns=["roas", "return on ad spend", "roi", "return on investment", "profitable", "profitability"],
+            sql=sql,
+            description="Campaign ROAS and net revenue analysis"
+        )
+
+    def generate_growth_analysis(self) -> Optional[QueryTemplate]:
+        """Generate growth and trend analysis template."""
+        date_col = self._resolve('date')
+        spend_col = self._resolve('spend')
+        conversions_col = self._resolve('conversions')
+        
+        if not all([date_col, spend_col, conversions_col]):
+            return None
+            
+        sql = f"""
+SELECT
+    DATE_TRUNC('week', CAST({date_col} AS DATE)) AS week,
+    SUM({spend_col}) AS weekly_spend,
+    SUM({conversions_col}) AS weekly_conversions,
+    LAG(SUM({conversions_col})) OVER (ORDER BY week) AS prev_week_conversions,
+    ROUND((SUM({conversions_col}) - LAG(SUM({conversions_col})) OVER (ORDER BY week)) / NULLIF(LAG(SUM({conversions_col})) OVER (ORDER BY week), 0) * 100, 2) AS growth_percentage
+FROM all_campaigns
+GROUP BY week
+ORDER BY week
+        """  # nosec B608
+        
+        return QueryTemplate(
+            name="Weekly Growth Analysis",
+            patterns=["growth", "trend", "wow", "week over week", "over time", "changes", "increase", "decrease"],
+            sql=sql,
+            description="Week-over-week conversion growth and spend trends"
         )
     
     def generate_top_campaigns(self) -> Optional[QueryTemplate]:
@@ -132,7 +189,7 @@ WHERE {conversions_col} > 0
 GROUP BY {', '.join(group_cols)}
 ORDER BY total_conversions DESC
 LIMIT 10
-        """
+        """  # nosec B608
         
         return QueryTemplate(
             name="Top Performing Campaigns",
@@ -167,7 +224,7 @@ SELECT
 FROM all_campaigns
 GROUP BY {channel_col}
 ORDER BY total_spend DESC
-        """
+        """  # nosec B608
         
         return QueryTemplate(
             name="Channel Performance Comparison",
@@ -202,7 +259,7 @@ SELECT
 FROM all_campaigns
 GROUP BY {platform_col}
 ORDER BY total_spend DESC
-        """
+        """  # nosec B608
         
         return QueryTemplate(
             name="Platform Performance Comparison",
@@ -237,7 +294,7 @@ SELECT
     ROUND(SUM({spend_col}) / NULLIF(SUM({clicks_col or '1'}), 0), 2) AS overall_cpc,
     ROUND(SUM({spend_col}) / NULLIF(SUM({conversions_col or '1'}), 0), 2) AS overall_cpa
 FROM all_campaigns
-        """
+        """  # nosec B608
         
         return QueryTemplate(
             name="Overall Summary",
@@ -255,6 +312,8 @@ FROM all_campaigns
             ("top_campaigns", self.generate_top_campaigns),
             ("channel_comparison", self.generate_channel_comparison),
             ("platform_comparison", self.generate_platform_comparison),
+            ("roas_analysis", self.generate_roas_analysis),
+            ("growth_analysis", self.generate_growth_analysis),
             ("summary", self.generate_summary),
         ]
         

@@ -10,61 +10,57 @@ const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: fa
 const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false });
 const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
 const Cell = dynamic(() => import('recharts').then(mod => mod.Cell), { ssr: false });
-const LabelList = dynamic(() => import('recharts').then(mod => mod.LabelList), { ssr: false });
 
 interface LollipopChartProps {
-    data: any[];
+    data: Record<string, any>[];
     dataKey: string;
     nameKey?: string;
     color?: string;
-    horizontal?: boolean;
 }
 
 const COLORS = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e'];
+
+const CustomBar = (props: any) => {
+    const { x, y, width, height, fill, index } = props;
+    const dotRadius = 8;
+
+    return (
+        <g>
+            {/* Stem */}
+            <motion.rect
+                x={x}
+                y={y + height / 2 - 2}
+                width={width}
+                height={4}
+                fill={fill}
+                rx={2}
+                initial={{ width: 0 }}
+                animate={{ width: width }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+            />
+            {/* Dot/Circle at end */}
+            <motion.circle
+                cx={x + width}
+                cy={y + height / 2}
+                r={dotRadius}
+                fill={fill}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: index * 0.1 + 0.3, duration: 0.3 }}
+            />
+        </g>
+    );
+};
 
 export function LollipopChart({
     data,
     dataKey,
     nameKey = 'name',
-    color,
-    horizontal = true
+    color
 }: LollipopChartProps) {
     if (!data || data.length === 0) {
         return <div className="flex items-center justify-center h-full text-muted-foreground">No data</div>;
     }
-
-    // For lollipop effect, we use thin bars with circle dots at the end
-    const CustomBar = (props: any) => {
-        const { x, y, width, height, fill, index } = props;
-        const dotRadius = 8;
-
-        return (
-            <g>
-                {/* Stem */}
-                <motion.rect
-                    x={x}
-                    y={y + height / 2 - 2}
-                    width={width}
-                    height={4}
-                    fill={fill}
-                    rx={2}
-                    initial={{ width: 0 }}
-                    animate={{ width: width }}
-                    transition={{ delay: index * 0.1, duration: 0.5 }}
-                />
-                {/* Dot/Circle at end */}
-                <motion.circle
-                    cx={x + width}
-                    cy={y + height / 2}
-                    r={dotRadius}
-                    fill={fill}
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: index * 0.1 + 0.3, duration: 0.3 }}
-                />
-            </g>
-        );
-    };
 
     return (
         <motion.div
@@ -98,7 +94,7 @@ export function LollipopChart({
                             border: '1px solid hsl(var(--border))',
                             borderRadius: '8px'
                         }}
-                        formatter={(value: any) => [value.toLocaleString(), dataKey]}
+                        formatter={((value: any) => [value.toLocaleString(), dataKey]) as any}
                     />
                     <Bar
                         dataKey={dataKey}

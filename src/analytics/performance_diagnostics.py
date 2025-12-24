@@ -420,7 +420,8 @@ class PerformanceDiagnostics:
                 sig_score = 1.0 - p_value  # Lower p-value = higher confidence
             else:
                 sig_score = 0.5
-        except:
+        except Exception as e:
+            logger.debug(f"Statistical test failed: {e}")
             sig_score = 0.5
         
         # Combined confidence score
@@ -816,8 +817,8 @@ class PerformanceDiagnostics:
                     corr = df[col].corr(df[target_metric])
                     if not np.isnan(corr):
                         correlations[col] = abs(corr)
-                except:
-                    pass
+                except Exception as e:
+                    logger.debug(f"Correlation calculation failed for {col}: {e}")
         
         # Sort by correlation
         sorted_corr = sorted(correlations.items(), key=lambda x: x[1], reverse=True)

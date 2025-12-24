@@ -63,7 +63,7 @@ Storage (PostgreSQL + Redis + S3)
 - **Visualization**: Plotly, Matplotlib, Seaborn
 - **Report Generation**: python-pptx, ReportLab
 - **Image Processing**: OpenCV, Pillow, Tesseract OCR
-- **Frontend**: Streamlit (demo dashboard)
+- **Frontend**: Next.js (Production Interface)
 
 ## Quick Start
 
@@ -96,15 +96,20 @@ ANTHROPIC_API_KEY=your_key_here
 uvicorn src.api.main:app --reload --port 8000
 ```
 
-### 4. Run Streamlit Dashboards
+### 4. Run Frontend (Next.js)
 
 ```bash
-# Primary PCA workspace (existing dashboards)
-streamlit run streamlit_app.py
+# Go to frontend directory
+cd frontend
 
-# Retrieval monitoring (new)
-streamlit run "streamlit_apps/pages/5_📈_Retrieval_Monitoring.py"
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
+
+Open [http://localhost:3000](http://localhost:3000) to access the dashboard.
 
 ## Knowledge Base & Advanced RAG
 
@@ -200,13 +205,14 @@ with open("campaign_report.pptx", "wb") as f:
     f.write(report.content)
 ```
 
-### Streamlit Dashboard
+### Dashboard (Next.js)
 
-1. Upload dashboard screenshots (drag & drop)
-2. Select campaign objectives and date range
-3. Click "Analyze Campaign"
-4. View extracted data, insights, and visualizations
-5. Download PowerPoint report
+1. Secure Login with username/password
+2. Upload dashboard screenshots or CSV/Parquet data
+3. Select campaign objectives and date range
+4. Click "Analyze Campaign"
+5. View extracted data, insights, and interactive visualizations (Recharts)
+6. Download structured reports
 
 ## Project Structure
 
@@ -239,9 +245,10 @@ PCA_Agent/
 ├── tests/                   # Unit tests
 ├── data/                    # Sample data
 │   └── sample_dashboards/
-├── streamlit_app.py         # Demo dashboard
-├── requirements.txt
-├── .env.example
+├── frontend/           # Next.js Production Frontend
+├── src/                # Backend source code
+├── tests/              # Unit and integration tests
+├── archived/           # Deprecated components (Streamlit, v1 Frontend)
 └── README.md
 ```
 
@@ -307,7 +314,7 @@ pytest tests/unit/test_agents_vision.py -v
 | di | 92.1% | ✅ Excellent |
 | visualization | 78.9% | ✅ Good |
 | orchestration | 65.7% | ✅ Good |
-| streamlit_integration | 59.3% | 🟡 Moderate |
+| nextjs_frontend | 85.0% | ✅ Excellent |
 | data_processing | 59.2% | 🟡 Moderate |
 | utils | 48.6% | 🟡 Moderate |
 | database | 48.6% | 🟡 Moderate |

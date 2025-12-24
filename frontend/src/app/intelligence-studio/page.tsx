@@ -131,7 +131,8 @@ const useIntelligenceQuery = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'X-CSRF-Token': 'v2-token-generation-pca'
         },
         body: JSON.stringify({ query })
       });

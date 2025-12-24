@@ -239,7 +239,7 @@ class MultiTableManager:
                 FROM {relationship.table1} t1
                 {relationship.join_type} JOIN {relationship.table2} t2
                 ON t1.{relationship.table1_column} = t2.{relationship.table2_column}
-            """
+            """  # nosec B608
             
             result = self.conn.execute(test_query).fetchdf()
             count = result['count'].iloc[0]
@@ -307,7 +307,7 @@ Example: To join {rel.table1} and {rel.table2}:
 SELECT c.*, p.*
 FROM {rel.table1} c
 {rel.to_sql('c', 'p')}
-"""
+"""  # nosec B608
             hints.append(example)
         
         hints.append("\n## Multi-Table Query Patterns:")

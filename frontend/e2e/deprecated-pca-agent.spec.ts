@@ -15,7 +15,7 @@ import { test, expect } from '@playwright/test';
 // Test user credentials
 const TEST_USER = {
     username: 'testuser',
-    password: 'SecurePass123!'
+    password: 'testpassword123'
 };
 
 test.describe('Authentication', () => {

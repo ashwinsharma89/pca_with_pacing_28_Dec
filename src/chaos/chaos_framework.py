@@ -171,7 +171,7 @@ class ChaosFramework:
         attempts = 100
         
         for _ in range(attempts):
-            if random.random() < failure_rate:
+            if random.random() < failure_rate:  # nosec B311
                 failures += 1
         
         return {
@@ -266,7 +266,7 @@ class ChaosFramework:
         logger.warning(f"⚠️  Injecting random errors ({error_rate*100}% rate)")
         
         # Randomly raise errors
-        if random.random() < error_rate:
+        if random.random() < error_rate:  # nosec B311
             raise Exception("Chaos-induced error")
         
         return {

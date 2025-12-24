@@ -22,40 +22,6 @@ export function PerformanceTable({ title, description, data, type, onMonthClick,
     const [sortKey, setSortKey] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-    if (!data || data.length === 0) return null;
-
-    const formatMonth = (monthStr: string) => {
-        const [year, month] = monthStr.split('-');
-        const date = new Date(parseInt(year), parseInt(month) - 1);
-        const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-        const yearShort = year.slice(-2);
-        return `${monthName} ${yearShort}`;
-    };
-
-    const formatValue = (key: string, val: any) => {
-        if (key === 'month') return formatMonth(val);
-        if (key === 'spend') return `$${Number(val).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-        if (key === 'cpm' || key === 'cpc' || key === 'cpa') return `$${Number(val).toFixed(2)}`;
-        if (key === 'ctr' || key === 'roas') return `${Number(val).toFixed(2)}${key === 'ctr' ? '%' : 'x'}`;
-        if (key === 'impressions' || key === 'clicks' || key === 'conversions' || key === 'reach') return Number(val).toLocaleString();
-        return val;
-    };
-
-    const getHeatmapColor = (key: string, val: number, allData: any[]) => {
-        const values = allData.map(d => Number(d[key]));
-        const min = Math.min(...values);
-        const max = Math.max(...values);
-        const range = max - min;
-        if (range === 0) return 'rgba(16, 185, 129, 0.1)';
-
-        const percentage = (val - min) / range;
-
-        // Green scale for good metrics (spend, impressions, clicks, conversions, roas, ctr)
-        // Red scale for cost metrics (cpm, cpc, cpa) - but let's stick to one consistent green for now as in snip
-        const opacity = 0.1 + (percentage * 0.4);
-        return `rgba(16, 185, 129, ${opacity})`;
-    };
-
     const columns = type === 'funnel' ? [
         { key: 'platform', label: 'Funnel Stage' },
         { key: 'spend', label: 'Spend' },
@@ -80,6 +46,7 @@ export function PerformanceTable({ title, description, data, type, onMonthClick,
 
     // Sort data
     const sortedData = React.useMemo(() => {
+        if (!data || data.length === 0) return [];
         if (!sortKey) return data;
 
         return [...data].sort((a, b) => {
@@ -98,6 +65,37 @@ export function PerformanceTable({ title, description, data, type, onMonthClick,
             return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
         });
     }, [data, sortKey, sortDirection]);
+
+    if (!data || data.length === 0) return null;
+
+    const formatMonth = (monthStr: string) => {
+        const [year, month] = monthStr.split('-');
+        const date = new Date(parseInt(year), parseInt(month) - 1);
+        const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+        const yearShort = year.slice(-2);
+        return `${monthName} ${yearShort}`;
+    };
+
+    const formatValue = (key: string, val: unknown) => {
+        if (key === 'month') return formatMonth(String(val));
+        if (key === 'spend') return `$${Number(val).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+        if (key === 'cpm' || key === 'cpc' || key === 'cpa') return `$${Number(val).toFixed(2)}`;
+        if (key === 'ctr' || key === 'roas') return `${Number(val).toFixed(2)}${key === 'ctr' ? '%' : 'x'}`;
+        if (key === 'impressions' || key === 'clicks' || key === 'conversions' || key === 'reach') return Number(val).toLocaleString();
+        return String(val);
+    };
+
+    const getHeatmapColor = (key: string, val: number, allData: Record<string, any>[]) => {
+        const values = allData.map(d => Number(d[key]));
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const range = max - min;
+        if (range === 0) return 'rgba(16, 185, 129, 0.1)';
+
+        const percentage = (val - min) / range;
+        const opacity = 0.1 + (percentage * 0.4);
+        return `rgba(16, 185, 129, ${opacity})`;
+    };
 
     const handleSort = (key: string) => {
         if (sortKey === key) {

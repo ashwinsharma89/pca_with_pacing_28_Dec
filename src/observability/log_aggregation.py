@@ -219,10 +219,13 @@ class SplunkShipper:
     def _test_connection(self):
         """Test Splunk HEC connection."""
         try:
+            # Get SSL verification setting from environment (default: True for production)
+            verify_ssl = os.getenv("SPLUNK_VERIFY_SSL", "true").lower() != "false"
+            
             response = requests.get(
                 f"https://{self.host}:{self.port}/services/collector/health",
                 headers={"Authorization": f"Splunk {self.token}"},
-                verify=False,  # Configure SSL verification in production
+                verify=verify_ssl,
                 timeout=5
             )
             
@@ -254,6 +257,9 @@ class SplunkShipper:
                 "event": self._enrich_log(log_entry)
             }
             
+            # Get SSL verification setting from environment (default: True for production)
+            verify_ssl = os.getenv("SPLUNK_VERIFY_SSL", "true").lower() != "false"
+            
             # Send to Splunk
             response = requests.post(
                 self.splunk_url,
@@ -262,7 +268,7 @@ class SplunkShipper:
                     "Authorization": f"Splunk {self.token}",
                     "Content-Type": "application/json"
                 },
-                verify=False,  # Configure SSL verification in production
+                verify=verify_ssl,
                 timeout=5
             )
             

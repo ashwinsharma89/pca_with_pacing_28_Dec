@@ -366,7 +366,7 @@ class SemanticCache:
         try:
             if os.path.exists(cache_file):
                 with open(cache_file, 'rb') as f:
-                    data = pickle.load(f)
+                    data = pickle.load(f)  # nosec B301 B403
                     self._cache = data.get('cache', {})
                     self._metrics = data.get('metrics', self._metrics)
                 logger.info(f"Loaded {len(self._cache)} cache entries from disk")
@@ -378,7 +378,7 @@ class SemanticCache:
         cache_file = os.path.join(self.cache_dir, "semantic_cache.pkl")
         try:
             with open(cache_file, 'wb') as f:
-                pickle.dump({
+                pickle.dump({  # nosec B301 B403
                     'cache': self._cache,
                     'metrics': self._metrics
                 }, f)

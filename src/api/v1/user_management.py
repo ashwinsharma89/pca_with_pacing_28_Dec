@@ -5,12 +5,13 @@ Secure user CRUD operations with password management.
 """
 
 from fastapi import APIRouter, HTTPException, Depends, status, Request
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, validator
 from typing import Dict, Any, List
 from sqlalchemy.orm import Session
 
 from src.database.connection import get_db
 from src.database.user_models import User
+from src.api.v1.models import sanitize_string
 from src.services.user_service import UserService, PasswordValidator
 from ..middleware.secure_auth import (
     create_access_token,
@@ -37,6 +38,14 @@ class UserCreate(BaseModel):
     password: str = Field(..., min_length=8)
     role: str = Field(default="user", pattern="^(user|admin)$")
     tier: str = Field(default="free", pattern="^(free|pro|enterprise)$")
+
+    @validator('username')
+    def sanitize_username(cls, v):
+        return sanitize_string(v)
+
+    @validator('email')
+    def sanitize_email(cls, v):
+        return sanitize_string(v)
 
 
 class UserResponse(BaseModel):
@@ -76,6 +85,12 @@ class UserUpdate(BaseModel):
     role: str | None = Field(None, pattern="^(user|admin)$")
     tier: str | None = Field(None, pattern="^(free|pro|enterprise)$")
     is_active: bool | None = None
+
+    @validator('email', pre=True)
+    def sanitize_email(cls, v):
+        if v:
+            return sanitize_string(v)
+        return v
 
 
 # Endpoints

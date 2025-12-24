@@ -10,9 +10,29 @@ interface AnalysisConfig {
     include_recommendations: boolean;
 }
 
+export interface AnalysisResult {
+    executive_summary?: {
+        brief?: string;
+        detailed?: string;
+        rag_metadata?: {
+            tokens_input: number;
+            tokens_output: number;
+            model: string;
+            latency: number;
+            retrieval_count?: number;
+        };
+    };
+    insights?: string[];
+    recommendations?: any[];
+    metrics?: {
+        by_platform?: Record<string, any>;
+    };
+    benchmarks?: Record<string, any>;
+}
+
 interface AnalysisContextType {
     analyzing: boolean;
-    analysisResult: any;
+    analysisResult: AnalysisResult | null;
     config: AnalysisConfig;
     setConfig: React.Dispatch<React.SetStateAction<AnalysisConfig>>;
     runAutoAnalysis: () => Promise<void>;
@@ -23,7 +43,7 @@ const AnalysisContext = createContext<AnalysisContextType | undefined>(undefined
 
 export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     const [analyzing, setAnalyzing] = useState(false);
-    const [analysisResult, setAnalysisResult] = useState<any>(null);
+    const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
     const [config, setConfig] = useState<AnalysisConfig>({
         use_rag_summary: true,
         include_benchmarks: true,
@@ -35,7 +55,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const savedResult = localStorage.getItem('pca_analysis_result');
         if (savedResult) {
-            setAnalysisResult(JSON.parse(savedResult));
+            setAnalysisResult(JSON.parse(savedResult) as AnalysisResult);
         }
 
         const isAnalyzing = localStorage.getItem('pca_is_analyzing');
@@ -50,7 +70,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         setAnalyzing(true);
         localStorage.setItem('pca_is_analyzing', 'true');
         try {
-            const result = await api.post('/campaigns/analyze/global', config);
+            const result = await api.post('/campaigns/analyze/global', config) as AnalysisResult;
             setAnalysisResult(result);
             localStorage.setItem('pca_analysis_result', JSON.stringify(result));
         } catch (error) {

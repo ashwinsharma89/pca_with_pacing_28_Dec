@@ -193,7 +193,7 @@ class APIAdapter(DataSourceAdapter):
         params = config.options.get('params', {})
         auth = config.options.get('auth')
         
-        response = requests.get(config.path_or_connection, headers=headers, params=params, auth=auth)
+        response = requests.get(config.path_or_connection, headers=headers, params=params, auth=auth, timeout=30)
         response.raise_for_status()
         
         data = response.json()

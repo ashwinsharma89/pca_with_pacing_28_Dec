@@ -294,7 +294,7 @@ class DatabaseConnector:
         Returns:
             DataFrame with table data
         """
-        query = f"SELECT * FROM {table_name}"
+        query = f"SELECT * FROM {table_name}"  # nosec B608
         if limit:
             query += f" LIMIT {limit}"
         

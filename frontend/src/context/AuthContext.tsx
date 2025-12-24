@@ -4,7 +4,6 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { User } from '@/types';
-import { api } from '@/lib/api';
 
 interface AuthContextType {
     user: User | null;
@@ -76,57 +75,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check token expiration on mount and periodically
     useEffect(() => {
+        const initializeAuth = () => {
+            const storedToken = localStorage.getItem('token');
+            const storedUser = localStorage.getItem('user');
+
+            if (storedToken && storedUser) {
+                const decoded = decodeToken(storedToken);
+                if (decoded?.exp) {
+                    const expiryTime = decoded.exp * 1000;
+                    const now = Date.now();
+
+                    if (expiryTime > now) {
+                        // Token still valid
+                        setToken(storedToken);
+                        setUser(JSON.parse(storedUser));
+                        localStorage.setItem('tokenExpiry', decoded.exp.toString());
+                    } else {
+                        // Token expired
+                        setSessionExpired(true);
+                        logout();
+                    }
+                } else {
+                    setToken(storedToken);
+                    setUser(JSON.parse(storedUser));
+                }
+            }
+            setIsLoading(false);
+        };
+
         const checkTokenExpiration = () => {
             const storedToken = localStorage.getItem('token');
             const storedExpiry = localStorage.getItem('tokenExpiry');
 
             if (storedToken && storedExpiry) {
-                const expiryTime = parseInt(storedExpiry, 10) * 1000; // Convert to milliseconds
+                const expiryTime = parseInt(storedExpiry, 10) * 1000;
                 const now = Date.now();
                 const timeUntilExpiry = expiryTime - now;
 
-                // If token expires in less than 5 minutes or already expired
                 if (timeUntilExpiry < 5 * 60 * 1000) {
                     if (timeUntilExpiry < 0) {
-                        // Token already expired
                         console.log('Token expired, logging out...');
                         setSessionExpired(true);
                         logout();
                         router.push('/login');
                     } else {
-                        // Token expiring soon - could implement refresh here
                         console.log(`Token expiring in ${Math.floor(timeUntilExpiry / 1000 / 60)} minutes`);
                     }
                 }
             }
         };
 
-        // Check on mount
-        const storedToken = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
-
-        if (storedToken && storedUser) {
-            const decoded = decodeToken(storedToken);
-            if (decoded?.exp) {
-                const expiryTime = decoded.exp * 1000;
-                const now = Date.now();
-
-                if (expiryTime > now) {
-                    // Token still valid
-                    setToken(storedToken);
-                    setUser(JSON.parse(storedUser));
-                    localStorage.setItem('tokenExpiry', decoded.exp.toString());
-                } else {
-                    // Token expired
-                    setSessionExpired(true);
-                    logout();
-                }
-            } else {
-                setToken(storedToken);
-                setUser(JSON.parse(storedUser));
-            }
-        }
-        setIsLoading(false);
+        initializeAuth();
 
         // Check every minute
         const interval = setInterval(checkTokenExpiration, 60 * 1000);
@@ -136,17 +135,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Intercept API errors for 401 Unauthorized
     useEffect(() => {
-        const handleUnauthorized = (event: CustomEvent) => {
+        const handleUnauthorized = () => {
             console.log('Unauthorized access detected');
             setSessionExpired(true);
             logout();
             router.push('/login');
         };
 
-        window.addEventListener('unauthorized' as any, handleUnauthorized);
+        window.addEventListener('unauthorized', handleUnauthorized as EventListener);
 
         return () => {
-            window.removeEventListener('unauthorized' as any, handleUnauthorized);
+            window.removeEventListener('unauthorized', handleUnauthorized as EventListener);
         };
     }, [logout, router]);
 

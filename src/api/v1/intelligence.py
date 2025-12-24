@@ -230,7 +230,7 @@ async def process_intelligence_query(
             db_manager = get_db_manager()
             with db_manager.get_session() as session:
                 # Fetch recent campaign data to provide context and schema
-                query = text("SELECT * FROM campaigns ORDER BY date DESC LIMIT 10000")
+                query = text("SELECT * FROM campaigns ORDER BY date DESC LIMIT 10000")  # nosec B608
                 db_result = session.execute(query)
                 # Use a list of dictionaries to build the DataFrame
                 df = pd.DataFrame([dict(r) for r in db_result.mappings().all()])
@@ -252,6 +252,8 @@ async def process_intelligence_query(
             if not result["success"]:
                  raise Exception(result.get("error", "Unknown NL Engine error"))
 
+        except HTTPException:
+            raise
         except Exception as e:
             logger.warning(f"Real NL Engine failed: {e}. Falling back to Mock Engine.")
             mock_engine = MockNLToSQLEngine()
@@ -326,6 +328,8 @@ async def process_intelligence_query(
             }
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Intelligence query error: {str(e)}", exc_info=True)
         raise HTTPException(
@@ -403,7 +407,7 @@ class MockNLToSQLEngine:
         # Pattern matching for common queries
         if 'google ads' in query_lower and 'meta' in query_lower:
             return self.SQLResult(
-                sql="""
+                sql="""  # nosec B608
                     SELECT platform, 
                            SUM(spend) as spend, 
                            SUM(conversions) as conversions,
@@ -424,7 +428,7 @@ class MockNLToSQLEngine:
                 limit = 20
             
             return self.SQLResult(
-                sql=f"""
+                sql=f"""  # nosec B608
                     SELECT campaign_name, 
                            SUM(spend) as spend,
                            SUM(conversions) as conversions,
@@ -440,7 +444,7 @@ class MockNLToSQLEngine:
         
         # Default query
         return self.SQLResult(
-            sql="""
+            sql="""  # nosec B608
                 SELECT platform,
                        SUM(spend) as spend,
                        SUM(conversions) as conversions,

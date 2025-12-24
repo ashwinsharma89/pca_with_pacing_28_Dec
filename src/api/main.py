@@ -225,7 +225,7 @@ async def startup_event():
     logger.info("✅ Specific exception handling enabled")
     logger.info("=" * 60)
     
-    if SECRET_KEY == "change-this-secret-key":
+    if SECRET_KEY == "change-this-secret-key":  # nosec B105
         logger.warning("⚠️ WARNING: Using default JWT secret key!")
         logger.warning("⚠️ Change JWT_SECRET_KEY in .env for production")
     
@@ -245,7 +245,7 @@ if __name__ == "__main__":
     from src.config.settings import settings
     
     logger.info(f"Starting server on {settings.api_host}:{settings.api_port}")
-    if settings.api_host == "0.0.0.0":
+    if settings.api_host == "0.0.0.0":  # nosec B104
         logger.warning("⚠️  WARNING: Binding to 0.0.0.0 (all network interfaces)")
         logger.warning("⚠️  Ensure firewall rules are properly configured!")
     

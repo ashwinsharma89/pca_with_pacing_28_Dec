@@ -114,26 +114,7 @@ class TestUserManagement:
             pass
 
 
-class TestSupabaseClient:
-    """Tests for supabase_client module."""
-    
-    def test_import_module(self):
-        """Test module import."""
-        try:
-            from src.database.supabase_client import SupabaseClient
-            assert SupabaseClient is not None
-        except Exception:
-            pass
-    
-    @patch.dict('os.environ', {'SUPABASE_URL': 'https://test.supabase.co', 'SUPABASE_KEY': 'test_key'})
-    def test_client_initialization(self):
-        """Test client initialization."""
-        try:
-            from src.database.supabase_client import SupabaseClient
-            client = SupabaseClient()
-            assert client is not None
-        except Exception:
-            pass
+
 
 
 class TestMainV3:

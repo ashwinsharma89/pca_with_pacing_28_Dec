@@ -120,8 +120,8 @@ class TimeSeriesForecaster:
                 is_stationary = adf_result[1] < 0.05
                 if is_stationary:
                     return "arima"
-            except:
-                pass
+            except Exception as e:
+                logger.debug(f"ADF test failed: {e}")
         
         if PROPHET_AVAILABLE:
             return "prophet"

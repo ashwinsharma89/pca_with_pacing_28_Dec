@@ -81,6 +81,14 @@ class DataLoader:
                     error_msg = f"Unsupported file type: {file_path.suffix}. Supported: {', '.join(DataLoader.SUPPORTED_EXTENSIONS)}"
                     logger.error(error_msg)
                     return None, error_msg
+
+                # Check magic numbers (content-based validation)
+                with open(file_path, 'rb') as f:
+                    first_bytes = f.read(8)
+                    if not DataLoader._validate_file_content(first_bytes, file_path.suffix.lower()):
+                        error_msg = f"File content does not match extension: {file_path.suffix}"
+                        logger.error(error_msg)
+                        return None, error_msg
             
             # Try to read CSV with different encodings
             encodings_to_try = [encoding, 'utf-8', 'latin-1', 'iso-8859-1', 'cp1252']
@@ -175,6 +183,54 @@ class DataLoader:
             return "All values in DataFrame are NaN/missing"
         
         return None
+
+    @staticmethod
+    def _validate_file_content(first_bytes: bytes, extension: str) -> bool:
+        """
+        Validate file content using magic numbers (first few bytes).
+        
+        Args:
+            first_bytes: First 8 bytes of the file
+            extension: File extension (including dot)
+            
+        Returns:
+            True if valid, False otherwise
+        """
+        if not first_bytes:
+            return False
+
+        # Magic numbers for supported formats
+        # Parquet: PAR1
+        if extension == '.parquet':
+            return first_bytes.startswith(b'PAR1')
+        
+        # Excel: [50, 4B, 03, 04] (ZIP-based for XLSX) or [D0, CF, 11, E0] (Old XLS)
+        if extension == '.xlsx':
+            return first_bytes.startswith(b'PK\x03\x04')
+        if extension == '.xls':
+            return first_bytes.startswith(b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1')
+        
+        # JSON: [7B] ({) or [5B] ([)
+        if extension == '.json':
+            return first_bytes.startswith(b'{') or first_bytes.startswith(b'[')
+        
+        # CSV: Harder to validate via magic number, check for common characters
+        # But we can at least ensure it's not a known binary format
+        if extension == '.csv':
+            # Ensure it's not a ZIP, Executable, etc.
+            binary_signatures = [
+                b'PK\x03\x04',    # ZIP/XLSX
+                b'\x7fELF',      # ELF
+                b'MZ',           # PE
+                b'\x89PNG',      # PNG
+                b'\xff\xd8\xff', # JPEG
+            ]
+            for sig in binary_signatures:
+                if first_bytes.startswith(sig):
+                    return False
+            return True
+            
+        return True
     
     @staticmethod
     def _fix_column_names(df: pd.DataFrame) -> pd.DataFrame:

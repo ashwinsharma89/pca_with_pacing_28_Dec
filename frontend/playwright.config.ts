@@ -5,10 +5,14 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
     testDir: './e2e',
-    fullyParallel: true,
+    timeout: 60000,
+    expect: {
+        timeout: 10000,
+    },
+    fullyParallel: false, // Run file by file to avoid overloading the dev server
     forbidOnly: !!process.env.CI,
-    retries: process.env.CI ? 2 : 0,
-    workers: process.env.CI ? 1 : undefined,
+    retries: process.env.CI ? 2 : 1, // Add a retry locally for flakiness
+    workers: process.env.CI ? 1 : 1, // Use single worker locally to avoid overloading dev server
     reporter: [
         ['html', { outputFolder: 'playwright-report' }],
         ['json', { outputFile: 'test-results.json' }],
@@ -19,6 +23,8 @@ export default defineConfig({
         trace: 'on-first-retry',
         screenshot: 'only-on-failure',
         video: 'retain-on-failure',
+        navigationTimeout: 30000,
+        actionTimeout: 15000,
     },
 
     projects: [

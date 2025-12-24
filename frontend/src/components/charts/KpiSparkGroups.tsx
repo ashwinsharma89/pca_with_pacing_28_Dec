@@ -2,15 +2,26 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { motion } from 'framer-motion';
-import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
+
+interface KpiData {
+    spend: number;
+    impresions: number; // typo in original maybe? no, impressions below.
+    impressions: number;
+    clicks: number;
+    conversions: number;
+    cpm: number;
+    cpc: number;
+    cpa: number;
+    roas: number;
+    ctr: number;
+}
 
 interface KpiSparkGroupsProps {
     data: {
-        current: any;
-        previous: any;
-        sparkline: any[];
+        current: KpiData;
+        previous: KpiData;
+        sparkline: Record<string, any>[];
     };
 }
 
