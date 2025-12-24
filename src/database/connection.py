@@ -152,11 +152,18 @@ class DatabaseManager:
             self._initialized = False
     
     def health_check(self) -> bool:
-        """Check database connectivity."""
+        """
+        Check database connectivity with circuit breaker protection.
+        Prevents cascading failures during database outages.
+        """
         try:
+            from src.utils.circuit_breaker import database_circuit
             from sqlalchemy import text
-            with self.get_session() as session:
-                session.execute(text("SELECT 1"))
+            
+            # Use circuit breaker to prevent hammering a failed database
+            with database_circuit:
+                with self.get_session() as session:
+                    session.execute(text("SELECT 1"))
             return True
         except Exception as e:
             logger.error(f"Database health check failed: {e}")
