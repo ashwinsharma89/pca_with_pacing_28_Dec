@@ -25,8 +25,8 @@ class DatabaseConfig:
         self.user = os.getenv('DB_USER', 'postgres')
         self.password = os.getenv('DB_PASSWORD', '')
         
-        # SSL Configuration (required for Supabase)
-        self.ssl_mode = os.getenv('DB_SSL_MODE', '')  # 'require' for Supabase
+        # SSL Configuration (optional for secure PostgreSQL connections)
+        self.ssl_mode = os.getenv('DB_SSL_MODE', '')  # e.g., 'require' for SSL
         
         # Connection pool settings
         self.pool_size = int(os.getenv('DB_POOL_SIZE', '5'))
@@ -37,23 +37,21 @@ class DatabaseConfig:
         # Connection pool settings
     
     def get_database_url(self) -> str:
-        """Get database URL."""
-        # Check if SQLite should be used
-        use_sqlite = os.getenv('USE_SQLITE', 'false').lower() == 'true'
-        if use_sqlite:
-            return "sqlite:///./data/pca_agent.db"
-        
+        """Get database URL (PostgreSQL only)."""
+        # Prioritize explicit URL
         env_url = os.getenv('DATABASE_URL')
         if env_url:
             return env_url
         
+        # Build PostgreSQL URL from components
         base_url = f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
         
-        # Add SSL mode if specified (required for Supabase)
+        # Add SSL mode if specified
         if self.ssl_mode:
             base_url += f"?sslmode={self.ssl_mode}"
         
         return base_url
+
 
 
 class DatabaseManager:
@@ -177,7 +175,8 @@ def get_db_manager() -> DatabaseManager:
         try:
             _db_manager.initialize()
         except Exception as e:
-            logger.warning(f"PostgreSQL not available, continuing with DuckDB only: {e}")
+            logger.error(f"Failed to initialize PostgreSQL: {e}")
+            raise
     return _db_manager
 
 
