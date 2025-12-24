@@ -4,14 +4,29 @@ import socket
 import os
 from contextlib import closing
 import pytest
+from dotenv import load_dotenv
 
+# Load .env file to get DATABASE_URL (Supabase)
+load_dotenv()
 
 # Hybrid Test Configuration
+# Priority: 1. DATABASE_URL from .env (Supabase) 2. Docker 3. Local fallback
 DOCKER_COMPOSE_FILE = "docker-compose.test.yml"
 LOCAL_FALLBACK_URL = "postgresql://ashwin@localhost:5433/test_pca"
 
-# CRITICAL: Set DATABASE_URL before importing app to avoid 5432 connection attempt
-os.environ["DATABASE_URL"] = LOCAL_FALLBACK_URL
+# Get Supabase URL from environment (set in .env file)
+SUPABASE_URL = os.environ.get("DATABASE_URL")
+
+# Use Supabase if available, otherwise local fallback
+if SUPABASE_URL and "supabase" in SUPABASE_URL.lower():
+    DEFAULT_DB_URL = SUPABASE_URL
+    print(f"[Config] Using Supabase database")
+else:
+    DEFAULT_DB_URL = LOCAL_FALLBACK_URL
+    print(f"[Config] Using local fallback database")
+
+# Set for app initialization
+os.environ["DATABASE_URL"] = DEFAULT_DB_URL
 os.environ["RATE_LIMIT_ENABLED"] = "false"
 os.environ["USE_SQLITE"] = "false"
 
@@ -52,15 +67,17 @@ def wait_for_postgres(url, retries=10, delay=1):
 def engine():
     """
     Hybrid Database Engine Fixture:
-    1. Try starting Docker container (Enterprise isolation)
-    2. Fallback to local DB (Dev flexibility)
+    Priority: 1. Supabase (cloud) 2. Docker container 3. Local fallback
     """
-    db_url = LOCAL_FALLBACK_URL
+    db_url = DEFAULT_DB_URL  # Use Supabase from .env if available
     use_docker = False
+    use_supabase = "supabase" in db_url.lower() if db_url else False
     
-    # 1. Attempt Docker Start (unless skipped)
-    if os.environ.get("SKIP_DOCKER"):
-        print("\n[DEBUG] SKIP_DOCKER set. Skipping container startup.")
+    if use_supabase:
+        print(f"\n[DEBUG] ✅ Using Supabase database")
+    # Try Docker only if not using Supabase
+    elif os.environ.get("SKIP_DOCKER"):
+        print("\n[DEBUG] SKIP_DOCKER set. Using local fallback.")
     else:
         try:
             print("\n[DEBUG] Attempting to start test containers...")
@@ -74,13 +91,13 @@ def engine():
                 print("[DEBUG] ✅ Using Dockerized Test DB")
                 use_docker = True
             else:
-                print("[DEBUG] ⚠️ Docker DB started but unreachable. Falling back to local.")
+                print("[DEBUG] ⚠️ Docker DB started but unreachable. Using fallback.")
         except Exception as e:
-            print(f"[DEBUG] ⚠️ Docker unavailable ({e}). Falling back to local DB.")
+            print(f"[DEBUG] ⚠️ Docker unavailable ({e}). Using current DB URL.")
 
-    # 2. Configure Environment
+    # Configure Environment
     os.environ["DATABASE_URL"] = db_url
-    print(f"[DEBUG] Test Database URL: {db_url}")
+    print(f"[DEBUG] Test Database URL: {db_url.split('@')[-1] if '@' in db_url else db_url}")
     
     engine = create_engine(db_url)
     
