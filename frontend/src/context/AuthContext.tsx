@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { User } from '@/types';
 import { api } from '@/lib/api';
 
@@ -40,6 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [sessionExpired, setSessionExpired] = useState(false);
+    const queryClient = useQueryClient();
     const router = useRouter();
 
     const logout = useCallback(() => {
@@ -48,7 +50,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('tokenExpiry');
-    }, []);
+
+        // Clear all queries and cancel in-flight requests to prevent 401s
+        queryClient.cancelQueries();
+        queryClient.removeQueries();
+    }, [queryClient]);
 
     const login = useCallback((newToken: string, newUser: User) => {
         setToken(newToken);

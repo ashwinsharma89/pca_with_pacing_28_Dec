@@ -82,7 +82,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </div>
 
                 <div className="flex flex-col justify-between h-[calc(100vh-64px)] p-4">
-                    <nav className="space-y-2">
+                    <nav className="space-y-2 flex-1 overflow-y-auto no-scrollbar">
                         {navItems.map((item) => {
                             const Icon = item.icon;
                             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);

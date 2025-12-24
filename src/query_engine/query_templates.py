@@ -32,14 +32,14 @@ QUERY_TEMPLATES = {
         sql="""
 WITH stage_totals AS (
     SELECT
-        funnel_stage,
-        SUM(spend) AS stage_spend,
-        SUM(impressions) AS stage_impressions,
-        SUM(clicks) AS stage_clicks,
-        SUM(conversions) AS stage_conversions
+        Funnel AS funnel_stage,
+        SUM("Total Spent") AS stage_spend,
+        SUM("Impressions") AS stage_impressions,
+        SUM("Clicks") AS stage_clicks,
+        SUM("Site Visit") AS stage_conversions
     FROM all_campaigns
-    WHERE funnel_stage IS NOT NULL AND funnel_stage != 'Unknown'
-    GROUP BY funnel_stage
+    WHERE Funnel IS NOT NULL AND Funnel != 'Unknown'
+    GROUP BY Funnel
 )
 SELECT
     funnel_stage,
@@ -68,16 +68,16 @@ ORDER BY
         patterns=["top campaigns", "best campaigns", "highest roas", "top performing", "best performing", "winners", "top 10"],
         sql="""
 SELECT
-    campaign_name,
+    "Campaign_Name_Full",
     platform,
     channel,
-    SUM(spend) AS total_spend,
-    SUM(conversions) AS total_conversions,
-    AVG(roas) AS avg_roas,
-    ROUND(SUM(spend) / NULLIF(SUM(conversions), 0), 2) AS cpa
+    SUM("Total Spent") AS total_spend,
+    SUM("Site Visit") AS total_conversions,
+    AVG("ROAS") AS avg_roas,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa
 FROM all_campaigns
-WHERE conversions > 0
-GROUP BY campaign_name, platform, channel
+WHERE "Site Visit" > 0
+GROUP BY "Campaign_Name_Full", platform, channel
 ORDER BY avg_roas DESC
 LIMIT 10
         """,
@@ -89,16 +89,16 @@ LIMIT 10
         patterns=["worst", "underperforming", "low roas", "poor performance", "losers", "wasting money"],
         sql="""
 SELECT
-    campaign_name,
+    "Campaign_Name_Full",
     platform,
     channel,
-    SUM(spend) AS total_spend,
-    SUM(conversions) AS total_conversions,
-    AVG(roas) AS avg_roas,
-    ROUND(SUM(spend) / NULLIF(SUM(conversions), 0), 2) AS cpa
+    SUM("Total Spent") AS total_spend,
+    SUM("Site Visit") AS total_conversions,
+    AVG("ROAS") AS avg_roas,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa
 FROM all_campaigns
-WHERE spend > 1000
-GROUP BY campaign_name, platform, channel
+WHERE "Total Spent" > 1000
+GROUP BY "Campaign_Name_Full", platform, channel
 ORDER BY avg_roas ASC
 LIMIT 10
         """,
@@ -111,15 +111,15 @@ LIMIT 10
         sql="""
 SELECT
     channel,
-    COUNT(DISTINCT campaign_name) AS campaign_count,
-    SUM(spend) AS total_spend,
-    SUM(impressions) AS total_impressions,
-    SUM(clicks) AS total_clicks,
-    SUM(conversions) AS total_conversions,
-    ROUND((SUM(clicks) / NULLIF(SUM(impressions), 0)) * 100, 2) AS ctr,
-    ROUND(SUM(spend) / NULLIF(SUM(clicks), 0), 2) AS cpc,
-    ROUND(SUM(spend) / NULLIF(SUM(conversions), 0), 2) AS cpa,
-    AVG(roas) AS avg_roas
+    COUNT(DISTINCT "Campaign_Name_Full") AS campaign_count,
+    SUM("Total Spent") AS total_spend,
+    SUM("Impressions") AS total_impressions,
+    SUM("Clicks") AS total_clicks,
+    SUM("Site Visit") AS total_conversions,
+    ROUND((SUM("Clicks") / NULLIF(SUM("Impressions"), 0)) * 100, 2) AS ctr,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Clicks"), 0), 2) AS cpc,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa,
+    AVG("ROAS") AS avg_roas
 FROM all_campaigns
 GROUP BY channel
 ORDER BY total_spend DESC
@@ -133,15 +133,15 @@ ORDER BY total_spend DESC
         sql="""
 SELECT
     platform,
-    COUNT(DISTINCT campaign_name) AS campaign_count,
-    SUM(spend) AS total_spend,
-    SUM(impressions) AS total_impressions,
-    SUM(clicks) AS total_clicks,
-    SUM(conversions) AS total_conversions,
-    ROUND((SUM(clicks) / NULLIF(SUM(impressions), 0)) * 100, 2) AS ctr,
-    ROUND(SUM(spend) / NULLIF(SUM(clicks), 0), 2) AS cpc,
-    ROUND(SUM(spend) / NULLIF(SUM(conversions), 0), 2) AS cpa,
-    AVG(roas) AS avg_roas
+    COUNT(DISTINCT "Campaign_Name_Full") AS campaign_count,
+    SUM("Total Spent") AS total_spend,
+    SUM("Impressions") AS total_impressions,
+    SUM("Clicks") AS total_clicks,
+    SUM("Site Visit") AS total_conversions,
+    ROUND((SUM("Clicks") / NULLIF(SUM("Impressions"), 0)) * 100, 2) AS ctr,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Clicks"), 0), 2) AS cpc,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa,
+    AVG("ROAS") AS avg_roas
 FROM all_campaigns
 GROUP BY platform
 ORDER BY avg_roas DESC
@@ -155,10 +155,10 @@ ORDER BY avg_roas DESC
         sql="""
 SELECT 
     DATE_TRUNC('month', CAST(date AS TIMESTAMP)) AS month,
-    SUM(spend) as total_spend,
-    SUM(conversions) as total_conversions,
-    SUM(clicks) as total_clicks,
-    SUM(impressions) as total_impressions
+    SUM("Total Spent") as total_spend,
+    SUM("Site Visit") as total_conversions,
+    SUM("Clicks") as total_clicks,
+    SUM("Impressions") as total_impressions
 FROM all_campaigns
 WHERE date IS NOT NULL
 GROUP BY DATE_TRUNC('month', CAST(date AS TIMESTAMP))
@@ -173,16 +173,16 @@ LIMIT 12
         patterns=["wasting money", "high spend low conversion", "inefficient", "money pit"],
         sql="""
 SELECT
-    campaign_name,
+    "Campaign_Name_Full",
     platform,
     channel,
-    SUM(spend) AS total_spend,
-    SUM(conversions) AS total_conversions,
-    ROUND(SUM(spend) / NULLIF(SUM(conversions), 0), 2) AS cpa,
-    ROUND((SUM(conversions) / NULLIF(SUM(clicks), 0)) * 100, 2) AS conversion_rate
+    SUM("Total Spent") AS total_spend,
+    SUM("Site Visit") AS total_conversions,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa,
+    ROUND((SUM("Site Visit") / NULLIF(SUM("Clicks"), 0)) * 100, 2) AS conversion_rate
 FROM all_campaigns
-GROUP BY campaign_name, platform, channel
-HAVING SUM(spend) > 5000 AND SUM(conversions) < 100
+GROUP BY "Campaign_Name_Full", platform, channel
+HAVING SUM("Total Spent") > 5000 AND SUM("Site Visit") < 100
 ORDER BY total_spend DESC
         """,
         description="Campaigns with high spend but low conversions (potential waste)"
@@ -193,17 +193,17 @@ ORDER BY total_spend DESC
         patterns=["summary", "overview", "overall", "total", "all metrics", "show all"],
         sql="""
 SELECT
-    COUNT(DISTINCT campaign_name) AS total_campaigns,
+    COUNT(DISTINCT "Campaign_Name_Full") AS total_campaigns,
     COUNT(DISTINCT platform) AS total_platforms,
     COUNT(DISTINCT channel) AS total_channels,
-    SUM(spend) AS total_spend,
-    SUM(impressions) AS total_impressions,
-    SUM(clicks) AS total_clicks,
-    SUM(conversions) AS total_conversions,
-    ROUND((SUM(clicks) / NULLIF(SUM(impressions), 0)) * 100, 2) AS overall_ctr,
-    ROUND(SUM(spend) / NULLIF(SUM(clicks), 0), 2) AS overall_cpc,
-    ROUND(SUM(spend) / NULLIF(SUM(conversions), 0), 2) AS overall_cpa,
-    AVG(roas) AS avg_roas
+    SUM("Total Spent") AS total_spend,
+    SUM("Impressions") AS total_impressions,
+    SUM("Clicks") AS total_clicks,
+    SUM("Site Visit") AS total_conversions,
+    ROUND((SUM("Clicks") / NULLIF(SUM("Impressions"), 0)) * 100, 2) AS overall_ctr,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Clicks"), 0), 2) AS overall_cpc,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS overall_cpa,
+    AVG("ROAS") AS avg_roas
 FROM all_campaigns
         """,
         description="High-level summary of all campaign performance"
@@ -215,15 +215,15 @@ FROM all_campaigns
         sql="""
 SELECT
     device_type,
-    COUNT(DISTINCT campaign_name) AS campaign_count,
-    SUM(spend) AS total_spend,
-    SUM(impressions) AS total_impressions,
-    SUM(clicks) AS total_clicks,
-    SUM(conversions) AS total_conversions,
-    ROUND((SUM(clicks) / NULLIF(SUM(impressions), 0)) * 100, 2) AS ctr,
-    ROUND(SUM(spend) / NULLIF(SUM(clicks), 0), 2) AS cpc,
-    ROUND(SUM(spend) / NULLIF(SUM(conversions), 0), 2) AS cpa,
-    ROUND((SUM(conversions) / NULLIF(SUM(clicks), 0)) * 100, 2) AS conversion_rate
+    COUNT(DISTINCT "Campaign_Name_Full") AS campaign_count,
+    SUM("Total Spent") AS total_spend,
+    SUM("Impressions") AS total_impressions,
+    SUM("Clicks") AS total_clicks,
+    SUM("Site Visit") AS total_conversions,
+    ROUND((SUM("Clicks") / NULLIF(SUM("Impressions"), 0)) * 100, 2) AS ctr,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Clicks"), 0), 2) AS cpc,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa,
+    ROUND((SUM("Site Visit") / NULLIF(SUM("Clicks"), 0)) * 100, 2) AS conversion_rate
 FROM all_campaigns
 WHERE device_type IS NOT NULL AND device_type != 'Unknown'
 GROUP BY device_type
@@ -238,12 +238,12 @@ ORDER BY total_spend DESC
         sql="""
 SELECT
     date,
-    SUM(spend) AS daily_spend,
-    SUM(impressions) AS daily_impressions,
-    SUM(clicks) AS daily_clicks,
-    SUM(conversions) AS daily_conversions,
-    ROUND((SUM(clicks) / NULLIF(SUM(impressions), 0)) * 100, 2) AS ctr,
-    ROUND(SUM(spend) / NULLIF(SUM(conversions), 0), 2) AS cpa
+    SUM("Total Spent") AS daily_spend,
+    SUM("Impressions") AS daily_impressions,
+    SUM("Clicks") AS daily_clicks,
+    SUM("Site Visit") AS daily_conversions,
+    ROUND((SUM("Clicks") / NULLIF(SUM("Impressions"), 0)) * 100, 2) AS ctr,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa
 FROM all_campaigns
 GROUP BY date
 ORDER BY date DESC
@@ -259,7 +259,7 @@ LIMIT 30
 WITH daily_spend AS (
     SELECT
         date,
-        SUM(spend) AS daily_total
+        SUM("Total Spent") AS daily_total
     FROM all_campaigns
     GROUP BY date
 ),
@@ -286,16 +286,16 @@ FROM spend_stats
         patterns=["roas by funnel", "roas by stage", "funnel roas", "return by stage"],
         sql="""
 SELECT
-    funnel_stage,
-    SUM(spend) AS total_spend,
-    SUM(conversions) AS total_conversions,
-    AVG(roas) AS avg_roas,
-    ROUND(SUM(spend) / NULLIF(SUM(conversions), 0), 2) AS cpa
+    Funnel AS funnel_stage,
+    SUM("Total Spent") AS total_spend,
+    SUM("Site Visit") AS total_conversions,
+    AVG("ROAS") AS avg_roas,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa
 FROM all_campaigns
-WHERE funnel_stage IS NOT NULL AND funnel_stage != 'Unknown'
-GROUP BY funnel_stage
+WHERE Funnel IS NOT NULL AND Funnel != 'Unknown'
+GROUP BY Funnel
 ORDER BY 
-    CASE funnel_stage
+    CASE Funnel
         WHEN 'Awareness' THEN 1
         WHEN 'Consideration' THEN 2
         WHEN 'Conversion' THEN 3
@@ -310,16 +310,16 @@ ORDER BY
         patterns=["most conversions", "highest conversions", "top converting", "best converters"],
         sql="""
 SELECT
-    campaign_name,
+    "Campaign_Name_Full",
     platform,
     channel,
-    SUM(spend) AS total_spend,
-    SUM(conversions) AS total_conversions,
-    ROUND(SUM(spend) / NULLIF(SUM(conversions), 0), 2) AS cpa,
-    ROUND((SUM(conversions) / NULLIF(SUM(clicks), 0)) * 100, 2) AS conversion_rate
+    SUM("Total Spent") AS total_spend,
+    SUM("Site Visit") AS total_conversions,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa,
+    ROUND((SUM("Site Visit") / NULLIF(SUM("Clicks"), 0)) * 100, 2) AS conversion_rate
 FROM all_campaigns
-WHERE conversions > 0
-GROUP BY campaign_name, platform, channel
+WHERE "Site Visit" > 0
+GROUP BY "Campaign_Name_Full", platform, channel
 ORDER BY total_conversions DESC
 LIMIT 10
         """,
@@ -332,19 +332,19 @@ LIMIT 10
         sql="""
 WITH campaign_ctr AS (
     SELECT
-        campaign_name,
+        "Campaign_Name_Full",
         platform,
         channel,
-        SUM(spend) AS total_spend,
-        SUM(impressions) AS total_impressions,
-        SUM(clicks) AS total_clicks,
-        ROUND((SUM(clicks) / NULLIF(SUM(impressions), 0)) * 100, 2) AS ctr
+        SUM("Total Spent") AS total_spend,
+        SUM("Impressions") AS total_impressions,
+        SUM("Clicks") AS total_clicks,
+        ROUND((SUM("Clicks") / NULLIF(SUM("Impressions"), 0)) * 100, 2) AS ctr
     FROM all_campaigns
-    GROUP BY campaign_name, platform, channel
-    HAVING SUM(impressions) > 1000
+    GROUP BY "Campaign_Name_Full", platform, channel
+    HAVING SUM("Impressions") > 1000
 )
 SELECT
-    campaign_name,
+    "Campaign_Name_Full",
     platform,
     channel,
     total_spend,
@@ -366,12 +366,12 @@ LIMIT 10
 SELECT
     platform,
     channel,
-    COUNT(DISTINCT campaign_name) AS campaigns,
-    SUM(spend) AS total_spend,
-    SUM(conversions) AS total_conversions,
-    ROUND((SUM(clicks) / NULLIF(SUM(impressions), 0)) * 100, 2) AS ctr,
-    ROUND(SUM(spend) / NULLIF(SUM(conversions), 0), 2) AS cpa,
-    AVG(roas) AS avg_roas
+    COUNT(DISTINCT "Campaign_Name_Full") AS campaigns,
+    SUM("Total Spent") AS total_spend,
+    SUM("Site Visit") AS total_conversions,
+    ROUND((SUM("Clicks") / NULLIF(SUM("Impressions"), 0)) * 100, 2) AS ctr,
+    ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS cpa,
+    AVG("ROAS") AS avg_roas
 FROM all_campaigns
 GROUP BY platform, channel
 ORDER BY total_spend DESC

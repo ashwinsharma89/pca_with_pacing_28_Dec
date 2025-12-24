@@ -25,6 +25,9 @@ import os
 import time
 
 
+
+query_engine = NaturalLanguageQueryEngine(api_key=os.getenv("OPENAI_API_KEY", "dummy"))
+
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
 from fastapi import UploadFile, File, Form
@@ -165,6 +168,10 @@ async def upload_campaign_data(
             'preview': preview
         }
         
+    except HTTPException:
+        raise
+    except pd.errors.EmptyDataError:
+        raise HTTPException(status_code=400, detail="The uploaded file is empty")
     except Exception as e:
         logger.error(f"Upload failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -792,6 +799,8 @@ async def chat_global(
     """
     try:
         question = chat_request.question
+        if not question or not question.strip():
+            raise HTTPException(status_code=400, detail="Question cannot be empty")
         
         # KNOWLEDGE MODE: Use RAG for marketing insights, benchmarks, best practices
         if chat_request.knowledge_mode:
@@ -811,14 +820,34 @@ async def chat_global(
         
         # If NL-to-SQL fails, try templates as fallback
         if not result.get('success'):
-            logger.info("NL-to-SQL failed, trying templates as fallback...")
-            from src.query_engine.query_templates import find_matching_template
-            template = find_matching_template(question)
+            logger.info("NL-to-SQL failed, trying dynamic templates as fallback...")
+            try:
+                # Load schema from Parquet and generate templates dynamically
+                from src.query_engine.template_generator import load_schema_from_parquet, generate_templates_for_schema
+                
+                schema_columns = load_schema_from_parquet(str(CAMPAIGNS_PARQUET))
+                if not schema_columns:
+                    logger.warning("Could not load schema from Parquet")
+                else:
+                    # Generate templates based on actual schema
+                    dynamic_templates = generate_templates_for_schema(schema_columns)
+                    
+                    # Find matching template
+                    template = None
+                    for tmpl in dynamic_templates.values():
+                        if tmpl.matches(question):
+                            template = tmpl
+                            break
+            except Exception as e:
+                logger.error(f"Error generating dynamic templates: {e}")
+                template = None
             
             if template:
                 logger.info(f"✅ Using template fallback: {template.name}")
                 try:
                     import duckdb
+                    # Load data from Parquet file
+                    df = pd.read_parquet(CAMPAIGNS_PARQUET)
                     conn = duckdb.connect(':memory:')
                     conn.register('all_campaigns', df)
                     results_df = conn.execute(template.sql).df()
@@ -925,6 +954,8 @@ async def chat_global(
         
         return result
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Global chat failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -2194,7 +2225,12 @@ async def get_campaign(
         duckdb_mgr = get_duckdb_manager()
         with duckdb_mgr.connection() as conn:
             query = f"SELECT * FROM '{CAMPAIGNS_PARQUET}' WHERE \"Creative_ID\" = ? OR \"Campaign_Name_Full\" = ? LIMIT 1"
-            df = conn.execute(query, [campaign_id, campaign_id]).df()
+            try:
+                df = conn.execute(query, [campaign_id, campaign_id]).df()
+            except Exception as e:
+                # If casting fails (e.g. searching string against int column), handle gracefully
+                logger.warning(f"Campaign lookup query failed (likely type mismatch): {e}")
+                raise HTTPException(status_code=404, detail=f"Campaign '{campaign_id}' not found")
             if df.empty:
                 raise HTTPException(status_code=404, detail=f"Campaign '{campaign_id}' not found")
             row = df.iloc[0]
