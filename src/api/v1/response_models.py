@@ -4,8 +4,8 @@ Response Models for API Validation
 Ensures consistent response structure and prevents data leakage.
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from pydantic import BaseModel, Field, field_validator
+from typing import Optional, List, Dict, Any, Union
 from datetime import datetime
 
 
@@ -77,6 +77,148 @@ class AnalysisResponse(BaseModel):
 
 
 # ============================================================================
+# VISUALIZATION RESPONSES
+# ============================================================================
+
+class ChartDataPoint(BaseModel):
+    """Single data point for charts"""
+    label: str
+    value: Union[float, int]
+    category: Optional[str] = None
+
+
+class VisualizationResponse(BaseModel):
+    """Response for visualization endpoints"""
+    success: bool = True
+    chart_type: str = Field(..., description="Chart type (bar, line, pie, etc.)")
+    metric: str = Field(..., description="Primary metric displayed")
+    data: List[Dict[str, Any]] = Field(..., description="Chart data points")
+    title: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+
+
+class DashboardStatsResponse(BaseModel):
+    """Response for dashboard statistics"""
+    success: bool = True
+    total_spend: float = Field(..., ge=0)
+    total_impressions: int = Field(..., ge=0)
+    total_clicks: int = Field(..., ge=0)
+    total_conversions: int = Field(..., ge=0)
+    avg_ctr: float = Field(..., ge=0)
+    avg_cpc: float = Field(..., ge=0)
+    avg_cpm: float = Field(..., ge=0)
+    roas: Optional[float] = None
+    period: Optional[Dict[str, str]] = None
+
+
+class FilterOptionsResponse(BaseModel):
+    """Response for filter options"""
+    success: bool = True
+    platforms: List[str] = Field(default_factory=list)
+    channels: List[str] = Field(default_factory=list)
+    funnels: List[str] = Field(default_factory=list)
+    objectives: List[str] = Field(default_factory=list)
+    regions: List[str] = Field(default_factory=list)
+    devices: List[str] = Field(default_factory=list)
+    date_range: Optional[Dict[str, str]] = None
+
+
+class FunnelStatsResponse(BaseModel):
+    """Response for funnel statistics"""
+    success: bool = True
+    stages: List[Dict[str, Any]] = Field(default_factory=list)
+    conversion_rates: Dict[str, float] = Field(default_factory=dict)
+    drop_off_points: Optional[List[Dict[str, Any]]] = None
+
+
+class AudienceStatsResponse(BaseModel):
+    """Response for audience statistics"""
+    success: bool = True
+    demographics: Dict[str, Any] = Field(default_factory=dict)
+    segments: List[Dict[str, Any]] = Field(default_factory=list)
+    top_performing: Optional[List[Dict[str, Any]]] = None
+
+
+# ============================================================================
+# REGRESSION & ANALYTICS RESPONSES
+# ============================================================================
+
+class RegressionResult(BaseModel):
+    """Single regression result"""
+    metric: str
+    coefficient: float
+    p_value: float
+    confidence_interval: Optional[List[float]] = None
+    significant: bool = False
+
+
+class RegressionResponse(BaseModel):
+    """Response for regression analysis"""
+    success: bool = True
+    model_type: str = Field(default="linear", description="Regression model type")
+    r_squared: float = Field(..., ge=0, le=1, description="R-squared value")
+    adjusted_r_squared: Optional[float] = None
+    coefficients: List[RegressionResult] = Field(default_factory=list)
+    predictions: Optional[List[Dict[str, Any]]] = None
+    shap_summary: Optional[Dict[str, Any]] = None
+    recommendations: Optional[List[Dict[str, Any]]] = None
+
+
+class AnalyticsSnapshotResponse(BaseModel):
+    """Response for analytics snapshot"""
+    success: bool = True
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    summary: Dict[str, Any] = Field(default_factory=dict)
+    trends: List[Dict[str, Any]] = Field(default_factory=list)
+    anomalies: Optional[List[Dict[str, Any]]] = None
+    insights: Optional[List[str]] = None
+
+
+class KPIComparisonResponse(BaseModel):
+    """Response for KPI comparison"""
+    success: bool = True
+    kpis: List[str] = Field(..., description="KPIs compared")
+    dimension: str = Field(..., description="Comparison dimension")
+    data: List[Dict[str, Any]] = Field(default_factory=list)
+    summary: Optional[Dict[str, Any]] = None
+    chart_config: Optional[Dict[str, Any]] = None
+
+
+class ChartDataResponse(BaseModel):
+    """Response for chart data endpoint"""
+    success: bool = True
+    chart_type: str
+    labels: List[str] = Field(default_factory=list)
+    datasets: List[Dict[str, Any]] = Field(default_factory=list)
+    options: Optional[Dict[str, Any]] = None
+
+
+class SuggestedQuestionsResponse(BaseModel):
+    """Response for suggested questions"""
+    success: bool = True
+    questions: List[str] = Field(default_factory=list, max_length=20)
+    categories: Optional[Dict[str, List[str]]] = None
+
+
+class CampaignDetailResponse(BaseModel):
+    """Response for single campaign details"""
+    success: bool = True
+    campaign: Dict[str, Any] = Field(..., description="Campaign details")
+    metrics: Optional[Dict[str, Any]] = None
+    insights: Optional[List[str]] = None
+
+
+class CampaignListResponse(BaseModel):
+    """Response for campaign list"""
+    success: bool = True
+    campaigns: List[Dict[str, Any]] = Field(default_factory=list)
+    total: int = Field(..., ge=0)
+    page: int = Field(..., ge=1)
+    per_page: int = Field(..., ge=1)
+    has_next: bool = False
+
+
+# ============================================================================
 # AUTH RESPONSES
 # ============================================================================
 
@@ -130,10 +272,31 @@ class ValidationErrorResponse(BaseModel):
     error: Dict[str, Any] = Field(
         ...,
         description="Validation error details",
-        example={
+        examples=[{
             "code": "VALIDATION_ERROR",
             "message": "Request validation failed",
             "details": []
-        }
+        }]
     )
     detail: List[ValidationErrorDetail] = Field(..., description="Detailed validation errors")
+
+
+# ============================================================================
+# HEALTH CHECK RESPONSES
+# ============================================================================
+
+class HealthCheckResponse(BaseModel):
+    """Response for health check endpoint"""
+    status: str = Field(..., description="Health status")
+    version: str = Field(..., description="API version")
+    uptime_seconds: Optional[float] = None
+    components: Optional[Dict[str, str]] = None
+
+
+class DetailedHealthResponse(BaseModel):
+    """Response for detailed health check"""
+    status: str
+    version: str
+    components: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+    metrics: Optional[Dict[str, Any]] = None
+
