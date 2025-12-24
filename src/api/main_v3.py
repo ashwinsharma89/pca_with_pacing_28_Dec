@@ -129,6 +129,10 @@ app.openapi = custom_openapi
 # Setup exception handlers (MUST be before other middleware)
 setup_exception_handlers(app)
 
+# Setup validation error handlers
+from .validation_handlers import setup_validation_handlers
+setup_validation_handlers(app)
+
 # User state population (lightweight auth for rate limiting/logging)
 from .middleware.auth import populate_user_state_middleware
 app.middleware("http")(populate_user_state_middleware)
@@ -140,6 +144,10 @@ app.add_middleware(SlowAPIMiddleware)
 
 # Add Security Headers middleware
 app.add_middleware(SecurityHeadersMiddleware)
+
+# Add Request Size Limit middleware (prevent DoS)
+from .middleware.request_size_limit import RequestSizeLimitMiddleware
+app.add_middleware(RequestSizeLimitMiddleware)
 
 # Setup OpenTelemetry (if enabled)
 setup_opentelemetry(app)

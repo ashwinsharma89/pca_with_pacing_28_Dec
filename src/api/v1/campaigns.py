@@ -92,13 +92,34 @@ async def upload_campaign_data(
     """
     Upload campaign data from CSV/Excel.
     Uses DuckDB + Parquet for fast analytics.
+    
+    **File Constraints:**
+    - Max size: 100MB
+    - Allowed formats: CSV, XLSX, XLS
     """
     try:
         from src.database.duckdb_manager import get_duckdb_manager
         
+        # Validate file extension
+        file_ext = file.filename.split('.')[-1].lower() if file.filename else ''
+        if file_ext not in ['csv', 'xlsx', 'xls']:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid file format '{file_ext}'. Allowed: csv, xlsx, xls"
+            )
+        
         t_start = time.time()
         contents = await file.read()
-        logger.info(f"File read took {time.time() - t_start:.2f}s (Size: {len(contents)} bytes)")
+        
+        # Validate file size (100MB limit)
+        file_size_mb = len(contents) / (1024 * 1024)
+        if file_size_mb > 100:
+            raise HTTPException(
+                status_code=413,
+                detail=f"File too large: {file_size_mb:.1f}MB. Maximum allowed: 100MB"
+            )
+        
+        logger.info(f"File read took {time.time() - t_start:.2f}s (Size: {file_size_mb:.1f}MB)")
         
         import io
         t_parse = time.time()
