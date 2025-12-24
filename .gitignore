@@ -50,6 +50,9 @@ logs/
 *.log
 
 # Data & Databases
+*.db
+*.sqlite
+*.sqlite3
 data/uploads/*
 data/reports/*
 data/snapshots/*
