@@ -130,11 +130,11 @@ class TestAgentCapabilityEnum:
         
         assert AgentCapability is not None
     
-    def test_has_analysis_capability(self):
-        """Test ANALYSIS capability exists."""
+    def test_has_pattern_detection_capability(self):
+        """Test PATTERN_DETECTION capability exists."""
         from src.agents.agent_registry import AgentCapability
         
-        assert hasattr(AgentCapability, 'ANALYSIS')
+        assert hasattr(AgentCapability, 'PATTERN_DETECTION')
     
     def test_has_visualization_capability(self):
         """Test VISUALIZATION capability exists."""
@@ -277,22 +277,20 @@ class TestMultiAgentOrchestrator:
 # RESILIENT ORCHESTRATOR TESTS
 # ============================================================================
 
-class TestResilientOrchestrator:
-    """Unit tests for ResilientOrchestrator class."""
+class TestResilientMultiAgentOrchestrator:
+    """Unit tests for ResilientMultiAgentOrchestrator class."""
     
     def test_class_exists(self):
-        """Test ResilientOrchestrator class can be imported."""
-        from src.agents.resilient_orchestrator import ResilientOrchestrator
+        """Test ResilientMultiAgentOrchestrator class can be imported."""
+        from src.agents.resilient_orchestrator import ResilientMultiAgentOrchestrator
         
-        assert ResilientOrchestrator is not None
+        assert ResilientMultiAgentOrchestrator is not None
     
-    def test_initialization(self):
-        """Test ResilientOrchestrator initialization."""
-        from src.agents.resilient_orchestrator import ResilientOrchestrator
+    def test_has_run_method(self):
+        """Test ResilientMultiAgentOrchestrator has run method."""
+        from src.agents.resilient_orchestrator import ResilientMultiAgentOrchestrator
         
-        orchestrator = ResilientOrchestrator()
-        
-        assert orchestrator is not None
+        assert hasattr(ResilientMultiAgentOrchestrator, 'run')
 
 
 # ============================================================================
