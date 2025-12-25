@@ -17,6 +17,16 @@ from .enhanced_visualization_agent import EnhancedVisualizationAgent
 from .visualization_filters import SmartFilterEngine, FilterType, FilterCondition
 from .filter_presets import FilterPresets
 
+# Prompt Template System for versioned prompt management
+from .prompt_templates import (
+    PromptTemplate,
+    PromptRegistry,
+    PromptCategory,
+    prompt_registry,
+    get_prompt,
+    list_prompts
+)
+
 __all__ = [
     "VisionAgent",
     "ExtractionAgent",
@@ -37,5 +47,12 @@ __all__ = [
     "SmartFilterEngine",
     "FilterType",
     "FilterCondition",
-    "FilterPresets"
+    "FilterPresets",
+    # Prompt Templates
+    "PromptTemplate",
+    "PromptRegistry",
+    "PromptCategory",
+    "prompt_registry",
+    "get_prompt",
+    "list_prompts"
 ]

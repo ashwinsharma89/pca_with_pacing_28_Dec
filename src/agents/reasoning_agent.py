@@ -19,6 +19,14 @@ from ..models.platform import PlatformType, MetricType, NormalizedMetric, PLATFO
 from ..config.settings import settings
 from ..utils.anthropic_helpers import create_async_anthropic_client
 
+# Import prompt template system for versioned, manageable prompts
+try:
+    from .prompt_templates import prompt_registry, get_prompt
+    PROMPT_TEMPLATES_AVAILABLE = True
+except ImportError:
+    PROMPT_TEMPLATES_AVAILABLE = False
+    logger.warning("Prompt templates not available, using inline prompts")
+
 
 class ReasoningAgent:
     """Agent for generating insights, detecting achievements, and providing recommendations."""
