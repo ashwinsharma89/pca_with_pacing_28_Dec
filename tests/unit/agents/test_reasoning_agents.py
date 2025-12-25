@@ -2,12 +2,12 @@
 Unit Tests for Reasoning Agents
 
 Tests for:
-- ReasoningAgent (reasoning_agent.py)
-- ValidatedReasoningAgent (validated_reasoning_agent.py)
-- EnhancedReasoningAgent (enhanced_reasoning_agent.py)
+- PatternDetector from enhanced_reasoning_agent.py
+- ReasoningAgent interface
+- ValidatedReasoningAgent interface
+- EnhancedReasoningAgent interface
 
-NOTE: LLM-dependent tests are marked as integration tests since they require
-proper OpenAI/Anthropic client mocking at import time.
+FIXED: PatternDetector methods use underscore prefix (_detect_trends, etc.)
 """
 
 import pytest
@@ -31,40 +31,40 @@ class TestPatternDetectorFromEnhanced:
         """Test PatternDetector initialization."""
         assert detector is not None
     
-    def test_has_detect_trend_method(self, detector):
-        """Test PatternDetector has detect_trend method."""
-        assert hasattr(detector, 'detect_trend')
+    def test_has_detect_trends_method(self, detector):
+        """Test PatternDetector has _detect_trends method (underscore prefix)."""
+        assert hasattr(detector, '_detect_trends')
     
     def test_has_detect_anomalies_method(self, detector):
-        """Test PatternDetector has detect_anomalies method."""
-        assert hasattr(detector, 'detect_anomalies')
+        """Test PatternDetector has _detect_anomalies method."""
+        assert hasattr(detector, '_detect_anomalies')
     
     def test_has_detect_creative_fatigue_method(self, detector):
-        """Test PatternDetector has detect_creative_fatigue method."""
-        assert hasattr(detector, 'detect_creative_fatigue')
+        """Test PatternDetector has _detect_creative_fatigue method."""
+        assert hasattr(detector, '_detect_creative_fatigue')
     
     def test_has_detect_audience_saturation_method(self, detector):
-        """Test PatternDetector has detect_audience_saturation method."""
-        assert hasattr(detector, 'detect_audience_saturation')
+        """Test PatternDetector has _detect_audience_saturation method."""
+        assert hasattr(detector, '_detect_audience_saturation')
     
     def test_has_detect_seasonality_method(self, detector):
-        """Test PatternDetector has detect_seasonality method."""
-        assert hasattr(detector, 'detect_seasonality')
+        """Test PatternDetector has _detect_seasonality method."""
+        assert hasattr(detector, '_detect_seasonality')
     
-    def test_has_find_day_parting_opportunities_method(self, detector):
-        """Test PatternDetector has find_day_parting_opportunities method."""
-        assert hasattr(detector, 'find_day_parting_opportunities')
+    def test_has_find_day_parting_method(self, detector):
+        """Test PatternDetector has _find_day_parting method."""
+        assert hasattr(detector, '_find_day_parting')
     
-    def test_has_detect_budget_pacing_method(self, detector):
-        """Test PatternDetector has budget pacing detection."""
-        assert hasattr(detector, 'detect_budget_pacing')
+    def test_has_analyze_budget_pacing_method(self, detector):
+        """Test PatternDetector has _analyze_budget_pacing method."""
+        assert hasattr(detector, '_analyze_budget_pacing')
     
     def test_has_identify_performance_clusters_method(self, detector):
-        """Test PatternDetector has performance clusters method."""
-        assert hasattr(detector, 'identify_performance_clusters')
+        """Test PatternDetector has _identify_performance_clusters method."""
+        assert hasattr(detector, '_identify_performance_clusters')
     
     def test_has_detect_all_method(self, detector):
-        """Test PatternDetector has detect_all method."""
+        """Test PatternDetector has detect_all method (public)."""
         assert hasattr(detector, 'detect_all')
 
 
