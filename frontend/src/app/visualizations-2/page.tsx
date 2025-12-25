@@ -167,6 +167,16 @@ function AdsOverviewContent() {
         platform_performance: []
     });
 
+    // Schema for dynamic KPI rendering
+    const [schema, setSchema] = useState<{
+        has_data: boolean;
+        metrics: Record<string, boolean>;
+        dimensions: Record<string, boolean>;
+        extra_metrics: string[];
+        extra_dimensions: string[];
+        all_columns: string[];
+    } | null>(null);
+
     // Filter state
     const [filters, setFilters] = useState<{
         platforms: string[];
@@ -560,7 +570,25 @@ function AdsOverviewContent() {
     useEffect(() => {
         fetchData();
         fetchFilterOptions();
+        fetchSchema();
     }, [filters.dateRange]);
+
+    const fetchSchema = async () => {
+        try {
+            const schemaData = await api.getSchema<{
+                has_data: boolean;
+                metrics: Record<string, boolean>;
+                dimensions: Record<string, boolean>;
+                extra_metrics: string[];
+                extra_dimensions: string[];
+                all_columns: string[];
+            }>();
+            setSchema(schemaData);
+            console.log('Schema loaded:', schemaData);
+        } catch (error) {
+            console.error('Failed to fetch schema:', error);
+        }
+    };
 
     // Fetch comparison data when dimension or metric changes
     useEffect(() => {
@@ -1688,29 +1716,32 @@ function AdsOverviewContent() {
                             {/* NEW: KPI Spark Groups */}
                             {/* NEW: KPI Cards with Sparklines */}
                             {trendData.length > 0 && (
-                                <KpiSparkGroups data={{
-                                    current: {
-                                        spend: trendData.reduce((sum, d) => sum + (d.spend || 0), 0),
-                                        impressions: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0),
-                                        clicks: trendData.reduce((sum, d) => sum + (d.clicks || 0), 0),
-                                        conversions: trendData.reduce((sum, d) => sum + (d.conversions || 0), 0),
-                                        cpm: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) * 1000 : 0,
-                                        ctr: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) / trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) * 100 : 0,
-                                        cpc: trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) : 0,
-                                        cpa: trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) : 0,
-                                        roas: trendData.reduce((sum, d) => sum + (d.spend || 0), 0) > 0 ? (trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) * 50) / trendData.reduce((sum, d) => sum + (d.spend || 0), 0) : 0
-                                    },
-                                    previous: dashboardStats.summary_groups?.previous || {
-                                        spend: 0, impressions: 0, clicks: 0, conversions: 0,
-                                        cpm: 0, ctr: 0, cpc: 0, cpa: 0, roas: 0
-                                    },
-                                    sparkline: trendData.map(d => ({
-                                        date: d.date,
-                                        spend: d.spend || 0,
-                                        clicks: d.clicks || 0,
-                                        conversions: d.conversions || 0
-                                    }))
-                                }} />
+                                <KpiSparkGroups
+                                    data={{
+                                        current: {
+                                            spend: trendData.reduce((sum, d) => sum + (d.spend || 0), 0),
+                                            impressions: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0),
+                                            clicks: trendData.reduce((sum, d) => sum + (d.clicks || 0), 0),
+                                            conversions: trendData.reduce((sum, d) => sum + (d.conversions || 0), 0),
+                                            cpm: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) * 1000 : 0,
+                                            ctr: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) / trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) * 100 : 0,
+                                            cpc: trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) : 0,
+                                            cpa: trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) : 0,
+                                            roas: trendData.reduce((sum, d) => sum + (d.spend || 0), 0) > 0 ? (trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) * 50) / trendData.reduce((sum, d) => sum + (d.spend || 0), 0) : 0
+                                        },
+                                        previous: dashboardStats.summary_groups?.previous || {
+                                            spend: 0, impressions: 0, clicks: 0, conversions: 0,
+                                            cpm: 0, ctr: 0, cpc: 0, cpa: 0, roas: 0
+                                        },
+                                        sparkline: trendData.map(d => ({
+                                            date: d.date,
+                                            spend: d.spend || 0,
+                                            clicks: d.clicks || 0,
+                                            conversions: d.conversions || 0
+                                        }))
+                                    }}
+                                    schema={schema || undefined}
+                                />
                             )}
 
 

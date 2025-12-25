@@ -634,6 +634,103 @@ async def get_dashboard_stats(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/schema")
+async def get_data_schema(
+    request: Request,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Get schema metadata about available columns for dynamic UI.
+    Returns which metrics and dimensions are available in the uploaded data.
+    """
+    try:
+        from src.database.duckdb_manager import get_duckdb_manager
+        import pandas as pd
+        
+        duckdb_mgr = get_duckdb_manager()
+        
+        if not duckdb_mgr.has_data():
+            return {
+                "has_data": False,
+                "metrics": {},
+                "dimensions": {},
+                "extra_metrics": [],
+                "extra_dimensions": [],
+                "all_columns": []
+            }
+        
+        # Get sample data to check columns
+        df = duckdb_mgr.get_campaigns(limit=1)
+        all_columns = list(df.columns)
+        
+        # Check which standard metrics are available
+        metrics = {
+            "spend": find_column(df, 'spend') is not None,
+            "impressions": find_column(df, 'impressions') is not None,
+            "clicks": find_column(df, 'clicks') is not None,
+            "conversions": find_column(df, 'conversions') is not None,
+            "reach": find_column(df, 'reach') is not None,
+            "ctr": find_column(df, 'clicks') is not None and find_column(df, 'impressions') is not None,
+            "cpc": find_column(df, 'spend') is not None and find_column(df, 'clicks') is not None,
+            "cpa": find_column(df, 'spend') is not None and find_column(df, 'conversions') is not None,
+            "cpm": find_column(df, 'spend') is not None and find_column(df, 'impressions') is not None,
+            "roas": find_column(df, 'spend') is not None and find_column(df, 'conversions') is not None,
+        }
+        
+        # Check which standard dimensions are available
+        dimensions = {
+            "date": find_column(df, 'date') is not None,
+            "platform": find_column(df, 'platform') is not None,
+            "channel": find_column(df, 'channel') is not None,
+            "funnel": find_column(df, 'funnel') is not None,
+            "device": find_column(df, 'device') is not None,
+            "region": find_column(df, 'region') is not None,
+            "placement": find_column(df, 'placement') is not None,
+            "campaign": find_column(df, 'campaign') is not None,
+            "ad_type": find_column(df, 'ad_type') is not None,
+        }
+        
+        # Find extra columns not in standard lists
+        standard_metric_keywords = ['spend', 'cost', 'impressions', 'impr', 'clicks', 'conversions', 
+                                     'reach', 'ctr', 'cpc', 'cpa', 'cpm', 'roas']
+        standard_dim_keywords = ['date', 'platform', 'channel', 'funnel', 'device', 'region', 
+                                  'placement', 'campaign', 'ad_type', 'account', 'network']
+        
+        extra_metrics = []
+        extra_dimensions = []
+        
+        for col in all_columns:
+            col_lower = col.lower()
+            is_metric = any(kw in col_lower for kw in ['spend', 'cost', 'impressions', 'clicks', 
+                                                        'conversions', 'views', 'starts', 'completes', 
+                                                        'revenue', 'value', 'count', 'ctr', 'cpc', 'cpm'])
+            is_standard = any(kw in col_lower for kw in standard_metric_keywords + standard_dim_keywords)
+            
+            if not is_standard:
+                # Check if numeric (likely a metric) or categorical (likely a dimension)
+                try:
+                    sample = df[col].dropna().head(10)
+                    if len(sample) > 0:
+                        if pd.api.types.is_numeric_dtype(sample):
+                            extra_metrics.append(col)
+                        else:
+                            extra_dimensions.append(col)
+                except:
+                    extra_dimensions.append(col)
+        
+        return {
+            "has_data": True,
+            "metrics": metrics,
+            "dimensions": dimensions,
+            "extra_metrics": extra_metrics,
+            "extra_dimensions": extra_dimensions,
+            "all_columns": all_columns
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get data schema: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/filters")
 async def get_filter_options(
     request: Request,
@@ -688,6 +785,10 @@ async def get_filter_options(
             if key not in standard_keys and values:
                 result[key] = values
         
+        # Remove empty arrays - only return filters that have values
+        result = {k: v for k, v in result.items() if v}
+        
+        logger.info(f"Returning {len(result)} filters with values: {list(result.keys())}")
         return result
         
     except Exception as e:

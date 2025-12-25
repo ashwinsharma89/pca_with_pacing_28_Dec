@@ -160,6 +160,12 @@ export const api = {
     async analyzeGlobal<T = unknown>(): Promise<T> {
         return request<T>(`/campaigns/analyze/global`, 'POST');
     },
+    async getSchema<T = unknown>(): Promise<T> {
+        return request<T>(`/campaigns/schema`, 'GET');
+    },
+    async getFilters<T = unknown>(): Promise<T> {
+        return request<T>(`/campaigns/filters`, 'GET');
+    },
 
     async uploadCampaigns<T = unknown>(file: File): Promise<T> {
         const formData = new FormData();
