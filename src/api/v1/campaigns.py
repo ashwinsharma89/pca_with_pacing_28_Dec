@@ -30,8 +30,55 @@ query_engine = NaturalLanguageQueryEngine(api_key=os.getenv("OPENAI_API_KEY", "d
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
+# ============================================================================
+# ROBUST COLUMN MAPPING - Central registry of all column name variations
+# ============================================================================
+METRIC_COLUMN_ALIASES = {
+    'spend': ['Spend', 'Total Spent', 'Total_Spent', 'spend', 'Cost', 'cost', 'Media Cost', 'media_cost', 'Ad Spend', 'ad_spend', 'Amount Spent', 'investment', 'Investment'],
+    'impressions': ['Impressions', 'Impr', 'impressions', 'impr', 'Impression', 'impression', 'views', 'Views'],
+    'clicks': ['Clicks', 'clicks', 'Click', 'click', 'link_clicks', 'Link Clicks'],
+    'conversions': ['Conversions', 'Site Visit', 'conversions', 'Conversion', 'conversion', 'conv', 'Conv', 'purchases', 'Purchases', 'leads', 'Leads', 'site_visit'],
+    'date': ['Date', 'date', 'Week', 'week', 'Month', 'month', 'Day', 'day', 'Period', 'period', 'Time', 'time', 'report_date'],
+    'reach': ['Reach', 'reach', 'Unique Reach', 'unique_reach', 'Reach_2024', 'Reach_2025', 'unique_users'],
+    'platform': ['Platform', 'platform', 'Network', 'network', 'Ad Network', 'ad_network', 'Publisher', 'publisher', 'Source', 'source', 'account'],
+    'channel': ['Channel', 'channel', 'Medium', 'medium', 'Marketing Channel', 'Traffic Source', 'traffic_source'],
+    'device': ['Device_Type', 'Device Type', 'device_type', 'Device', 'device'],
+    'region': ['Geographic_Region', 'geographic_region', 'Region', 'region', 'State', 'state', 'Location', 'location', 'Geo', 'geo', 'DMA', 'dma', 'Country', 'country'],
+    'campaign': ['Campaign', 'campaign', 'Campaign Name', 'campaign_name', 'Campaign_Name'],
+    'funnel': ['Funnel', 'funnel', 'Funnel_Stage', 'Funnel Stage', 'Stage', 'stage', 'funnel_stage'],
+    'placement': ['Placement', 'placement', 'Position', 'position', 'Ad Placement', 'ad_placement'],
+    'ad_type': ['Ad Type', 'ad_type', 'Ad_Type', 'AdType', 'creative_type', 'Creative Type'],
+    'ctr': ['CTR', 'ctr', 'Click Through Rate', 'click_through_rate'],
+    'cpc': ['CPC', 'cpc', 'Cost Per Click', 'cost_per_click'],
+    'cpm': ['CPM', 'cpm', 'Cost Per Mille', 'cost_per_mille'],
+    'cpa': ['CPA', 'cpa', 'Cost Per Acquisition', 'cost_per_acquisition', 'Cost Per Conversion'],
+    'roas': ['ROAS', 'roas', 'Return On Ad Spend', 'return_on_ad_spend'],
+}
+
+
+def find_column(df, metric_key: str):
+    """
+    Find a column in DataFrame using the central alias mapping.
+    Case-insensitive matching with comprehensive alias support.
+    
+    Args:
+        df: pandas DataFrame
+        metric_key: Key from METRIC_COLUMN_ALIASES (e.g., 'spend', 'impressions')
+    
+    Returns:
+        Actual column name in df or None if not found
+    """
+    aliases = METRIC_COLUMN_ALIASES.get(metric_key, [])
+    cols_lower = {c.lower(): c for c in df.columns}
+    for alias in aliases:
+        if alias.lower() in cols_lower:
+            return cols_lower[alias.lower()]
+    return None
+
+
 from fastapi import UploadFile, File, Form
 from typing import Optional
+
 
 @router.post("/upload/preview-sheets")
 async def preview_excel_sheets(
@@ -278,23 +325,15 @@ async def get_global_visualizations(
             if df.empty:
                 return {"trend": [], "device": [], "platform": [], "channel": []}
         
-        # Find actual column names (handle variations)
-        def find_col(df, options):
-            # Case-insensitive column finding
-            cols_lower = {c.lower(): c for c in df.columns}
-            for opt in options:
-                if opt.lower() in cols_lower:
-                    return cols_lower[opt.lower()]
-            return None
-        
-        spend_col = find_col(df, ['Spend', 'Total Spent', 'Total_Spent', 'spend'])
-        impr_col = find_col(df, ['Impressions', 'Impr', 'impressions'])
-        clicks_col = find_col(df, ['Clicks', 'clicks'])
-        conv_col = find_col(df, ['Conversions', 'Site Visit', 'conversions'])
-        date_col = find_col(df, ['Date', 'date', 'Week', 'Month'])
-        platform_col = find_col(df, ['Platform', 'platform'])
-        channel_col = find_col(df, ['Channel', 'channel'])
-        device_col = find_col(df, ['Device_Type', 'Device Type', 'device_type'])
+        # Use global find_column with METRIC_COLUMN_ALIASES
+        spend_col = find_column(df, 'spend')
+        impr_col = find_column(df, 'impressions')
+        clicks_col = find_column(df, 'clicks')
+        conv_col = find_column(df, 'conversions')
+        date_col = find_column(df, 'date')
+        platform_col = find_column(df, 'platform')
+        channel_col = find_column(df, 'channel')
+        device_col = find_column(df, 'device')
         
         # Helper to calculate metrics
         def calc_metrics(grp_df):
@@ -439,19 +478,13 @@ async def get_dashboard_stats(
         if total_df.empty:
             return {"summary_groups": {}, "monthly_performance": [], "platform_performance": []}
             
-        # Standardize Columns
-        def find_col(df, options):
-            cols_lower = {c.lower(): c for c in df.columns}
-            for opt in options:
-                if opt.lower() in cols_lower: return cols_lower[opt.lower()]
-            return None
-            
-        spend_col = find_col(total_df, ['Spend', 'Total Spent', 'Total_Spent', 'spend'])
-        impr_col = find_col(total_df, ['Impressions', 'Impr', 'impressions'])
-        clicks_col = find_col(total_df, ['Clicks', 'clicks'])
-        conv_col = find_col(total_df, ['Conversions', 'Site Visit', 'conversions'])
-        date_col = find_col(total_df, ['Date', 'date'])
-        platform_col = find_col(total_df, ['Platform', 'platform'])
+        # Use global find_column with METRIC_COLUMN_ALIASES
+        spend_col = find_column(total_df, 'spend')
+        impr_col = find_column(total_df, 'impressions')
+        clicks_col = find_column(total_df, 'clicks')
+        conv_col = find_column(total_df, 'conversions')
+        date_col = find_column(total_df, 'date')
+        platform_col = find_column(total_df, 'platform')
         
         if not date_col:
             return {"summary_groups": {}, "monthly_performance": [], "platform_performance": []}
@@ -498,8 +531,8 @@ async def get_dashboard_stats(
                 return {"spend": 0, "impressions": 0, "reach": 0, "clicks": 0, "conversions": 0, "ctr": 0, "cpc": 0, "cpm": 0, "cpa": 0, "roas": 0}
             s = float(df[spend_col].sum()) if spend_col else 0
             i = int(df[impr_col].sum()) if impr_col else 0
-            # Find reach column
-            reach_col = find_col(df, ['Reach', 'reach', 'Unique Reach', 'Reach_2024', 'Reach_2025'])
+            # Find reach column using global find_column
+            reach_col = find_column(df, 'reach')
             r = int(df[reach_col].sum()) if reach_col else 0
             c = int(df[clicks_col].sum()) if clicks_col else 0
             cv = int(df[conv_col].sum()) if conv_col else 0
@@ -559,7 +592,7 @@ async def get_dashboard_stats(
         
         # 4. Funnel stage aggregation
         funnel_perf = []
-        funnel_col = find_col(total_df, ['Funnel', 'funnel', 'Funnel_Stage', 'funnel_stage'])
+        funnel_col = find_column(total_df, 'funnel')
         if funnel_col and funnel_col in total_df.columns:
             for funnel_stage, group in total_df.groupby(funnel_col):
                 if pd.isna(funnel_stage) or funnel_stage == 'Unknown':
@@ -572,7 +605,7 @@ async def get_dashboard_stats(
         
         # 5. Channel by Funnel aggregation
         channel_by_funnel = []
-        channel_col = find_col(total_df, ['Channel', 'channel'])
+        channel_col = find_column(total_df, 'channel')
         if channel_col and funnel_col and channel_col in total_df.columns and funnel_col in total_df.columns:
             for (channel, funnel_stage), group in total_df.groupby([channel_col, funnel_col]):
                 if pd.isna(channel) or pd.isna(funnel_stage) or channel == 'Unknown' or funnel_stage == 'Unknown':
