@@ -63,6 +63,9 @@ data/*.sqlite3
 data/chroma_db/
 data/llm_usage.json
 data/enterprise/
+data/last_uploaded.csv
+data/*_dataset_large.csv
+test_pg_data/
 !data/.gitkeep
 
 # Reports
