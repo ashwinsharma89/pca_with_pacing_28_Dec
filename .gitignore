@@ -68,6 +68,9 @@ data/enterprise/
 # Reports
 *.pptx
 *.pdf
+*.xlsx
+reports/pacing/templates/*.xlsx
+reports/pacing/outputs/*.xlsx
 
 # OS
 .DS_Store
