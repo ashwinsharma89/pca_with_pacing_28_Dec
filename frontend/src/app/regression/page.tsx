@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, TrendingUp, TrendingDown, Info } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, Info, Brain, Activity, DollarSign, Zap, Target } from "lucide-react";
 import { api } from "@/lib/api";
 import { Label } from "@/components/ui/label";
+import { FeatureBox, FeatureItem } from "@/components/layout/FeatureBox";
 import dynamic from 'next/dynamic';
 
 const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
@@ -100,84 +101,88 @@ export default function RegressionPage() {
     };
 
     return (
-        <div className="container mx-auto py-10 px-6 space-y-8 max-w-7xl animate-in fade-in duration-500">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight mb-2">Regression Analysis</h1>
-                <p className="text-muted-foreground">Model relationships between your metrics to understand drivers of performance.</p>
-            </div>
+        <div className="space-y-6 p-6 mx-auto">
+            {/* Main Content Area */}
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight mb-2">Regression Analysis</h1>
+                        <p className="text-muted-foreground">Model relationships between your metrics to understand drivers of performance.</p>
+                    </div>
+                    <Button
+                        onClick={runRegression}
+                        disabled={loading || features.length === 0}
+                        size="lg"
+                        className="bg-violet-600 hover:bg-violet-700 h-12 px-8 font-bold gap-2"
+                    >
+                        {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Brain className="h-5 w-5" />}
+                        Run Model
+                    </Button>
+                </div>
 
-            <div className="grid gap-6 lg:grid-cols-4">
-                {/* Configuration */}
-                <Card className="lg:col-span-1 h-fit">
-                    <CardHeader>
-                        <CardTitle className="text-lg">Model Setup</CardTitle>
+                {/* Model Configuration Bar */}
+                <Card className="border-white/10 bg-black/20 backdrop-blur-sm">
+                    <CardHeader className="pb-3 border-b border-white/5">
+                        <div className="flex items-center gap-2">
+                            <Brain className="h-5 w-5 text-violet-400" />
+                            <CardTitle className="text-xl">Model Setup</CardTitle>
+                        </div>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-2">
-                            <Label>Algorithm</Label>
-                            <Select value={modelType} onValueChange={setModelType}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="linear">Linear Regression (OLS)</SelectItem>
-                                    <SelectItem value="ridge">Ridge Regression (L2)</SelectItem>
-                                    <SelectItem value="lasso">Lasso Regression (L1)</SelectItem>
-                                    <SelectItem value="elasticnet">Elastic Net (Regularized)</SelectItem>
-                                    <SelectItem value="bayesian">Bayesian Ridge (Probabilistic)</SelectItem>
-                                    <SelectItem value="sgd">Gradient Descent (SGD)</SelectItem>
-                                    <SelectItem value="random_forest">Random Forest (Non-linear)</SelectItem>
-                                    <SelectItem value="xgboost">XGBoost (Gradient Boosting)</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <p className="text-xs text-muted-foreground">Choose the statistical model.</p>
-                        </div>
+                    <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div className="space-y-2">
+                                <Label>Algorithm</Label>
+                                <Select value={modelType} onValueChange={setModelType}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="linear">OLS Regression</SelectItem>
+                                        <SelectItem value="ridge">Ridge (L2)</SelectItem>
+                                        <SelectItem value="lasso">Lasso (L1)</SelectItem>
+                                        <SelectItem value="elasticnet">Elastic Net</SelectItem>
+                                        <SelectItem value="bayesian">Bayesian</SelectItem>
+                                        <SelectItem value="random_forest">Random Forest</SelectItem>
+                                        <SelectItem value="xgboost">XGBoost</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
-                        <div className="flex items-center space-x-2 border p-3 rounded-lg bg-muted/20">
-                            <input
-                                type="checkbox"
-                                id="mediaTransform"
-                                checked={useMediaTransform}
-                                onChange={(e) => setUseMediaTransform(e.target.checked)}
-                                className="h-4 w-4 rounded border-gray-300"
-                            />
-                            <Label htmlFor="mediaTransform" className="text-sm font-medium cursor-pointer flex-1">
-                                Apply Media Realism
-                                <p className="text-xs text-muted-foreground font-normal">Adstock Decay & Saturation</p>
-                            </Label>
-                        </div>
+                            <div className="space-y-2">
+                                <Label>Target Variable (Y)</Label>
+                                <Select value={target} onValueChange={setTarget}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        {METRIC_OPTIONS.map(m => (
+                                            <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
-                        <div className="space-y-2">
-                            <Label>Target Variable (Y)</Label>
-                            <Select value={target} onValueChange={setTarget}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    {METRIC_OPTIONS.map(m => (
-                                        <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <p className="text-xs text-muted-foreground">The outcome you want to predict.</p>
-                        </div>
+                            <div className="space-y-2">
+                                <Label>Predictors (X)</Label>
+                                <MultiSelect
+                                    options={METRIC_OPTIONS.filter(m => m.value !== target)}
+                                    selected={features}
+                                    onChange={setFeatures}
+                                    placeholder="Select metrics..."
+                                    className="w-full"
+                                />
+                            </div>
 
-                        <div className="space-y-2">
-                            <Label>Feature Variables (X)</Label>
-                            <MultiSelect
-                                options={METRIC_OPTIONS.filter(m => m.value !== target)}
-                                selected={features}
-                                onChange={setFeatures}
-                                placeholder="Select predictors..."
-                                className="w-full"
-                            />
-                            <p className="text-xs text-muted-foreground">Metrics that might influence the target.</p>
+                            <div className="flex items-center gap-3 border p-3 rounded-lg bg-black/20 self-end h-[40px]">
+                                <input
+                                    type="checkbox"
+                                    id="mediaTransformMain"
+                                    checked={useMediaTransform}
+                                    onChange={(e) => setUseMediaTransform(e.target.checked)}
+                                    className="h-4 w-4 rounded border-gray-300"
+                                />
+                                <Label htmlFor="mediaTransformMain" className="text-xs font-medium cursor-pointer">
+                                    Media Realism
+                                    <span className="block text-[10px] text-muted-foreground font-normal">Adstock & Saturation</span>
+                                </Label>
+                            </div>
                         </div>
-
-                        <Button
-                            onClick={runRegression}
-                            disabled={loading || features.length === 0}
-                            className="w-full bg-violet-600 hover:bg-violet-700"
-                        >
-                            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <TrendingUp className="mr-2 h-4 w-4" />}
-                            Run Model
-                        </Button>
                     </CardContent>
                 </Card>
 
@@ -200,9 +205,9 @@ export default function RegressionPage() {
                                     <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">R² Score (Fit)</CardTitle></CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold flex items-center gap-2">
-                                            {result.metrics.r2_score.toFixed(3)}
-                                            {result.metrics.r2_score > 0.7 ? <Badge className="bg-green-500">Strong</Badge> :
-                                                result.metrics.r2_score > 0.4 ? <Badge className="bg-yellow-500">Moderate</Badge> :
+                                            {result!.metrics.r2_score.toFixed(3)}
+                                            {result!.metrics.r2_score > 0.7 ? <Badge className="bg-green-500">Strong</Badge> :
+                                                result!.metrics.r2_score > 0.4 ? <Badge className="bg-yellow-500">Moderate</Badge> :
                                                     <Badge variant="destructive">Weak</Badge>}
                                         </div>
                                     </CardContent>
@@ -210,13 +215,13 @@ export default function RegressionPage() {
                                 <Card>
                                     <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Sample Size</CardTitle></CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold">{result.metrics.sample_size}</div>
+                                        <div className="text-2xl font-bold">{result!.metrics.sample_size}</div>
                                     </CardContent>
                                 </Card>
                                 <Card>
                                     <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Intercept</CardTitle></CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold">{result.metrics.intercept.toFixed(2)}</div>
+                                        <div className="text-2xl font-bold">{result!.metrics.intercept.toFixed(2)}</div>
                                     </CardContent>
                                 </Card>
                             </div>
@@ -229,7 +234,7 @@ export default function RegressionPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
-                                        {result.coefficients.map(c => (
+                                        {result!.coefficients.map(c => (
                                             <div key={c.name} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border">
                                                 <div className="flex items-center gap-3">
                                                     <Badge variant="outline">{c.name}</Badge>

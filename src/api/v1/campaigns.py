@@ -53,6 +53,7 @@ METRIC_COLUMN_ALIASES = {
     'cpm': ['CPM', 'cpm', 'Cost Per Mille', 'cost_per_mille'],
     'cpa': ['CPA', 'cpa', 'Cost Per Acquisition', 'cost_per_acquisition', 'Cost Per Conversion'],
     'roas': ['ROAS', 'roas', 'Return On Ad Spend', 'return_on_ad_spend'],
+    'revenue': ['Revenue', 'revenue', 'Sales', 'Sales Value', 'sales_value', 'Conversion Value', 'conversion_value', 'Total Revenue', 'total_revenue', 'Income', 'income'],
 }
 
 
@@ -188,24 +189,25 @@ async def upload_campaign_data(
         duckdb_mgr = get_duckdb_manager()
         row_count = duckdb_mgr.save_campaigns(df)
         
-        # Generate summary stats
+        # Generate summary stats using central alias mapping
         summary = {'total_spend': 0, 'total_clicks': 0, 'total_impressions': 0, 'total_conversions': 0, 'avg_ctr': 0}
-        for col in ['Spend', 'Total Spent', 'Total_Spent']:
-            if col in df.columns:
-                summary['total_spend'] = float(df[col].sum())
-                break
-        for col in ['Clicks', 'clicks']:
-            if col in df.columns:
-                summary['total_clicks'] = int(df[col].sum())
-                break
-        for col in ['Impressions', 'Impr', 'impressions']:
-            if col in df.columns:
-                summary['total_impressions'] = int(df[col].sum())
-                break
-        for col in ['Conversions', 'Site Visit', 'conversions']:
-            if col in df.columns:
-                summary['total_conversions'] = int(df[col].sum())
-                break
+        
+        # Use find_column() for consistent column mapping across all endpoints
+        spend_col = find_column(df, 'spend')
+        if spend_col:
+            summary['total_spend'] = float(df[spend_col].sum())
+        
+        clicks_col = find_column(df, 'clicks')
+        if clicks_col:
+            summary['total_clicks'] = int(df[clicks_col].sum())
+        
+        impressions_col = find_column(df, 'impressions')
+        if impressions_col:
+            summary['total_impressions'] = int(df[impressions_col].sum())
+        
+        conversions_col = find_column(df, 'conversions')
+        if conversions_col:
+            summary['total_conversions'] = int(df[conversions_col].sum())
         
         # Calculate avg_ctr
         if summary['total_impressions'] > 0:
@@ -273,22 +275,43 @@ async def get_global_visualizations(
         if not duckdb_mgr.has_data():
             return {"trend": [], "device": [], "platform": [], "channel": []}
         
-        # Build filter parameters - map to actual column names in CSV
+        # Build filter parameters - map to actual column names in CSV using aliases
         filter_params = {}
-        if platforms:
-            filter_params['Platform'] = platforms
-        if funnel_stages:
-            filter_params['Funnel'] = funnel_stages
-        if channels:
-            filter_params['Channel'] = channels
-        if devices:
-            filter_params['Device_Type'] = devices
-        if placements:
-            filter_params['Placement'] = placements
-        if regions:
-            filter_params['Geographic_Region'] = regions
-        if adTypes:
-            filter_params['Ad Type'] = adTypes
+        
+        # Get sample data to find actual columns
+        sample_df = duckdb_mgr.get_campaigns(limit=1)
+        
+        if not sample_df.empty:
+            # Map standard frontend keys to actual columns
+            mapping = {
+                'platform': platforms,
+                'funnel': funnel_stages,
+                'channel': channels,
+                'device': devices,
+                'placement': placements,
+                'region': regions,
+                'ad_type': adTypes
+            }
+            
+            for key, val in mapping.items():
+                if val:
+                    actual_col = find_column(sample_df, key)
+                    if actual_col:
+                        filter_params[actual_col] = val
+                    else:
+                        # Fallback for old hardcoded keys if alias not found
+                        fallback_map = {
+                            'platform': 'Platform',
+                            'funnel': 'Funnel',
+                            'channel': 'Channel',
+                            'device': 'Device_Type',
+                            'placement': 'Placement',
+                            'region': 'Geographic_Region',
+                            'ad_type': 'Ad Type'
+                        }
+                        filter_params[fallback_map.get(key, key)] = val
+        
+        logger.info(f"DuckDB visualization filters (mapped): {filter_params}")
         
         logger.info(f"DuckDB visualization filters: {filter_params}")
         
@@ -348,7 +371,11 @@ async def get_global_visualizations(
                 cpc = (spend / clicks) if clicks > 0 else 0
                 cpa = (spend / conversions) if conversions > 0 else 0
                 cpm = (spend / impressions * 1000) if impressions > 0 else 0
-                roas = (conversions * 50 / spend) if spend > 0 else 0
+                
+                # Dynamic ROAS calculation based on revenue column
+                revenue_col = find_column(group, 'revenue')
+                revenue = float(group[revenue_col].sum()) if revenue_col else 0
+                roas = (revenue / spend) if spend > 0 and revenue_col else 0
                 
                 result.append({
                     "name": str(name) if not isinstance(name, str) else name,
@@ -455,23 +482,44 @@ async def get_dashboard_stats(
         delta = d2 - d1
         prev_start_date = (d1 - delta).strftime("%Y-%m-%d")
         
-        # 2. Build Filters
+        # 2. Build Filters - map to actual column names in CSV using aliases
         filter_params = {}
-        if platforms:
-            filter_params['Platform'] = platforms
-        if channels:
-            filter_params['Channel'] = channels
-        if regions:
-            filter_params['Geographic_Region'] = regions
-        if devices:
-            filter_params['Device_Type'] = devices
-        if placements:
-            filter_params['Placement'] = placements
-        if adTypes:
-            filter_params['Ad Type'] = adTypes
-        if funnelStages:
-            filter_params['Funnel'] = funnelStages
+        
+        # Get sample data to find actual columns
+        sample_df = duckdb_mgr.get_campaigns(limit=1)
+        
+        if not sample_df.empty:
+            # Map standard frontend keys to actual columns
+            mapping = {
+                'platform': platforms,
+                'funnel': funnelStages,
+                'channel': channels,
+                'device': devices,
+                'placement': placements,
+                'region': regions,
+                'ad_type': adTypes
+            }
             
+            for key, val in mapping.items():
+                if val:
+                    actual_col = find_column(sample_df, key)
+                    if actual_col:
+                        filter_params[actual_col] = val
+                    else:
+                        # Fallback for old hardcoded keys if alias not found
+                        fallback_map = {
+                            'platform': 'Platform',
+                            'funnel': 'Funnel',
+                            'channel': 'Channel',
+                            'device': 'Device_Type',
+                            'placement': 'Placement',
+                            'region': 'Geographic_Region',
+                            'ad_type': 'Ad Type'
+                        }
+                        filter_params[fallback_map.get(key, key)] = val
+        
+        logger.info(f"DuckDB dashboard-stats filters: {filter_params}")
+        
         # Fetch data for current and previous period
         # 1. First, fetch all data with filters applied, ignoring dates for now
         total_df = duckdb_mgr.get_campaigns(filters=filter_params if filter_params else None)
@@ -546,7 +594,7 @@ async def get_dashboard_stats(
                 "cpc": round((s / c) if c > 0 else 0, 2),
                 "cpm": round((s / i * 1000) if i > 0 else 0, 2),
                 "cpa": round((s / cv) if cv > 0 else 0, 2),
-                "roas": round((cv * 50 / s) if s > 0 else 0, 2)
+                "roas": round((float(df[find_column(df, 'revenue')].sum()) / s) if s > 0 and find_column(df, 'revenue') else 0, 2)
             }
             
         curr_summary = get_summary(curr_df)
@@ -674,7 +722,7 @@ async def get_data_schema(
             "cpc": find_column(df, 'spend') is not None and find_column(df, 'clicks') is not None,
             "cpa": find_column(df, 'spend') is not None and find_column(df, 'conversions') is not None,
             "cpm": find_column(df, 'spend') is not None and find_column(df, 'impressions') is not None,
-            "roas": find_column(df, 'spend') is not None and find_column(df, 'conversions') is not None,
+            "roas": find_column(df, 'spend') is not None and find_column(df, 'revenue') is not None,
         }
         
         # Check which standard dimensions are available
@@ -764,16 +812,45 @@ async def get_filter_options(
         logger.info(f"geographic_region values: {all_filters.get('geographic_region', [])}")
         logger.info(f"ad_type values: {all_filters.get('ad_type', [])}")
         
-        # Map common column variations to standard filter names
-        result = {
-            "platforms": all_filters.get('platform', []) or all_filters.get('platforms', []),
-            "channels": all_filters.get('channel', []),
-            "funnel_stages": all_filters.get('funnel', []) or all_filters.get('funnel_stage', []),
-            "devices": all_filters.get('device_type', []),
-            "placements": all_filters.get('placement', []),
-            "regions": all_filters.get('geographic_region', []) or all_filters.get('region', []) or all_filters.get('dma', []) or all_filters.get('state', []),
-            "ad_types": all_filters.get('ad_type', []) or all_filters.get('ad type', []) or all_filters.get('Ad Type', [])
-        }
+        # Map common column variations to standard filter names expected by frontend
+        result = {}
+        
+        # Get sample data to find actual columns
+        sample_df = duckdb_mgr.get_campaigns(limit=1)
+        
+        if not sample_df.empty:
+            standard_mappings = {
+                "platforms": "platform",
+                "channels": "channel",
+                "funnel_stages": "funnel",
+                "devices": "device",
+                "placements": "placement",
+                "regions": "region",
+                "ad_types": "ad_type"
+            }
+            
+            for frontend_key, standard_key in standard_mappings.items():
+                actual_col = find_column(sample_df, standard_key)
+                if actual_col:
+                    # DuckDBManager normalized keys to lower_underscore
+                    api_key = actual_col.lower().replace(' ', '_')
+                    result[frontend_key] = all_filters.get(api_key, [])
+        
+        # Add fallback for original keys manually just in case
+        if not result.get("platforms"):
+            result["platforms"] = all_filters.get('platform', []) or all_filters.get('platforms', [])
+        if not result.get("channels"):
+            result["channels"] = all_filters.get('channel', [])
+        if not result.get("funnel_stages"):
+            result["funnel_stages"] = all_filters.get('funnel', []) or all_filters.get('funnel_stage', [])
+        if not result.get("devices"):
+            result["devices"] = all_filters.get('device_type', [])
+        if not result.get("placements"):
+            result["placements"] = all_filters.get('placement', [])
+        if not result.get("regions"):
+            result["regions"] = all_filters.get('geographic_region', []) or all_filters.get('region', []) or all_filters.get('dma', []) or all_filters.get('state', [])
+        if not result.get("ad_types"):
+            result["ad_types"] = all_filters.get('ad_type', []) or all_filters.get('ad type', []) or all_filters.get('Ad Type', [])
         
         logger.info(f"Final result regions: {result.get('regions', [])}, ad_types: {result.get('ad_types', [])}")
         
@@ -987,163 +1064,122 @@ async def chat_global(
         if not question or not question.strip():
             raise HTTPException(status_code=400, detail="Question cannot be empty")
         
-        # KNOWLEDGE MODE: Use RAG for marketing insights, benchmarks, best practices
+        # Check for API Key if not in knowledge mode
+        api_key = os.getenv("OPENAI_API_KEY", "dummy")
+        if not chat_request.knowledge_mode and api_key == "dummy":
+            logger.warning("OpenAI API key is missing. LLM queries will likely fail.")
+        
+        # 1. KNOWLEDGE MODE (RAG)
         if chat_request.knowledge_mode:
             return await _handle_knowledge_mode_query(question)
         
-        # DATA MODE: Try templates first, then fall back to NL-to-SQL
-        # Use persistent Parquet data directly
+        # 2. DATA MODE
         if not CAMPAIGNS_PARQUET.exists():
-            return {"success": True, "answer": "No campaigns found to analyze. Please upload data first.", "sql": ""}
+            return {"success": True, "answer": "No campaign data found. Please upload a dynamic data file first.", "sql": ""}
             
-        logger.info(f"Chat using persistent Parquet: {CAMPAIGNS_PARQUET}")
-        query_engine.load_parquet_data(str(CAMPAIGNS_PARQUET), table_name="all_campaigns")
+        logger.info(f"Chat processing question: {question}")
         
-        # Try NL-to-SQL first - it's flexible and works with any column names
-        logger.info(f"🤖 Using NL-to-SQL for question: {question}")
-        result = query_engine.ask(question)
+        # Load and verify data
+        try:
+            query_engine.load_parquet_data(str(CAMPAIGNS_PARQUET), table_name="all_campaigns")
+        except Exception as load_err:
+            logger.error(f"Failed to load data for chat: {load_err}")
+            return {"success": False, "error": f"Failed to load data: {str(load_err)}"}
         
-        # If NL-to-SQL fails, try templates as fallback
+        # A. Try NL-to-SQL
+        try:
+            result = query_engine.ask(question)
+        except Exception as ask_err:
+            logger.error(f"NL-to-SQL crashed: {ask_err}")
+            result = {"success": False, "error": str(ask_err)}
+        
+        # B. Template Fallback
         if not result.get('success'):
-            logger.info("NL-to-SQL failed, trying dynamic templates as fallback...")
+            logger.info("Attempting local template fallback...")
             try:
-                # Load schema from Parquet and generate templates dynamically
                 from src.query_engine.template_generator import load_schema_from_parquet, generate_templates_for_schema
-                
                 schema_columns = load_schema_from_parquet(str(CAMPAIGNS_PARQUET))
-                if not schema_columns:
-                    logger.warning("Could not load schema from Parquet")
-                else:
-                    # Generate templates based on actual schema
+                if schema_columns:
                     dynamic_templates = generate_templates_for_schema(schema_columns)
+                    template = next((t for t in dynamic_templates.values() if t.matches(question)), None)
                     
-                    # Find matching template
-                    template = None
-                    for tmpl in dynamic_templates.values():
-                        if tmpl.matches(question):
-                            template = tmpl
-                            break
-            except Exception as e:
-                logger.error(f"Error generating dynamic templates: {e}")
-                template = None
-            
-            if template:
-                logger.info(f"✅ Using template fallback: {template.name}")
-                try:
-                    import duckdb
-                    # Load data from Parquet file
-                    df = pd.read_parquet(CAMPAIGNS_PARQUET)
-                    conn = duckdb.connect(':memory:')
-                    conn.register('all_campaigns', df)
-                    results_df = conn.execute(template.sql).df()
-                    conn.close()
-                    
-                    # Check if results are empty
-                    if results_df.empty:
-                        logger.info(f"Template returned no results for: {question}")
-                        result = {
-                            "success": True,
-                            "answer": f"No data found. {template.description} returned no results. This might mean:\n- The data doesn't have the required columns\n- No campaigns match the criteria\n- Try a different query",
-                            "sql": template.sql,
-                            "data": []
-                        }
-                    else:
-                        # Convert DataFrame to dict immediately to avoid serialization issues
-                        import math
-                        data_records = results_df.to_dict('records')
-                        
-                        # Convert numpy types to Python types
-                        def convert_numpy_types(obj):
-                            if isinstance(obj, dict):
-                                return {k: convert_numpy_types(v) for k, v in obj.items()}
-                            elif isinstance(obj, list):
-                                return [convert_numpy_types(item) for item in obj]
-                            elif isinstance(obj, (np.integer, np.int64, np.int32)):
-                                return int(obj)
-                            elif isinstance(obj, (np.floating, np.float64, np.float32)):
-                                val = float(obj)
-                                return None if math.isnan(val) or math.isinf(val) else val
-                            elif isinstance(obj, float):
-                                return None if math.isnan(obj) or math.isinf(obj) else obj
-                            elif isinstance(obj, np.ndarray):
-                                return obj.tolist()
-                            elif pd.isna(obj):
-                                return None
-                            else:
-                                return obj
-                        
-                        data_records = convert_numpy_types(data_records)
+                    if template:
+                        logger.info(f"Using template fallback: {template.name}")
+                        import duckdb
+                        conn = duckdb.connect(':memory:')
+                        conn.execute("CREATE VIEW all_campaigns AS SELECT * FROM read_parquet(?)", [str(CAMPAIGNS_PARQUET)])
+                        df = conn.execute(template.sql).fetchdf()
                         
                         result = {
                             "success": True,
-                            "answer": f"📊 {template.description}",
-                            "sql": template.sql,
-                            "data": data_records
+                            "answer": f"I used an analytical template for {template.name} to answer your question.",
+                            "sql_query": template.sql,
+                            "results": df
                         }
-                except Exception as e:
-                    logger.warning(f"Template execution also failed: {e}")
-                    result = {"success": False, "error": f"Both NL-to-SQL and template failed: {str(e)}"}
+            except Exception as t_err:
+                logger.error(f"Template fallback failed: {t_err}")
 
-        
-        # Enhance answer with RAG context if enabled
-        if chat_request.use_rag_context and result.get('success'):
-            rag_context = _get_rag_context_for_question(question)
-            if rag_context:
-                enhanced_answer = result.get('answer', '')
-                if enhanced_answer:
-                    enhanced_answer += f"\n\n💡 **Additional Context:**\n{rag_context}"
-                    result['answer'] = enhanced_answer
-                    result['rag_enhanced'] = True
-        
-        # Convert DataFrame results to array for frontend table display
-        if result.get('success') and result.get('results') is not None:
-            results_df = result['results']
-            if not results_df.empty:
-                # Convert to dict first
-                data_records = results_df.to_dict('records')
-                result['data'] = data_records
+        # C. Post-processing (RAG, Summary, Charts)
+        if result.get('success'):
+            final_result = {
+                "success": True,
+                "answer": result.get('answer') or '',
+                "sql_query": result.get('sql_query') or result.get('sql') or '',
+                "data": []
+            }
+            
+            # Handle DataFrame results
+            results_df = result.get('results')
+            if isinstance(results_df, pd.DataFrame) and not results_df.empty:
+                final_result['data'] = results_df.head(100).to_dict('records')
                 
-                # Generate summary and chart data
+                # Generate summary and chart
                 summary_and_chart = _generate_summary_and_chart(question, results_df)
-                result['summary'] = summary_and_chart.get('summary', '')
-                result['chart'] = summary_and_chart.get('chart', None)
-            else:
-                result['data'] = []
-        
-        # Helper function to convert numpy types to Python types
-        def convert_numpy_types(obj):
+                if not final_result['answer'] or final_result['answer'] == '':
+                    final_result['answer'] = summary_and_chart.get('summary', '')
+                final_result['chart'] = summary_and_chart.get('chart')
+            
+            # Add RAG context if enabled
+            if chat_request.use_rag_context:
+                rag_context = _get_rag_context_for_question(question)
+                if rag_context:
+                    final_result['answer'] += f"\n\n💡 **Insights:**\n{rag_context}"
+                    final_result['rag_enhanced'] = True
+            
+            # Helper function to convert numpy types to Python types
+            import numpy as np
             import math
-            # Handle pandas DataFrame - skip conversion
-            if isinstance(obj, pd.DataFrame):
-                return obj
-            elif isinstance(obj, dict):
-                return {k: convert_numpy_types(v) for k, v in obj.items()}
-            elif isinstance(obj, list):
-                return [convert_numpy_types(item) for item in obj]
-            elif isinstance(obj, (np.integer, np.int64, np.int32)):
-                return int(obj)
-            elif isinstance(obj, (np.floating, np.float64, np.float32)):
-                val = float(obj)
-                return None if math.isnan(val) or math.isinf(val) else val
-            elif isinstance(obj, float):
-                return None if math.isnan(obj) or math.isinf(obj) else obj
-            elif isinstance(obj, np.ndarray):
-                return obj.tolist()
-            elif pd.isna(obj):
-                return None
-            else:
-                return obj
-        
-        # Apply conversion to ENTIRE result to catch NaN in chart, summary, etc.
-        result = convert_numpy_types(result)
+            def convert_numpy_types(obj):
+                if isinstance(obj, pd.DataFrame):
+                    return obj
+                elif isinstance(obj, dict):
+                    return {k: convert_numpy_types(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [convert_numpy_types(item) for item in obj]
+                elif isinstance(obj, (np.integer, np.int64, np.int32)):
+                    return int(obj)
+                elif isinstance(obj, (np.floating, np.float64, np.float32)):
+                    val = float(obj)
+                    return None if math.isnan(val) or math.isinf(val) else val
+                elif isinstance(obj, float):
+                    return None if math.isnan(obj) or math.isinf(obj) else obj
+                elif isinstance(obj, np.ndarray):
+                    return obj.tolist()
+                elif pd.isna(obj):
+                    return None
+                else:
+                    return obj
+
+            return convert_numpy_types(final_result)
         
         return result
-        
+
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Global chat failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception(f"Unexpected error in chat_global: {e}")
+        return {"success": False, "error": f"An error occurred: {str(e)}"}
+
 
 
 def _generate_summary_and_chart(question: str, df: pd.DataFrame) -> Dict[str, Any]:
@@ -1629,7 +1665,52 @@ async def get_regression_analysis(
              series_norm = series / (np.max(series) + 1e-9) # Normalize first
              return (series_norm ** alpha) / (series_norm ** alpha + gamma ** alpha)
 
+        # 1. Load Data
+        from src.database.duckdb_manager import get_duckdb_manager
+        duckdb_mgr = get_duckdb_manager()
+        if not duckdb_mgr.has_data():
+            return {"success": False, "error": "No data found. Please upload a dataset first."}
 
+        # Build filters for DuckDB
+        filter_params = {}
+        if platforms:
+            sample_df = duckdb_mgr.get_campaigns(limit=1)
+            platform_col = find_column(sample_df, 'platform')
+            if platform_col:
+                filter_params[platform_col] = platforms
+
+        df = duckdb_mgr.get_campaigns(filters=filter_params if filter_params else None)
+
+        if df.empty:
+            return {"success": False, "error": "No data found matching your filters."}
+
+        # 2. Handle Dates and Standardization
+        date_col = find_column(df, 'date')
+        if date_col:
+            df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
+            if start_date:
+                df = df[df[date_col] >= pd.to_datetime(start_date)]
+            if end_date:
+                df = df[df[date_col] <= pd.to_datetime(end_date)]
+
+        # Map requested metrics to actual columns
+        reg_df = pd.DataFrame()
+        actual_target = find_column(df, target)
+        if not actual_target:
+             raise HTTPException(status_code=400, detail=f"Target metric '{target}' not found in data.")
+        reg_df[target] = df[actual_target]
+
+        feature_list = [f.strip() for f in features.split(',')]
+        for f in feature_list:
+            actual_f = find_column(df, f)
+            if not actual_f:
+                raise HTTPException(status_code=400, detail=f"Feature metric '{f}' not found in data.")
+            reg_df[f] = df[actual_f]
+
+        if date_col:
+            reg_df['date'] = df[date_col]
+            
+        df = reg_df # Use renamed/standardized dataframe for rest of logic
 
         # Sort by date for Time Series effects (Adstock)
         if 'date' in df.columns and use_media_transform:

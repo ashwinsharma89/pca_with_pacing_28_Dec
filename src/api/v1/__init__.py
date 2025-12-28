@@ -20,6 +20,7 @@ from .realtime import router as realtime_router
 from .dashboards import router as dashboards_router
 from .comparison import router as comparison_router
 from .visualizations import router as visualizations_router
+from .pacing_reports import router as pacing_reports_router
 
 router_v1.include_router(auth_router)
 router_v1.include_router(campaigns_router)
@@ -32,6 +33,7 @@ router_v1.include_router(realtime_router)
 router_v1.include_router(dashboards_router)
 router_v1.include_router(comparison_router)
 router_v1.include_router(visualizations_router)
+router_v1.include_router(pacing_reports_router)
 
 __all__ = ['router_v1']
 

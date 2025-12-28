@@ -87,6 +87,10 @@ export interface Insight {
 }
 
 export const api = {
+    // Generic request method for flexibility
+    request: <T>(endpoint: string, options?: ApiRequestOptions & { method?: RequestMethod; body?: unknown }) =>
+        request<T>(endpoint, options?.method || 'GET', options?.body, options),
+
     get: <T>(endpoint: string, options?: ApiRequestOptions) => request<T>(endpoint, 'GET', undefined, options),
     async regenerateReport<T = unknown>(campaignId: string, template: string = 'default'): Promise<T> {
         return request<T>(`/campaigns/${campaignId}/report/regenerate`, 'POST', { template });

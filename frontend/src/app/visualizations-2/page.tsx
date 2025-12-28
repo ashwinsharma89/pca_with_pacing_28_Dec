@@ -12,7 +12,10 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { api } from '@/lib/api';
+import { computeDataAvailability, DataAvailability } from '@/hooks/useDataAvailability';
 import { DashboardProvider, useDashboard } from '@/context/DashboardContext';
+import { FeatureBox, FeatureItem } from '@/components/layout/FeatureBox';
+import { Separator } from '@/components/ui/separator';
 
 // Original charts
 import { TreemapChart } from '@/components/charts/TreemapChart';
@@ -45,7 +48,8 @@ import { PerformanceTable } from '@/components/charts/PerformanceTable';
 
 import {
     LayoutGrid, BarChart3, Calendar, TrendingUp, Layers, Activity,
-    Sparkles, Target, Gauge, Filter, Lightbulb, Award, ArrowUpRight, ArrowDownRight, Loader2
+    Sparkles, Target, Gauge, Filter, Lightbulb, Award, ArrowUpRight, ArrowDownRight, Loader2,
+    DollarSign, Zap
 } from 'lucide-react';
 
 // Dynamically import Recharts
@@ -64,6 +68,12 @@ const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.Cartesian
 const BarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { ssr: false });
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'];
+
+interface VisualizationsData {
+    platform: any[];
+    channel: any[];
+    trend: any[];
+}
 
 function AdsOverviewContent() {
     console.log('AdsOverviewContent v2.1 (Route Fix Applied)');
@@ -215,6 +225,19 @@ function AdsOverviewContent() {
     const regionOptions = availableRegions.map(r => ({ label: r, value: r }));
     const adTypeOptions = availableAdTypes.map(a => ({ label: a, value: a }));
 
+    // Compute data availability for dynamic rendering
+    const dataAvailability: DataAvailability = useMemo(() => {
+        return computeDataAvailability(schema, {
+            platforms: availablePlatforms,
+            channels: availableChannels,
+            funnelStages: availableFunnelStages,
+            devices: availableDevices,
+            placements: availablePlacements,
+            regions: availableRegions,
+            adTypes: availableAdTypes,
+        });
+    }, [schema, availablePlatforms, availableChannels, availableFunnelStages, availableDevices, availablePlacements, availableRegions, availableAdTypes]);
+
     // Aggregate trend data to monthly level for cleaner charts
     const monthlyTrendData = useMemo(() => {
         if (!trendData || trendData.length === 0) return [];
@@ -229,11 +252,12 @@ function AdsOverviewContent() {
             if (!monthlyAgg[monthKey]) {
                 monthlyAgg[monthKey] = {
                     date: monthLabel,
-                    monthKey,
+                    monthKey: monthKey,
                     spend: 0,
                     clicks: 0,
                     conversions: 0,
-                    impressions: 0
+                    impressions: 0,
+                    revenue: 0
                 };
             }
 
@@ -241,6 +265,7 @@ function AdsOverviewContent() {
             monthlyAgg[monthKey].clicks += d.clicks || 0;
             monthlyAgg[monthKey].conversions += d.conversions || 0;
             monthlyAgg[monthKey].impressions += d.impressions || 0;
+            monthlyAgg[monthKey].revenue += d.revenue || 0;
         });
 
         // Convert to array and sort by month
@@ -250,7 +275,7 @@ function AdsOverviewContent() {
                 ...m,
                 cpc: m.clicks > 0 ? m.spend / m.clicks : 0,
                 ctr: m.impressions > 0 ? (m.clicks / m.impressions) * 100 : 0,
-                roas: m.spend > 0 ? (m.conversions * 50) / m.spend : 0,
+                roas: m.spend > 0 ? (m.revenue || 0) / m.spend : 0,
                 costPerConv: m.conversions > 0 ? m.spend / m.conversions : 0
             }));
     }, [trendData]);
@@ -278,13 +303,15 @@ function AdsOverviewContent() {
                         cpm: 0,
                         ctr: 0,
                         cpc: 0,
-                        cpa: 0
+                        cpa: 0,
+                        revenue: 0
                     };
                 }
                 platformTotals[p.platform].spend += p.spend || 0;
                 platformTotals[p.platform].impressions += p.impressions || 0;
                 platformTotals[p.platform].clicks += p.clicks || 0;
                 platformTotals[p.platform].conversions += p.conversions || 0;
+                platformTotals[p.platform].revenue += p.revenue || 0;
             });
 
             // Recalculate derived metrics
@@ -293,7 +320,8 @@ function AdsOverviewContent() {
                 cpm: p.impressions > 0 ? (p.spend / p.impressions * 1000) : 0,
                 ctr: p.impressions > 0 ? (p.clicks / p.impressions * 100) : 0,
                 cpc: p.clicks > 0 ? (p.spend / p.clicks) : 0,
-                cpa: p.conversions > 0 ? (p.spend / p.conversions) : 0
+                cpa: p.conversions > 0 ? (p.spend / p.conversions) : 0,
+                roas: p.spend > 0 ? ((p.revenue || 0) / p.spend) : 0
             })).sort((a, b) => b.spend - a.spend);
         }
     }, [dashboardStats.platform_performance, selectedMonth]);
@@ -324,6 +352,7 @@ function AdsOverviewContent() {
                 monthlyAgg[monthKey].clicks += p.clicks || 0;
                 monthlyAgg[monthKey].conversions += p.conversions || 0;
                 monthlyAgg[monthKey].impressions += p.impressions || 0;
+                monthlyAgg[monthKey].revenue += p.revenue || 0;
             });
 
             return Object.values(monthlyAgg)
@@ -333,7 +362,7 @@ function AdsOverviewContent() {
                     ctr: m.impressions > 0 ? (m.clicks / m.impressions * 100) : 0,
                     cpc: m.clicks > 0 ? (m.spend / m.clicks) : 0,
                     cpa: m.conversions > 0 ? (m.spend / m.conversions) : 0,
-                    roas: m.spend > 0 ? (m.conversions * 50 / m.spend) : 0
+                    roas: m.spend > 0 ? ((m.revenue || 0) / m.spend) : 0
                 }))
                 .sort((a: any, b: any) => b.month.localeCompare(a.month));
         }
@@ -353,7 +382,8 @@ function AdsOverviewContent() {
                     spend: 0,
                     clicks: 0,
                     conversions: 0,
-                    impressions: 0
+                    impressions: 0,
+                    revenue: 0
                 };
             }
 
@@ -361,6 +391,7 @@ function AdsOverviewContent() {
             monthlyAgg[monthKey].clicks += d.clicks || 0;
             monthlyAgg[monthKey].conversions += d.conversions || 0;
             monthlyAgg[monthKey].impressions += d.impressions || 0;
+            monthlyAgg[monthKey].revenue += d.revenue || 0;
         });
 
         return Object.values(monthlyAgg)
@@ -370,7 +401,7 @@ function AdsOverviewContent() {
                 ctr: m.impressions > 0 ? (m.clicks / m.impressions * 100) : 0,
                 cpc: m.clicks > 0 ? (m.spend / m.clicks) : 0,
                 cpa: m.conversions > 0 ? (m.spend / m.conversions) : 0,
-                roas: m.spend > 0 ? (m.conversions * 50 / m.spend) : 0
+                roas: m.spend > 0 ? ((m.revenue || 0) / m.spend) : 0
             }))
             .sort((a: any, b: any) => b.month.localeCompare(a.month));
     }, [trendData, selectedPlatform, dashboardStats.platform_performance]);
@@ -394,13 +425,15 @@ function AdsOverviewContent() {
                         spend: 0,
                         clicks: 0,
                         conversions: 0,
-                        impressions: 0
+                        impressions: 0,
+                        revenue: 0
                     };
                 }
                 platformAgg[platformKey].spend += p.spend || 0;
                 platformAgg[platformKey].clicks += p.clicks || 0;
                 platformAgg[platformKey].conversions += p.conversions || 0;
                 platformAgg[platformKey].impressions += p.impressions || 0;
+                platformAgg[platformKey].revenue += p.revenue || 0;
             });
 
             return Object.values(platformAgg)
@@ -410,7 +443,7 @@ function AdsOverviewContent() {
                     ctr: p.impressions > 0 ? (p.clicks / p.impressions * 100) : 0,
                     cpc: p.clicks > 0 ? (p.spend / p.clicks) : 0,
                     cpa: p.conversions > 0 ? (p.spend / p.conversions) : 0,
-                    roas: p.spend > 0 ? (p.conversions * 50 / p.spend) : 0
+                    roas: p.spend > 0 ? ((p.revenue || 0) / p.spend) : 0
                 }))
                 .sort((a: any, b: any) => b.spend - a.spend);
         }
@@ -428,7 +461,7 @@ function AdsOverviewContent() {
             ctr: p.ctr || 0,
             cpc: p.cpc || 0,
             cpa: p.cpa || (p.conversions > 0 ? p.spend / p.conversions : 0),
-            roas: p.roas || (p.spend > 0 ? (p.conversions * 50 / p.spend) : 0)
+            roas: p.roas || (p.spend > 0 ? ((p.revenue || 0) / p.spend) : 0)
         })).sort((a: any, b: any) => b.spend - a.spend);
     }, [platformData, selectedMonth, dashboardStats.platform_performance]);
 
@@ -446,7 +479,7 @@ function AdsOverviewContent() {
             ctr: c.ctr || (c.impressions > 0 ? (c.clicks / c.impressions * 100) : 0),
             cpc: c.cpc || (c.clicks > 0 ? (c.spend / c.clicks) : 0),
             cpa: c.cpa || (c.conversions > 0 ? (c.spend / c.conversions) : 0),
-            roas: c.roas || (c.spend > 0 ? (c.conversions * 50 / c.spend) : 0)
+            roas: c.roas || (c.spend > 0 ? ((c.revenue || 0) / c.spend) : 0)
         })).sort((a: any, b: any) => b.spend - a.spend);
     }, [channelData]);
 
@@ -677,7 +710,7 @@ function AdsOverviewContent() {
             let visualizations, stats;
             try {
                 console.log('Calling getGlobalVisualizations...');
-                visualizations = await api.getGlobalVisualizations(filterParams);
+                visualizations = await api.getGlobalVisualizations<VisualizationsData>(filterParams);
                 console.log('getGlobalVisualizations success:', !!visualizations);
             } catch (err) {
                 console.error('getGlobalVisualizations failed:', err);
@@ -705,13 +738,14 @@ function AdsOverviewContent() {
                     spend: acc.spend + (p.spend || 0),
                     impressions: acc.impressions + (p.impressions || 0),
                     clicks: acc.clicks + (p.clicks || 0),
-                    conversions: acc.conversions + (p.conversions || 0)
-                }), { spend: 0, impressions: 0, clicks: 0, conversions: 0 });
+                    conversions: acc.conversions + (p.conversions || 0),
+                    revenue: acc.revenue + (p.revenue || 0)
+                }), { spend: 0, impressions: 0, clicks: 0, conversions: 0, revenue: 0 });
 
                 const ctr = totals.impressions > 0 ? (totals.clicks / totals.impressions * 100) : 0;
                 const cpm = totals.impressions > 0 ? (totals.spend / totals.impressions * 1000) : 0;
                 const cpc = totals.clicks > 0 ? (totals.spend / totals.clicks) : 0;
-                const roas = totals.spend > 0 ? (totals.conversions * 50 / totals.spend) : 0;
+                const roas = totals.spend > 0 ? ((totals.revenue || 0) / totals.spend) : 0;
 
                 setKpis({
                     spend: totals.spend,
@@ -1164,18 +1198,20 @@ function AdsOverviewContent() {
                 const impressions = data.impressions || 0;
                 const clicks = data.clicks || 0;
                 const conversions = data.conversions || 0;
+                const revenue = data.revenue || 0;
 
                 return {
                     spend,
                     impressions,
                     clicks,
                     conversions,
+                    revenue,
                     cpm: impressions > 0 ? (spend / impressions) * 1000 : 0,
                     ctr: impressions > 0 ? (clicks / impressions) * 100 : 0,
                     cpc: clicks > 0 ? spend / clicks : 0,
                     convRate: clicks > 0 ? (conversions / clicks) * 100 : 0,
                     cpa: conversions > 0 ? spend / conversions : 0,
-                    roas: spend > 0 ? (conversions * 50) / spend : 0,
+                    roas: spend > 0 ? (revenue / spend) : 0,
                     reach: Math.round(impressions * 0.65)
                 };
             };
@@ -1266,26 +1302,28 @@ function AdsOverviewContent() {
 
             // Build comparison data using actual year data
             const compData = Array.from(allChannels).map(channel => {
-                const data1 = year1Data[channel] || { spend: 0, impressions: 0, clicks: 0, conversions: 0 };
-                const data2 = year2Data[channel] || { spend: 0, impressions: 0, clicks: 0, conversions: 0 };
+                const data1 = year1Data[channel] || { spend: 0, impressions: 0, clicks: 0, conversions: 0, revenue: 0 };
+                const data2 = year2Data[channel] || { spend: 0, impressions: 0, clicks: 0, conversions: 0, revenue: 0 };
 
                 // Year 1 metrics
                 const spend2025 = data1.spend;
                 const impressions2025 = data1.impressions;
                 const clicks2025 = data1.clicks;
                 const conversions2025 = data1.conversions;
+                const revenue2025 = data1.revenue || 0;
                 const ctr2025 = impressions2025 > 0 ? (clicks2025 / impressions2025) * 100 : 0;
                 const cpa2025 = conversions2025 > 0 ? spend2025 / conversions2025 : 0;
-                const roas2025 = spend2025 > 0 ? (conversions2025 * 50) / spend2025 : 0;
+                const roas2025 = spend2025 > 0 ? (revenue2025 / spend2025) : 0;
 
                 // Year 2 metrics
                 const spend2024 = data2.spend;
                 const impressions2024 = data2.impressions;
                 const clicks2024 = data2.clicks;
                 const conversions2024 = data2.conversions;
+                const revenue2024 = data2.revenue || 0;
                 const ctr2024 = impressions2024 > 0 ? (clicks2024 / impressions2024) * 100 : 0;
                 const cpa2024 = conversions2024 > 0 ? spend2024 / conversions2024 : 0;
-                const roas2024 = spend2024 > 0 ? (conversions2024 * 50) / spend2024 : 0;
+                const roas2024 = spend2024 > 0 ? (revenue2024 / spend2024) : 0;
 
                 // Calculate % changes (positive = improvement in year1 vs year2)
                 const calcChange = (current: number, previous: number) =>
@@ -1324,7 +1362,7 @@ function AdsOverviewContent() {
         try {
             console.log('Calling fetchFilterOptions (/campaigns/filters)...');
             const filterOptions: any = await api.get('/campaigns/filters');
-            console.log('Filter options from API success:', !!filterOptions);
+            console.log('Filter options from API response:', filterOptions);
 
             if (filterOptions.platforms) setAvailablePlatforms(filterOptions.platforms);
             if (filterOptions.funnel_stages) setAvailableFunnelStages(filterOptions.funnel_stages);
@@ -1333,6 +1371,9 @@ function AdsOverviewContent() {
             if (filterOptions.placements) setAvailablePlacements(filterOptions.placements);
             if (filterOptions.regions) setAvailableRegions(filterOptions.regions);
             if (filterOptions.ad_types) setAvailableAdTypes(filterOptions.ad_types);
+
+            // Handle any extra dynamic filters if they exist
+            // (These could be mapped to a generic 'Extra Filters' section if needed)
         } catch (error) {
             console.error('Failed to fetch filter options:', error);
         }
@@ -1388,7 +1429,7 @@ function AdsOverviewContent() {
             cpc: stage.cpc || (stage.clicks > 0 ? (stage.spend / stage.clicks) : 0),
             conversions: stage.conversions || 0,
             cpa: stage.cpa || (stage.conversions > 0 ? (stage.spend / stage.conversions) : 0),
-            roas: stage.roas || (stage.spend > 0 ? (stage.conversions * 50 / stage.spend) : 0)
+            roas: stage.roas || (stage.spend > 0 ? ((stage.revenue || 0) / stage.spend) : 0)
         }));
     }, [funnelStageDataFromBackend]);
 
@@ -1413,7 +1454,8 @@ function AdsOverviewContent() {
                         impressions: 0,
                         reach: 0,
                         clicks: 0,
-                        conversions: 0
+                        conversions: 0,
+                        revenue: 0
                     };
                 }
                 channelTotals[item.channel].spend += item.spend || 0;
@@ -1421,6 +1463,7 @@ function AdsOverviewContent() {
                 channelTotals[item.channel].reach += item.reach || 0;
                 channelTotals[item.channel].clicks += item.clicks || 0;
                 channelTotals[item.channel].conversions += item.conversions || 0;
+                channelTotals[item.channel].revenue += item.revenue || 0;
             });
 
             // Recalculate derived metrics
@@ -1430,7 +1473,7 @@ function AdsOverviewContent() {
                 cpc: ch.clicks > 0 ? (ch.spend / ch.clicks) : 0,
                 cpm: ch.impressions > 0 ? (ch.spend / ch.impressions * 1000) : 0,
                 cpa: ch.conversions > 0 ? (ch.spend / ch.conversions) : 0,
-                roas: ch.spend > 0 ? (ch.conversions * 50 / ch.spend) : 0
+                roas: ch.spend > 0 ? ((ch.revenue || 0) / ch.spend) : 0
             })).sort((a, b) => b.spend - a.spend);
         }
     }, [channelByFunnelData, selectedFunnelStage, channelData]);
@@ -1441,29 +1484,50 @@ function AdsOverviewContent() {
         after: p.spend
     })), [platformData]);
 
-    const scorecardData = useMemo(() => platformData.map(p => ({
-        name: p.name,
-        score: Math.min(100, Math.round((p.roas || 1) * 30 + (p.ctr || 0) * 10)),
-        metrics: [
-            { label: 'ROAS', value: `${(p.roas || 0).toFixed(2)}x` },
-            { label: 'CTR', value: `${(p.ctr || 0).toFixed(2)}%` }
-        ]
-    })), [platformData]);
+    const scorecardData = useMemo(() => platformData.map(p => {
+        const metrics = [];
+        if (dataAvailability.metrics.roas) {
+            metrics.push({ label: 'ROAS', value: `${(p.roas || 0).toFixed(2)}x` });
+        }
+        metrics.push({ label: 'CTR', value: `${(p.ctr || 0).toFixed(2)}%` });
 
-    const bulletData = useMemo(() => [
-        { label: 'Spend', value: kpis.spend, target: kpis.spend * 1.2, ranges: [kpis.spend * 0.5, kpis.spend * 0.8, kpis.spend * 1.1] as [number, number, number] },
-        { label: 'Conversions', value: kpis.conversions, target: kpis.conversions * 1.3, ranges: [kpis.conversions * 0.4, kpis.conversions * 0.7, kpis.conversions * 1.0] as [number, number, number] },
-        { label: 'ROAS', value: kpis.roas, target: 3, ranges: [1, 2, 2.5] as [number, number, number] }
-    ], [kpis]);
+        return {
+            name: p.name,
+            score: dataAvailability.metrics.roas
+                ? Math.min(100, Math.round((p.roas || 0) * 30 + (p.ctr || 0) * 10))
+                : Math.min(100, Math.round((p.ctr || 0) * 40)), // Adjust weight if ROAS missing
+            metrics
+        };
+    }), [platformData, dataAvailability.metrics.roas]);
 
-    const sparklineItems = useMemo(() => [
-        { label: 'Spend', value: kpis.spend, prefix: '$', trend: trendData, trendKey: 'spend', change: 12.5 },
-        { label: 'Clicks', value: kpis.clicks, trend: trendData, trendKey: 'clicks', change: 8.2 },
-        { label: 'CTR', value: kpis.ctr, suffix: '%', trend: trendData, trendKey: 'ctr', change: -2.1 },
-        { label: 'CPC', value: kpis.cpc, prefix: '$', trend: trendData, trendKey: 'cpc', change: 5.8 },
-        { label: 'Conversions', value: kpis.conversions, trend: trendData, trendKey: 'conversions', change: 15.3 },
-        { label: 'ROAS', value: kpis.roas, suffix: 'x', trend: trendData, trendKey: 'roas', change: 7.1 }
-    ], [kpis, trendData]);
+    const bulletData = useMemo(() => {
+        const data = [
+            { label: 'Spend', value: kpis.spend, target: kpis.spend * 1.2, ranges: [kpis.spend * 0.5, kpis.spend * 0.8, kpis.spend * 1.1] as [number, number, number] },
+            { label: 'Conversions', value: kpis.conversions, target: kpis.conversions * 1.3, ranges: [kpis.conversions * 0.4, kpis.conversions * 0.7, kpis.conversions * 1.0] as [number, number, number] },
+        ];
+
+        if (dataAvailability.metrics.roas) {
+            data.push({ label: 'ROAS', value: kpis.roas, target: 3, ranges: [1, 2, 2.5] as [number, number, number] });
+        }
+
+        return data;
+    }, [kpis, dataAvailability.metrics.roas]);
+
+    const sparklineItems = useMemo(() => {
+        const items = [
+            { label: 'Spend', value: kpis.spend, prefix: '$', trend: trendData, trendKey: 'spend', change: 12.5 },
+            { label: 'Clicks', value: kpis.clicks, trend: trendData, trendKey: 'clicks', change: 8.2 },
+            { label: 'CTR', value: kpis.ctr, suffix: '%', trend: trendData, trendKey: 'ctr', change: -2.1 },
+            { label: 'CPC', value: kpis.cpc, prefix: '$', trend: trendData, trendKey: 'cpc', change: 5.8 },
+            { label: 'Conversions', value: kpis.conversions, trend: trendData, trendKey: 'conversions', change: 15.3 },
+        ];
+
+        if (dataAvailability.metrics.roas) {
+            items.push({ label: 'ROAS', value: kpis.roas, suffix: 'x', trend: trendData, trendKey: 'roas', change: 7.1 });
+        }
+
+        return items;
+    }, [kpis, trendData, dataAvailability.metrics.roas]);
 
     const annotations = useMemo(() => [
         { date: '2024-12-01', label: 'Black Friday Campaign', type: 'campaign' as const },
@@ -1487,831 +1551,835 @@ function AdsOverviewContent() {
     }
 
     return (
-        <div className="container mx-auto p-6 space-y-6">
-            {/* Header */}
-            <motion.div
-                className="flex items-center justify-between"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-            >
-                <div>
-                    <h1 className="text-3xl font-bold flex items-center gap-2">
-                        <Sparkles className="h-7 w-7 text-primary" />
-                        Executive Overview
-                    </h1>
-                    <p className="text-muted-foreground">High-level performance insights for leadership</p>
-                </div>
-                <div className="flex items-center gap-4">
-                    <StatusRow items={[
-                        { label: 'Google', active: true, color: 'green' },
-                        { label: 'Meta', active: true, color: 'blue' },
-                        { label: 'LinkedIn', active: true, color: 'green' }
-                    ]} />
-                    <ComparisonModeSelector />
-                    <Select value={sourceFilter} onValueChange={setSourceFilter}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="All Sources" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Sources</SelectItem>
-                            {platformData.map((p) => (
-                                <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </motion.div>
-
-            {/* Simple KPI Cards - 9 Metrics */}
-            <motion.div
-                className="grid gap-3 grid-cols-3 md:grid-cols-5 lg:grid-cols-9"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-            >
-                <Card className="p-3">
-                    <p className="text-xs text-muted-foreground">Spend</p>
-                    <p className="text-xl font-bold text-blue-500">${formatNumber(kpis.spend)}</p>
-                </Card>
-                <Card className="p-3">
-                    <p className="text-xs text-muted-foreground">Conversions</p>
-                    <p className="text-xl font-bold text-purple-500">{formatNumber(kpis.conversions)}</p>
-                </Card>
-                <Card className="p-3">
-                    <p className="text-xs text-muted-foreground">Impressions</p>
-                    <p className="text-xl font-bold text-cyan-500">{formatNumber(kpis.impressions)}</p>
-                </Card>
-                <Card className="p-3">
-                    <p className="text-xs text-muted-foreground">Clicks</p>
-                    <p className="text-xl font-bold text-green-500">{formatNumber(kpis.clicks)}</p>
-                </Card>
-                <Card className="p-3">
-                    <p className="text-xs text-muted-foreground">CTR</p>
-                    <p className="text-xl font-bold text-orange-500">{kpis.ctr.toFixed(2)}%</p>
-                </Card>
-                <Card className="p-3">
-                    <p className="text-xs text-muted-foreground">CPA</p>
-                    <p className="text-xl font-bold text-pink-500">${kpis.conversions > 0 ? (kpis.spend / kpis.conversions).toFixed(2) : '0.00'}</p>
-                </Card>
-                <Card className="p-3">
-                    <p className="text-xs text-muted-foreground">ROAS</p>
-                    <p className="text-xl font-bold text-amber-500">{kpis.roas.toFixed(2)}x</p>
-                </Card>
-                <Card className="p-3">
-                    <p className="text-xs text-muted-foreground">Conv Rate</p>
-                    <p className="text-xl font-bold text-emerald-500">{kpis.clicks > 0 ? ((kpis.conversions / kpis.clicks) * 100).toFixed(2) : '0.00'}%</p>
-                </Card>
-                <Card className="p-3">
-                    <p className="text-xs text-muted-foreground">CPC</p>
-                    <p className="text-xl font-bold text-indigo-500">${kpis.cpc.toFixed(2)}</p>
-                </Card>
-            </motion.div>
-
-
-            {/* Global Executive Filters - Visible on ALL Tabs */}
-            <Card>
-                <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                        <Filter className="h-5 w-5" />
-                        Executive Filters
-                    </CardTitle>
-                    <CardDescription>Filter data across all views</CardDescription>
-                </CardHeader>
-                <CardContent className="pb-4">
-                    {/* Row 1: Platform, Date Range (wider), Channel */}
-                    <div className="grid gap-4 grid-cols-1 md:grid-cols-3 mb-4">
-                        <div className="space-y-1">
-                            <Label className="text-xs">Platform</Label>
-                            <MultiSelect
-                                options={platformOptions}
-                                selected={filters.platforms}
-                                onChange={(selected) => setFilters({ ...filters, platforms: selected })}
-                                placeholder="All Platforms"
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <Label className="text-xs">Date Range</Label>
-                            <DateRangePicker
-                                date={filters.dateRange}
-                                onDateChange={(range) => setFilters({ ...filters, dateRange: range })}
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <Label className="text-xs">Channel</Label>
-                            <MultiSelect
-                                options={channelOptions}
-                                selected={filters.channels}
-                                onChange={(selected) => setFilters({ ...filters, channels: selected })}
-                                placeholder="All Channels"
-                            />
-                        </div>
+        <div className="space-y-6 p-6 mx-auto">
+            {/* Main Content Area */}
+            <div className="space-y-6">
+                {/* Header */}
+                <motion.div
+                    className="flex items-center justify-between"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    <div>
+                        <h1 className="text-3xl font-bold flex items-center gap-2">
+                            <Sparkles className="h-7 w-7 text-primary" />
+                            Executive Overview
+                        </h1>
+                        <p className="text-muted-foreground">High-level performance insights</p>
                     </div>
-
-                    {/* Row 2: Funnel, Device, Ad Type */}
-                    <div className="grid gap-4 grid-cols-1 md:grid-cols-3 mb-4">
-                        <div className="space-y-1">
-                            <Label className="text-xs">Funnel Stage</Label>
-                            <MultiSelect
-                                options={funnelOptions}
-                                selected={filters.funnelStages}
-                                onChange={(selected) => setFilters({ ...filters, funnelStages: selected })}
-                                placeholder="All Stages"
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <Label className="text-xs">Device</Label>
-                            <MultiSelect
-                                options={deviceOptions}
-                                selected={filters.devices}
-                                onChange={(selected) => setFilters({ ...filters, devices: selected })}
-                                placeholder="All Devices"
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <Label className="text-xs">Ad Type</Label>
-                            <MultiSelect
-                                options={adTypeOptions}
-                                selected={filters.adTypes}
-                                onChange={(selected) => setFilters({ ...filters, adTypes: selected })}
-                                placeholder="All Ad Types"
-                            />
-                        </div>
+                    <div className="flex items-center gap-4">
+                        <ComparisonModeSelector />
+                        <Select value={sourceFilter} onValueChange={setSourceFilter}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="All Sources" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Sources</SelectItem>
+                                {platformData.map((p) => (
+                                    <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
+                </motion.div>
 
-                    {/* Row 3: Placement, Region, Apply Button */}
-                    <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-                        <div className="space-y-1">
-                            <Label className="text-xs">Placement</Label>
-                            <MultiSelect
-                                options={placementOptions}
-                                selected={filters.placements}
-                                onChange={(selected) => setFilters({ ...filters, placements: selected })}
-                                placeholder="All Placements"
-                            />
+                {/* Simple KPI Cards - 9 Metrics */}
+                <motion.div
+                    className={`grid gap-3 grid-cols-3 md:grid-cols-5 ${dataAvailability.metrics.roas ? 'lg:grid-cols-9' : 'lg:grid-cols-8'}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                >
+                    <Card className="p-3">
+                        <p className="text-xs text-muted-foreground">Spend</p>
+                        <p className="text-xl font-bold text-blue-500">${formatNumber(kpis.spend)}</p>
+                    </Card>
+                    <Card className="p-3">
+                        <p className="text-xs text-muted-foreground">Conversions</p>
+                        <p className="text-xl font-bold text-purple-500">{formatNumber(kpis.conversions)}</p>
+                    </Card>
+                    <Card className="p-3">
+                        <p className="text-xs text-muted-foreground">Impressions</p>
+                        <p className="text-xl font-bold text-cyan-500">{formatNumber(kpis.impressions)}</p>
+                    </Card>
+                    <Card className="p-3">
+                        <p className="text-xs text-muted-foreground">Clicks</p>
+                        <p className="text-xl font-bold text-green-500">{formatNumber(kpis.clicks)}</p>
+                    </Card>
+                    <Card className="p-3">
+                        <p className="text-xs text-muted-foreground">CTR</p>
+                        <p className="text-xl font-bold text-orange-500">{kpis.ctr.toFixed(2)}%</p>
+                    </Card>
+                    <Card className="p-3">
+                        <p className="text-xs text-muted-foreground">CPA</p>
+                        <p className="text-xl font-bold text-pink-500">${kpis.conversions > 0 ? (kpis.spend / kpis.conversions).toFixed(2) : '0.00'}</p>
+                    </Card>
+                    {dataAvailability.metrics.roas && (
+                        <Card className="p-3">
+                            <p className="text-xs text-muted-foreground">ROAS</p>
+                            <p className="text-xl font-bold text-amber-500">{kpis.roas.toFixed(2)}x</p>
+                        </Card>
+                    )}
+                    <Card className="p-3">
+                        <p className="text-xs text-muted-foreground">Conv Rate</p>
+                        <p className="text-xl font-bold text-emerald-500">{kpis.clicks > 0 ? ((kpis.conversions / kpis.clicks) * 100).toFixed(2) : '0.00'}%</p>
+                    </Card>
+                    <Card className="p-3">
+                        <p className="text-xs text-muted-foreground">CPC</p>
+                        <p className="text-xl font-bold text-indigo-500">${kpis.cpc.toFixed(2)}</p>
+                    </Card>
+                </motion.div>
+
+
+                {/* Executive Filters Content Area */}
+                <Card className="border-white/10 bg-black/20 backdrop-blur-sm">
+                    <CardHeader className="pb-3 border-b border-white/5">
+                        <div className="flex items-center gap-2">
+                            <Filter className="h-5 w-5 text-primary" />
+                            <CardTitle className="text-xl">Executive Filters</CardTitle>
                         </div>
-
-                        <div className="space-y-1">
-                            <Label className="text-xs">Region</Label>
-                            <MultiSelect
-                                options={regionOptions}
-                                selected={filters.regions}
-                                onChange={(selected) => setFilters({ ...filters, regions: selected })}
-                                placeholder="All Regions"
-                            />
-                        </div>
-
-                        <div className="flex items-end justify-end">
-                            <Button onClick={applyFilters} size="sm" className="gap-2">
-                                <Filter className="h-4 w-4" />
-                                Apply Filters
-                            </Button>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                <TabsList className="grid w-full grid-cols-6">
-                    <TabsTrigger value="overview" className="gap-2">
-                        <LayoutGrid className="h-4 w-4" />
-                        Overview
-                    </TabsTrigger>
-                    <TabsTrigger value="funnel" className="gap-2">
-                        <Filter className="h-4 w-4" />
-                        Funnel
-                    </TabsTrigger>
-                    <TabsTrigger value="charts" className="gap-2">
-                        <BarChart3 className="h-4 w-4" />
-                        Charts
-                    </TabsTrigger>
-                    <TabsTrigger value="insights" className="gap-2">
-                        <Lightbulb className="h-4 w-4" />
-                        Insights
-                    </TabsTrigger>
-                    <TabsTrigger value="performance" className="gap-2">
-                        <Award className="h-4 w-4" />
-                        Performance
-                    </TabsTrigger>
-                    <TabsTrigger value="calendar" className="gap-2">
-                        <Calendar className="h-4 w-4" />
-                        Calendar
-                    </TabsTrigger>
-                </TabsList>
-
-                {/* Overview Tab */}
-                <TabsContent value="overview" className="space-y-6">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key="overview"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="space-y-6"
-                        >
-                            {/* NEW: KPI Spark Groups */}
-                            {/* NEW: KPI Cards with Sparklines */}
-                            {trendData.length > 0 && (
-                                <KpiSparkGroups
-                                    data={{
-                                        current: {
-                                            spend: trendData.reduce((sum, d) => sum + (d.spend || 0), 0),
-                                            impressions: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0),
-                                            clicks: trendData.reduce((sum, d) => sum + (d.clicks || 0), 0),
-                                            conversions: trendData.reduce((sum, d) => sum + (d.conversions || 0), 0),
-                                            cpm: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) * 1000 : 0,
-                                            ctr: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) / trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) * 100 : 0,
-                                            cpc: trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) : 0,
-                                            cpa: trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) : 0,
-                                            roas: trendData.reduce((sum, d) => sum + (d.spend || 0), 0) > 0 ? (trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) * 50) / trendData.reduce((sum, d) => sum + (d.spend || 0), 0) : 0
-                                        },
-                                        previous: dashboardStats.summary_groups?.previous || {
-                                            spend: 0, impressions: 0, clicks: 0, conversions: 0,
-                                            cpm: 0, ctr: 0, cpc: 0, cpa: 0, roas: 0
-                                        },
-                                        sparkline: trendData.map(d => ({
-                                            date: d.date,
-                                            spend: d.spend || 0,
-                                            clicks: d.clicks || 0,
-                                            conversions: d.conversions || 0
-                                        }))
-                                    }}
-                                    schema={schema || undefined}
-                                />
+                        <CardDescription>Filter data across all views</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {dataAvailability.filters.platform && (
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Platform</Label>
+                                    <MultiSelect
+                                        options={platformOptions}
+                                        selected={filters.platforms}
+                                        onChange={(selected) => setFilters({ ...filters, platforms: selected })}
+                                        placeholder="All Platforms"
+                                        className="w-full"
+                                    />
+                                </div>
                             )}
 
-
-                            {/* WEEKLY PERFORMANCE TRENDS - 3 Stacked Charts */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <TrendingUp className="h-5 w-5" />
-                                        Monthly Performance Trends
-                                    </CardTitle>
-                                    <CardDescription>Hover for more details</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    {/* Chart 1: Clicks with CPC overlay */}
-                                    <div className="h-[150px]">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-xs font-medium text-muted-foreground w-16">Clicks</span>
-                                            <div className="flex gap-3 text-xs">
-                                                <span className="flex items-center gap-1"><span className="w-3 h-3 bg-amber-500 rounded-sm"></span> Clicks</span>
-                                                <span className="flex items-center gap-1"><span className="w-3 h-3 bg-cyan-400 rounded-sm"></span> CPC</span>
-                                            </div>
-                                        </div>
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <ComposedChart data={monthlyTrendData}>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                                                <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
-                                                <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
-                                                <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v.toFixed(2)}`} domain={['dataMin * 0.9', 'dataMax * 1.1']} />
-                                                <Bar yAxisId="left" dataKey="clicks" fill="#f59e0b" radius={[2, 2, 0, 0]} />
-                                                <Line yAxisId="right" type="monotone" dataKey="cpc" stroke="#22d3ee" strokeWidth={2} dot={false} />
-                                            </ComposedChart>
-                                        </ResponsiveContainer>
-                                    </div>
-
-                                    {/* Chart 2: Spend with Conversions overlay */}
-                                    <div className="h-[150px]">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-xs font-medium text-muted-foreground w-16">Spend</span>
-                                            <div className="flex gap-3 text-xs">
-                                                <span className="flex items-center gap-1"><span className="w-3 h-3 bg-blue-500 rounded-sm"></span> Spend</span>
-                                                <span className="flex items-center gap-1"><span className="w-3 h-3 bg-purple-400 rounded-sm"></span> Conversions</span>
-                                            </div>
-                                        </div>
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <ComposedChart data={monthlyTrendData}>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                                                <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
-                                                <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />
-                                                <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} domain={['dataMin * 0.95', 'dataMax * 1.05']} />
-                                                <Bar yAxisId="left" dataKey="spend" fill="#3b82f6" radius={[2, 2, 0, 0]} />
-                                                <Line yAxisId="right" type="monotone" dataKey="conversions" stroke="#a78bfa" strokeWidth={2} dot={false} />
-                                            </ComposedChart>
-                                        </ResponsiveContainer>
-                                    </div>
-
-                                    {/* Chart 3: Conversions with Cost/Conv overlay */}
-                                    <div className="h-[150px]">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-xs font-medium text-muted-foreground w-16">Conv</span>
-                                            <div className="flex gap-3 text-xs">
-                                                <span className="flex items-center gap-1"><span className="w-3 h-3 bg-pink-500 rounded-sm"></span> Conversions</span>
-                                                <span className="flex items-center gap-1"><span className="w-3 h-3 bg-emerald-400 rounded-sm"></span> Cost/Conv</span>
-                                            </div>
-                                        </div>
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <ComposedChart data={monthlyTrendData}>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                                                <XAxis
-                                                    dataKey="date"
-                                                    tick={{ fill: '#9ca3af', fontSize: 10 }}
-                                                    tickFormatter={(value) => {
-                                                        const date = new Date(value);
-                                                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                                                    }}
-                                                />
-                                                <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
-                                                <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v.toFixed(0)}`} domain={['dataMin * 0.9', 'dataMax * 1.1']} />
-                                                <Bar yAxisId="left" dataKey="conversions" fill="#ec4899" radius={[2, 2, 0, 0]} />
-                                                <Line yAxisId="right" type="monotone" dataKey="costPerConv" stroke="#34d399" strokeWidth={2} dot={false} />
-                                            </ComposedChart>
-                                        </ResponsiveContainer>
-                                    </div>
-
-                                    {/* Chart 4: Spend with ROAS overlay */}
-                                    <div className="h-[150px]">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-xs font-medium text-muted-foreground w-16">Spend</span>
-                                            <div className="flex gap-3 text-xs">
-                                                <span className="flex items-center gap-1"><span className="w-3 h-3 bg-indigo-500 rounded-sm"></span> Spend</span>
-                                                <span className="flex items-center gap-1"><span className="w-3 h-3 bg-yellow-400 rounded-sm"></span> ROAS</span>
-                                            </div>
-                                        </div>
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <ComposedChart data={monthlyTrendData}>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                                                <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
-                                                <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />
-                                                <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(1)}x`} domain={['dataMin * 0.9', 'dataMax * 1.1']} />
-                                                <Bar yAxisId="left" dataKey="spend" fill="#6366f1" radius={[2, 2, 0, 0]} />
-                                                <Line yAxisId="right" type="monotone" dataKey="roas" stroke="#facc15" strokeWidth={2} dot={false} />
-                                            </ComposedChart>
-                                        </ResponsiveContainer>
-                                    </div>
-
-                                    {/* Chart 5: Spend with CTR overlay */}
-                                    <div className="h-[150px]">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-xs font-medium text-muted-foreground w-16">Spend</span>
-                                            <div className="flex gap-3 text-xs">
-                                                <span className="flex items-center gap-1"><span className="w-3 h-3 bg-teal-500 rounded-sm"></span> Spend</span>
-                                                <span className="flex items-center gap-1"><span className="w-3 h-3 bg-orange-400 rounded-sm"></span> CTR</span>
-                                            </div>
-                                        </div>
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <ComposedChart data={monthlyTrendData}>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                                                <XAxis
-                                                    dataKey="date"
-                                                    tick={{ fill: '#9ca3af', fontSize: 10 }}
-                                                    tickFormatter={(value) => {
-                                                        const date = new Date(value);
-                                                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                                                    }}
-                                                />
-                                                <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />
-                                                <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(2)}%`} domain={['dataMin - 0.05', 'dataMax + 0.05']} />
-                                                <Bar yAxisId="left" dataKey="spend" fill="#14b8a6" radius={[2, 2, 0, 0]} />
-                                                <Line yAxisId="right" type="monotone" dataKey="ctr" stroke="#fb923c" strokeWidth={2} dot={false} />
-                                            </ComposedChart>
-                                        </ResponsiveContainer>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* Channel Performance Table */}
-                            <div className="mb-6">
-                                <PerformanceTable
-                                    key={`channel-${JSON.stringify(computedChannelPerformance?.slice(0, 1))}`}
-                                    title="Channel Performance"
-                                    description="Performance breakdown across marketing channels"
-                                    data={computedChannelPerformance}
-                                    type="channel"
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium">Date Range</Label>
+                                <DateRangePicker
+                                    date={filters.dateRange}
+                                    onDateChange={(range) => setFilters({ ...filters, dateRange: range })}
                                 />
                             </div>
 
-                            {/* Monthly & Platform Performance Tables */}
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <PerformanceTable
-                                    key={`monthly-${selectedPlatform}-${JSON.stringify(dashboardStats.monthly_performance?.slice(0, 1))}`}
-                                    title={selectedPlatform ? `Monthly Performance (${selectedPlatform})` : "Monthly Performance"}
-                                    description={selectedPlatform
-                                        ? "Filtered by selected platform - Click platform again to show all"
-                                        : "Click a month to filter Platform Performance"}
-                                    data={computedMonthlyPerformance}
-                                    type="month"
-                                    onMonthClick={(month) => {
-                                        setSelectedMonth(month === selectedMonth ? null : month);
-                                        // Clear platform selection when month is clicked
-                                        if (month !== selectedMonth) setSelectedPlatform(null);
-                                    }}
-                                    selectedMonth={selectedMonth}
-                                />
-                                <PerformanceTable
-                                    key={`platform-${selectedMonth}-${JSON.stringify(aggregatedPlatformData?.slice(0, 1))}`}
-                                    title={selectedMonth ? `Platform Performance (${(() => {
-                                        const [year, month] = selectedMonth.split('-');
-                                        const date = new Date(parseInt(year), parseInt(month) - 1);
-                                        const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-                                        const yearShort = year.slice(-2);
-                                        return `${monthName} ${yearShort}`;
-                                    })()})` : "Platform Performance"}
-                                    description={selectedMonth
-                                        ? "Filtered by selected month - Click month again to show all"
-                                        : "Click a platform to filter Monthly Performance"}
-                                    data={computedPlatformPerformance}
-                                    type="platform"
-                                    onPlatformClick={(platform) => {
-                                        setSelectedPlatform(platform === selectedPlatform ? null : platform);
-                                        // Clear month selection when platform is clicked
-                                        if (platform !== selectedPlatform) setSelectedMonth(null);
-                                    }}
-                                    selectedPlatform={selectedPlatform}
-                                />
-                                {selectedMonth && dashboardStats.platform_performance.filter((p: any) => p.month === selectedMonth).length === 0 && (
-                                    <div className="col-span-1 flex items-center justify-center p-8 text-center">
-                                        <div className="text-muted-foreground">
-                                            <p className="text-sm font-medium">No platform data for selected month</p>
-                                            <p className="text-xs mt-1">Click the month again to show all data</p>
-                                        </div>
-                                    </div>
+                            {dataAvailability.filters.channel && (
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Channel</Label>
+                                    <MultiSelect
+                                        options={channelOptions}
+                                        selected={filters.channels}
+                                        onChange={(selected) => setFilters({ ...filters, channels: selected })}
+                                        placeholder="All Channels"
+                                        className="w-full"
+                                    />
+                                </div>
+                            )}
+
+                            {dataAvailability.filters.funnel && (
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Funnel Stage</Label>
+                                    <MultiSelect
+                                        options={funnelOptions}
+                                        selected={filters.funnelStages}
+                                        onChange={(selected) => setFilters({ ...filters, funnelStages: selected })}
+                                        placeholder="All Stages"
+                                        className="w-full"
+                                    />
+                                </div>
+                            )}
+
+                            {dataAvailability.filters.device && (
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Device</Label>
+                                    <MultiSelect
+                                        options={deviceOptions}
+                                        selected={filters.devices}
+                                        onChange={(selected) => setFilters({ ...filters, devices: selected })}
+                                        placeholder="All Devices"
+                                        className="w-full"
+                                    />
+                                </div>
+                            )}
+
+                            {dataAvailability.filters.adType && (
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Ad Type</Label>
+                                    <MultiSelect
+                                        options={adTypeOptions}
+                                        selected={filters.adTypes}
+                                        onChange={(selected) => setFilters({ ...filters, adTypes: selected })}
+                                        placeholder="All Ad Types"
+                                        className="w-full"
+                                    />
+                                </div>
+                            )}
+
+                            {dataAvailability.filters.placement && (
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Placement</Label>
+                                    <MultiSelect
+                                        options={placementOptions}
+                                        selected={filters.placements}
+                                        onChange={(selected) => setFilters({ ...filters, placements: selected })}
+                                        placeholder="All Placements"
+                                        className="w-full"
+                                    />
+                                </div>
+                            )}
+
+                            {dataAvailability.filters.region && (
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Region</Label>
+                                    <MultiSelect
+                                        options={regionOptions}
+                                        selected={filters.regions}
+                                        onChange={(selected) => setFilters({ ...filters, regions: selected })}
+                                        placeholder="All Regions"
+                                        className="w-full"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="flex items-end">
+                                <Button onClick={applyFilters} className="w-full gap-2 bg-primary/20 hover:bg-primary/30 border-primary/30 text-primary">
+                                    <Filter className="h-4 w-4" />
+                                    Apply Filters
+                                </Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Tabs */}
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+                    <TabsList className="grid w-full grid-cols-6">
+                        <TabsTrigger value="overview" className="gap-2">
+                            <LayoutGrid className="h-4 w-4" />
+                            Overview
+                        </TabsTrigger>
+                        <TabsTrigger value="funnel" className="gap-2">
+                            <Filter className="h-4 w-4" />
+                            Funnel
+                        </TabsTrigger>
+                        <TabsTrigger value="charts" className="gap-2">
+                            <BarChart3 className="h-4 w-4" />
+                            Charts
+                        </TabsTrigger>
+                        <TabsTrigger value="insights" className="gap-2">
+                            <Lightbulb className="h-4 w-4" />
+                            Insights
+                        </TabsTrigger>
+                        <TabsTrigger value="performance" className="gap-2">
+                            <Award className="h-4 w-4" />
+                            Performance
+                        </TabsTrigger>
+                        <TabsTrigger value="calendar" className="gap-2">
+                            <Calendar className="h-4 w-4" />
+                            Calendar
+                        </TabsTrigger>
+                    </TabsList>
+
+                    {/* Overview Tab */}
+                    <TabsContent value="overview" className="space-y-6">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key="overview"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="space-y-6"
+                            >
+                                {/* NEW: KPI Spark Groups */}
+                                {/* NEW: KPI Cards with Sparklines */}
+                                {trendData.length > 0 && (
+                                    <KpiSparkGroups
+                                        data={{
+                                            current: {
+                                                spend: trendData.reduce((sum, d) => sum + (d.spend || 0), 0),
+                                                impressions: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0),
+                                                clicks: trendData.reduce((sum, d) => sum + (d.clicks || 0), 0),
+                                                conversions: trendData.reduce((sum, d) => sum + (d.conversions || 0), 0),
+                                                cpm: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) * 1000 : 0,
+                                                ctr: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) / trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) * 100 : 0,
+                                                cpc: trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) : 0,
+                                                cpa: trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) : 0,
+                                                roas: trendData.reduce((sum, d) => sum + (d.spend || 0), 0) > 0 ? (trendData.reduce((sum, d) => sum + (d.revenue || 0), 0)) / trendData.reduce((sum, d) => sum + (d.spend || 0), 0) : 0
+                                            },
+                                            previous: dashboardStats.summary_groups?.previous || {
+                                                spend: 0, impressions: 0, clicks: 0, conversions: 0,
+                                                cpm: 0, ctr: 0, cpc: 0, cpa: 0, roas: 0
+                                            },
+                                            sparkline: trendData.map(d => ({
+                                                date: d.date,
+                                                spend: d.spend || 0,
+                                                clicks: d.clicks || 0,
+                                                conversions: d.conversions || 0,
+                                                revenue: d.revenue || 0
+                                            }))
+                                        }}
+                                        schema={schema || undefined}
+                                    />
                                 )}
-                            </div>
-                        </motion.div>
-                    </AnimatePresence>
-                </TabsContent>
 
-                {/* Funnel Tab */}
-                <TabsContent value="funnel" className="space-y-6">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key="funnel"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="space-y-6"
-                        >
-                            {/* Funnel Performance Table */}
-                            <PerformanceTable
-                                key={`funnel-${JSON.stringify(funnelStageData?.slice(0, 1))}`}
-                                title="Funnel Performance"
-                                description="Click a funnel stage to filter Channel Performance"
-                                data={funnelStageData}
-                                type="funnel"
-                                onFunnelStageClick={(stage) => setSelectedFunnelStage(stage === selectedFunnelStage ? null : stage)}
-                                selectedFunnelStage={selectedFunnelStage}
-                            />
 
-                            {/* Channel Performance Table */}
-                            <PerformanceTable
-                                key={`channel-${selectedFunnelStage}-${JSON.stringify(filteredChannelData?.slice(0, 1))}`}
-                                title={selectedFunnelStage ? `Channel Performance (${selectedFunnelStage} Funnel)` : "Channel Performance"}
-                                description="Performance breakdown across marketing channels"
-                                data={filteredChannelData}
-                                type="channel"
-                            />
-
-                            {/* Performance Funnel - Visual Funnel */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Filter className="h-5 w-5" />
-                                        Performance Funnel
-                                    </CardTitle>
-                                    <CardDescription>Conversion flow from impressions to conversions</CardDescription>
-                                </CardHeader>
-                                <CardContent className="h-[400px]">
-                                    {kpis && (kpis.impressions > 0 || kpis.clicks > 0 || kpis.conversions > 0) ? (
-                                        <div className="flex flex-col items-center justify-center h-full space-y-4">
-                                            {(() => {
-                                                const ctr = kpis.impressions > 0 ? (kpis.clicks / kpis.impressions * 100).toFixed(1) : '0';
-                                                const conversionRate = kpis.clicks > 0 ? (kpis.conversions / kpis.clicks * 100).toFixed(1) : '0';
-
-                                                const formatNumber = (num: number) => {
-                                                    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-                                                    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-                                                    return num.toString();
-                                                };
-
-                                                return (
-                                                    <>
-                                                        {/* Impressions */}
-                                                        <div className="relative w-full max-w-md">
-                                                            <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg p-6 shadow-lg" style={{ clipPath: 'polygon(10% 0%, 90% 0%, 85% 100%, 15% 100%)' }}>
-                                                                <div className="text-3xl font-bold text-center">{formatNumber(kpis.impressions)}</div>
-                                                            </div>
-                                                            <div className="absolute right-0 top-1/2 transform translate-x-full -translate-y-1/2 ml-4 text-sm font-medium whitespace-nowrap">
-                                                                → Impressions
-                                                            </div>
+                                {/* WEEKLY PERFORMANCE TRENDS - Dynamic rendering based on available metrics */}
+                                {dataAvailability.hasAnyData && monthlyTrendData.length > 0 && (
+                                    <Card data-testid="chart-trends-card">
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2">
+                                                <TrendingUp className="h-5 w-5" />
+                                                Monthly Performance Trends
+                                            </CardTitle>
+                                            <CardDescription>Hover for more details</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4">
+                                            {/* Chart 1: Clicks with CPC overlay - only show if clicks available */}
+                                            {dataAvailability.metrics.clicks && (
+                                                <div className="h-[150px]" data-testid="chart-clicks">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-medium text-muted-foreground w-16">Clicks</span>
+                                                        <div className="flex gap-3 text-xs">
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-amber-500 rounded-sm"></span> Clicks</span>
+                                                            {dataAvailability.metrics.cpc && <span className="flex items-center gap-1"><span className="w-3 h-3 bg-cyan-400 rounded-sm"></span> CPC</span>}
                                                         </div>
+                                                    </div>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <ComposedChart data={monthlyTrendData}>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                                                            <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
+                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
+                                                            {dataAvailability.metrics.cpc && <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v.toFixed(2)}`} domain={['dataMin * 0.9', 'dataMax * 1.1']} />}
+                                                            <Bar yAxisId="left" dataKey="clicks" fill="#f59e0b" radius={[2, 2, 0, 0]} />
+                                                            {dataAvailability.metrics.cpc && <Line yAxisId="right" type="monotone" dataKey="cpc" stroke="#22d3ee" strokeWidth={2} dot={false} />}
+                                                        </ComposedChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
 
-                                                        {/* Arrow & CTR */}
-                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                            <div className="h-8 w-0.5 bg-gradient-to-b from-indigo-500 to-purple-500"></div>
-                                                            <span className="font-medium">CTR: {ctr}%</span>
+                                            {/* Chart 2: Spend with Conversions overlay - only show if spend available */}
+                                            {dataAvailability.metrics.spend && (
+                                                <div className="h-[150px]" data-testid="chart-spend">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-medium text-muted-foreground w-16">Spend</span>
+                                                        <div className="flex gap-3 text-xs">
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-blue-500 rounded-sm"></span> Spend</span>
+                                                            {dataAvailability.metrics.conversions && <span className="flex items-center gap-1"><span className="w-3 h-3 bg-purple-400 rounded-sm"></span> Conversions</span>}
                                                         </div>
+                                                    </div>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <ComposedChart data={monthlyTrendData}>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                                                            <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
+                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />
+                                                            {dataAvailability.metrics.conversions && <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} domain={['dataMin * 0.95', 'dataMax * 1.05']} />}
+                                                            <Bar yAxisId="left" dataKey="spend" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                                                            {dataAvailability.metrics.conversions && <Line yAxisId="right" type="monotone" dataKey="conversions" stroke="#a78bfa" strokeWidth={2} dot={false} />}
+                                                        </ComposedChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
 
-                                                        {/* Clicks */}
-                                                        <div className="relative w-full max-w-sm">
-                                                            <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg p-6 shadow-lg" style={{ clipPath: 'polygon(12% 0%, 88% 0%, 83% 100%, 17% 100%)' }}>
-                                                                <div className="text-3xl font-bold text-center">{formatNumber(kpis.clicks)}</div>
-                                                            </div>
-                                                            <div className="absolute right-0 top-1/2 transform translate-x-full -translate-y-1/2 ml-4 text-sm font-medium whitespace-nowrap">
-                                                                → Clicks
-                                                            </div>
+                                            {/* Chart 3: Conversions with Cost/Conv overlay - only show if conversions available */}
+                                            {dataAvailability.metrics.conversions && (
+                                                <div className="h-[150px]" data-testid="chart-conversions">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-medium text-muted-foreground w-16">Conv</span>
+                                                        <div className="flex gap-3 text-xs">
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-pink-500 rounded-sm"></span> Conversions</span>
+                                                            {dataAvailability.metrics.cpa && <span className="flex items-center gap-1"><span className="w-3 h-3 bg-emerald-400 rounded-sm"></span> Cost/Conv</span>}
                                                         </div>
+                                                    </div>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <ComposedChart data={monthlyTrendData}>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                                                            <XAxis
+                                                                dataKey="date"
+                                                                tick={{ fill: '#9ca3af', fontSize: 10 }}
+                                                                tickFormatter={(value) => {
+                                                                    const date = new Date(value);
+                                                                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                                                }}
+                                                            />
+                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
+                                                            {dataAvailability.metrics.cpa && <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v.toFixed(0)}`} domain={['dataMin * 0.9', 'dataMax * 1.1']} />}
+                                                            <Bar yAxisId="left" dataKey="conversions" fill="#ec4899" radius={[2, 2, 0, 0]} />
+                                                            {dataAvailability.metrics.cpa && <Line yAxisId="right" type="monotone" dataKey="costPerConv" stroke="#34d399" strokeWidth={2} dot={false} />}
+                                                        </ComposedChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
 
-                                                        {/* Arrow & Conversion Rate */}
-                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                            <div className="h-8 w-0.5 bg-gradient-to-b from-purple-500 to-green-500"></div>
-                                                            <span className="font-medium">Conv Rate: {conversionRate}%</span>
+                                            {/* Chart 4: Spend with ROAS overlay - only show if ROAS can be calculated */}
+                                            {dataAvailability.metrics.roas && (
+                                                <div className="h-[150px]" data-testid="chart-roas">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-medium text-muted-foreground w-16">Spend</span>
+                                                        <div className="flex gap-3 text-xs">
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-indigo-500 rounded-sm"></span> Spend</span>
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-yellow-400 rounded-sm"></span> ROAS</span>
                                                         </div>
+                                                    </div>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <ComposedChart data={monthlyTrendData}>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                                                            <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
+                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />
+                                                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(1)}x`} domain={['dataMin * 0.9', 'dataMax * 1.1']} />
+                                                            <Bar yAxisId="left" dataKey="spend" fill="#6366f1" radius={[2, 2, 0, 0]} />
+                                                            <Line yAxisId="right" type="monotone" dataKey="roas" stroke="#facc15" strokeWidth={2} dot={false} />
+                                                        </ComposedChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
 
-                                                        {/* Conversions */}
-                                                        <div className="relative w-full max-w-xs">
-                                                            <div className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg p-6 shadow-lg" style={{ clipPath: 'polygon(15% 0%, 85% 0%, 80% 100%, 20% 100%)' }}>
-                                                                <div className="text-3xl font-bold text-center">{formatNumber(kpis.conversions)}</div>
-                                                            </div>
-                                                            <div className="absolute right-0 top-1/2 transform translate-x-full -translate-y-1/2 ml-4 text-sm font-medium whitespace-nowrap">
-                                                                → Conversions
-                                                            </div>
+                                            {/* Chart 5: Spend with CTR overlay - only show if CTR can be calculated */}
+                                            {dataAvailability.metrics.ctr && (
+                                                <div className="h-[150px]" data-testid="chart-ctr">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-medium text-muted-foreground w-16">Spend</span>
+                                                        <div className="flex gap-3 text-xs">
+                                                            {dataAvailability.metrics.spend && <span className="flex items-center gap-1"><span className="w-3 h-3 bg-teal-500 rounded-sm"></span> Spend</span>}
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-orange-400 rounded-sm"></span> CTR</span>
                                                         </div>
-                                                    </>
-                                                );
-                                            })()}
-                                        </div>
-                                    ) : (
-                                        <div className="flex items-center justify-center h-full text-muted-foreground">
-                                            No funnel data available
+                                                    </div>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <ComposedChart data={monthlyTrendData}>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                                                            <XAxis
+                                                                dataKey="date"
+                                                                tick={{ fill: '#9ca3af', fontSize: 10 }}
+                                                                tickFormatter={(value) => {
+                                                                    const date = new Date(value);
+                                                                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                                                }}
+                                                            />
+                                                            {dataAvailability.metrics.spend && <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />}
+                                                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(2)}%`} domain={['dataMin - 0.05', 'dataMax + 0.05']} />
+                                                            {dataAvailability.metrics.spend && <Bar yAxisId="left" dataKey="spend" fill="#14b8a6" radius={[2, 2, 0, 0]} />}
+                                                            <Line yAxisId="right" type="monotone" dataKey="ctr" stroke="#fb923c" strokeWidth={2} dot={false} />
+                                                        </ComposedChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                )}
+
+                                {/* Channel Performance Table */}
+                                <div className="mb-6">
+                                    <PerformanceTable
+                                        key={`channel-${JSON.stringify(computedChannelPerformance?.slice(0, 1))}`}
+                                        title="Channel Performance"
+                                        description="Performance breakdown across marketing channels"
+                                        data={computedChannelPerformance}
+                                        type="channel"
+                                        schema={schema || undefined}
+                                    />
+                                </div>
+
+                                {/* Monthly & Platform Performance Tables */}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <PerformanceTable
+                                        key={`monthly-${selectedPlatform}-${JSON.stringify(dashboardStats.monthly_performance?.slice(0, 1))}`}
+                                        title={selectedPlatform ? `Monthly Performance (${selectedPlatform})` : "Monthly Performance"}
+                                        description={selectedPlatform
+                                            ? "Filtered by selected platform - Click platform again to show all"
+                                            : "Click a month to filter Platform Performance"}
+                                        data={computedMonthlyPerformance}
+                                        type="month"
+                                        onMonthClick={(month) => {
+                                            setSelectedMonth(month === selectedMonth ? null : month);
+                                            // Clear platform selection when month is clicked
+                                            if (month !== selectedMonth) setSelectedPlatform(null);
+                                        }}
+                                        selectedMonth={selectedMonth}
+                                        schema={schema || undefined}
+                                    />
+                                    <PerformanceTable
+                                        key={`platform-${selectedMonth}-${JSON.stringify(aggregatedPlatformData?.slice(0, 1))}`}
+                                        title={selectedMonth ? `Platform Performance (${(() => {
+                                            const [year, month] = selectedMonth.split('-');
+                                            const date = new Date(parseInt(year), parseInt(month) - 1);
+                                            const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+                                            const yearShort = year.slice(-2);
+                                            return `${monthName} ${yearShort}`;
+                                        })()})` : "Platform Performance"}
+                                        description={selectedMonth
+                                            ? "Filtered by selected month - Click month again to show all"
+                                            : "Click a platform to filter Monthly Performance"}
+                                        data={computedPlatformPerformance}
+                                        type="platform"
+                                        onPlatformClick={(platform) => {
+                                            setSelectedPlatform(platform === selectedPlatform ? null : platform);
+                                            // Clear month selection when platform is clicked
+                                            if (platform !== selectedPlatform) setSelectedMonth(null);
+                                        }}
+                                        selectedPlatform={selectedPlatform}
+                                        schema={schema || undefined}
+                                    />
+                                    {selectedMonth && dashboardStats.platform_performance.filter((p: any) => p.month === selectedMonth).length === 0 && (
+                                        <div className="col-span-1 flex items-center justify-center p-8 text-center">
+                                            <div className="text-muted-foreground">
+                                                <p className="text-sm font-medium">No platform data for selected month</p>
+                                                <p className="text-xs mt-1">Click the month again to show all data</p>
+                                            </div>
                                         </div>
                                     )}
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    </AnimatePresence>
-                </TabsContent>
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
+                    </TabsContent>
 
-                {/* Charts Tab */}
-                <TabsContent value="charts" className="space-y-6">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key="charts"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="space-y-6"
-                        >
-                            <div className="grid gap-6 md:grid-cols-2">
-                                {/* Lollipop Chart */}
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Platform Spend</CardTitle>
-                                        <CardDescription>Lollipop visualization</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="h-[300px] overflow-hidden">
-                                        <LollipopChart
-                                            data={platformData}
-                                            dataKey="spend"
-                                        />
-                                    </CardContent>
-                                </Card>
+                    {/* Funnel Tab */}
+                    <TabsContent value="funnel" className="space-y-6">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key="funnel"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="space-y-6"
+                            >
+                                {/* Funnel Performance Table */}
+                                <PerformanceTable
+                                    key={`funnel-${JSON.stringify(funnelStageData?.slice(0, 1))}`}
+                                    title="Funnel Performance"
+                                    description="Click a funnel stage to filter Channel Performance"
+                                    data={funnelStageData}
+                                    type="funnel"
+                                    onFunnelStageClick={(stage) => setSelectedFunnelStage(stage === selectedFunnelStage ? null : stage)}
+                                    selectedFunnelStage={selectedFunnelStage}
+                                    schema={schema || undefined}
+                                />
 
-                                {/* Slope Chart */}
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Period Comparison</CardTitle>
-                                        <CardDescription>This vs Last period</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="h-[300px] overflow-hidden">
-                                        <SlopeChart
-                                            data={slopeData}
-                                            valuePrefix="$"
-                                        />
-                                    </CardContent>
-                                </Card>
-                            </div>
+                                {/* Channel Performance Table */}
+                                <PerformanceTable
+                                    key={`channel-${selectedFunnelStage}-${JSON.stringify(filteredChannelData?.slice(0, 1))}`}
+                                    title={selectedFunnelStage ? `Channel Performance (${selectedFunnelStage} Funnel)` : "Channel Performance"}
+                                    description="Performance breakdown across marketing channels"
+                                    data={filteredChannelData}
+                                    type="channel"
+                                    schema={schema || undefined}
+                                />
 
-                            <div className="grid gap-6 md:grid-cols-2">
-                                {/* Bubble Chart */}
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Spend vs Conversions</CardTitle>
-                                        <CardDescription>Bubble size = ROAS</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="h-[300px] overflow-hidden">
-                                        <BubbleChart
-                                            data={platformData}
-                                            onBubbleClick={(item) => handleDrillDown('Platform', item.name)}
-                                        />
-                                    </CardContent>
-                                </Card>
-
-                                {/* Waterfall */}
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Channel Contribution</CardTitle>
-                                        <CardDescription>Cumulative conversions</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="h-[300px] overflow-hidden">
-                                        <WaterfallChart
-                                            data={channelData.length > 0 ? channelData : platformData}
-                                            dataKey="conversions"
-                                        />
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </motion.div>
-                    </AnimatePresence>
-                </TabsContent>
-
-                {/* Insights Tab */}
-                <TabsContent value="insights" className="space-y-6">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key="insights"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="space-y-6"
-                        >
-                            <div className="grid gap-6 md:grid-cols-2">
-                                {/* AI Insights */}
+                                {/* Performance Funnel - Visual Funnel */}
                                 <Card>
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2">
-                                            <Lightbulb className="h-5 w-5" />
-                                            AI Insights
+                                            <Filter className="h-5 w-5" />
+                                            Performance Funnel
                                         </CardTitle>
-                                        <CardDescription>Auto-generated recommendations</CardDescription>
+                                        <CardDescription>Conversion flow from impressions to conversions</CardDescription>
                                     </CardHeader>
-                                    <CardContent>
-                                        <AIInsightCard
-                                            data={{ platformData, ctr: kpis.ctr }}
+                                    <CardContent className="h-[400px]">
+                                        {kpis && (kpis.impressions > 0 || kpis.clicks > 0 || kpis.conversions > 0) ? (
+                                            <div className="flex flex-col items-center justify-center h-full space-y-4">
+                                                {(() => {
+                                                    const ctr = kpis.impressions > 0 ? (kpis.clicks / kpis.impressions * 100).toFixed(1) : '0';
+                                                    const conversionRate = kpis.clicks > 0 ? (kpis.conversions / kpis.clicks * 100).toFixed(1) : '0';
+
+                                                    const formatNumber = (num: number) => {
+                                                        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+                                                        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+                                                        return num.toString();
+                                                    };
+
+                                                    return (
+                                                        <>
+                                                            {/* Impressions */}
+                                                            <div className="relative w-full max-w-md">
+                                                                <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg p-6 shadow-lg" style={{ clipPath: 'polygon(10% 0%, 90% 0%, 85% 100%, 15% 100%)' }}>
+                                                                    <div className="text-3xl font-bold text-center">{formatNumber(kpis.impressions)}</div>
+                                                                </div>
+                                                                <div className="absolute right-0 top-1/2 transform translate-x-full -translate-y-1/2 ml-4 text-sm font-medium whitespace-nowrap">
+                                                                    → Impressions
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Arrow & CTR */}
+                                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                <div className="h-8 w-0.5 bg-gradient-to-b from-indigo-500 to-purple-500"></div>
+                                                                <span className="font-medium">CTR: {ctr}%</span>
+                                                            </div>
+
+                                                            {/* Clicks */}
+                                                            <div className="relative w-full max-w-sm">
+                                                                <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg p-6 shadow-lg" style={{ clipPath: 'polygon(12% 0%, 88% 0%, 83% 100%, 17% 100%)' }}>
+                                                                    <div className="text-3xl font-bold text-center">{formatNumber(kpis.clicks)}</div>
+                                                                </div>
+                                                                <div className="absolute right-0 top-1/2 transform translate-x-full -translate-y-1/2 ml-4 text-sm font-medium whitespace-nowrap">
+                                                                    → Clicks
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Arrow & Conversion Rate */}
+                                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                <div className="h-8 w-0.5 bg-gradient-to-b from-purple-500 to-green-500"></div>
+                                                                <span className="font-medium">Conv Rate: {conversionRate}%</span>
+                                                            </div>
+
+                                                            {/* Conversions */}
+                                                            <div className="relative w-full max-w-xs">
+                                                                <div className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg p-6 shadow-lg" style={{ clipPath: 'polygon(15% 0%, 85% 0%, 80% 100%, 20% 100%)' }}>
+                                                                    <div className="text-3xl font-bold text-center">{formatNumber(kpis.conversions)}</div>
+                                                                </div>
+                                                                <div className="absolute right-0 top-1/2 transform translate-x-full -translate-y-1/2 ml-4 text-sm font-medium whitespace-nowrap">
+                                                                    → Conversions
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    );
+                                                })()}
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center justify-center h-full text-muted-foreground">
+                                                No funnel data available
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                        </AnimatePresence>
+                    </TabsContent>
+
+                    {/* Charts Tab */}
+                    <TabsContent value="charts" className="space-y-6">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key="charts"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="space-y-6"
+                            >
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    {/* Lollipop Chart */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Platform Spend</CardTitle>
+                                            <CardDescription>Lollipop visualization</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="h-[300px] overflow-hidden">
+                                            <LollipopChart
+                                                data={platformData}
+                                                dataKey="spend"
+                                            />
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Slope Chart */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Period Comparison</CardTitle>
+                                            <CardDescription>This vs Last period</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="h-[300px] overflow-hidden">
+                                            <SlopeChart
+                                                data={slopeData}
+                                                valuePrefix="$"
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                </div>
+
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    {/* Bubble Chart */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Spend vs Conversions</CardTitle>
+                                            <CardDescription>Bubble size = ROAS</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="h-[300px] overflow-hidden">
+                                            <BubbleChart
+                                                data={platformData}
+                                                onBubbleClick={(item) => handleDrillDown('Platform', item.name)}
+                                            />
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Waterfall */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Channel Contribution</CardTitle>
+                                            <CardDescription>Cumulative conversions</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="h-[300px] overflow-hidden">
+                                            <WaterfallChart
+                                                data={channelData.length > 0 ? channelData : platformData}
+                                                dataKey="conversions"
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
+                    </TabsContent>
+
+                    {/* Insights Tab */}
+                    <TabsContent value="insights" className="space-y-6">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key="insights"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="space-y-6"
+                            >
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    {/* AI Insights */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2">
+                                                <Lightbulb className="h-5 w-5" />
+                                                AI Insights
+                                            </CardTitle>
+                                            <CardDescription>Auto-generated recommendations</CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <AIInsightCard
+                                                data={{ platformData, ctr: kpis.ctr }}
+                                            />
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Timeline */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Campaign Timeline</CardTitle>
+                                            <CardDescription>Key events and milestones</CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <TimelineAnnotation annotations={annotations} />
+                                        </CardContent>
+                                    </Card>
+                                </div>
+
+                                {/* Radar Chart */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Platform KPI Comparison</CardTitle>
+                                        <CardDescription>Multi-dimensional performance analysis</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="h-[300px] overflow-hidden">
+                                        <RadarSpiderChart
+                                            data={platformData}
+                                            metrics={['ctr', 'cpc', 'cpa', 'roas', 'cpm'].filter(m => {
+                                                if (m === 'roas') return dataAvailability.metrics.roas;
+                                                if (m === 'ctr') return dataAvailability.metrics.ctr;
+                                                if (m === 'cpc') return dataAvailability.metrics.cpc;
+                                                if (m === 'cpa') return dataAvailability.metrics.cpa;
+                                                if (m === 'cpm') return dataAvailability.metrics.cpm;
+                                                return true;
+                                            })}
                                         />
                                     </CardContent>
                                 </Card>
+                            </motion.div>
+                        </AnimatePresence>
+                    </TabsContent>
 
-                                {/* Timeline */}
+                    {/* Performance Tab - Comparison View */}
+                    <TabsContent value="performance" className="space-y-6">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key="performance"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="space-y-6"
+                            >
+                                {/* Comparison Controls */}
                                 <Card>
-                                    <CardHeader>
-                                        <CardTitle>Campaign Timeline</CardTitle>
-                                        <CardDescription>Key events and milestones</CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <TimelineAnnotation annotations={annotations} />
-                                    </CardContent>
-                                </Card>
-                            </div>
-
-                            {/* Radar Chart */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Platform KPI Comparison</CardTitle>
-                                    <CardDescription>Multi-dimensional performance analysis</CardDescription>
-                                </CardHeader>
-                                <CardContent className="h-[300px] overflow-hidden">
-                                    <RadarSpiderChart
-                                        data={platformData}
-                                        metrics={['ctr', 'cpc', 'cpa', 'roas', 'cpm']}
-                                    />
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    </AnimatePresence>
-                </TabsContent>
-
-                {/* Performance Tab - Comparison View */}
-                <TabsContent value="performance" className="space-y-6">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key="performance"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="space-y-6"
-                        >
-                            {/* Comparison Controls */}
-                            <Card>
-                                <CardContent className="py-4">
-                                    <div className="space-y-4">
-                                        {/* Comparison Mode Selector */}
-                                        <div className="space-y-1">
-                                            <Label className="text-xs font-semibold">Comparison Mode</Label>
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    variant={comparisonMode === 'auto' ? 'default' : 'outline'}
-                                                    size="sm"
-                                                    onClick={() => setComparisonMode('auto')}
-                                                    className="flex-1"
-                                                >
-                                                    Auto
-                                                </Button>
-                                                <Button
-                                                    variant={comparisonMode === 'preset' ? 'default' : 'outline'}
-                                                    size="sm"
-                                                    onClick={() => setComparisonMode('preset')}
-                                                    className="flex-1"
-                                                >
-                                                    Presets
-                                                </Button>
-                                                <Button
-                                                    variant={comparisonMode === 'custom' ? 'default' : 'outline'}
-                                                    size="sm"
-                                                    onClick={() => setComparisonMode('custom')}
-                                                    className="flex-1"
-                                                >
-                                                    Custom
-                                                </Button>
-                                            </div>
-                                        </div>
-
-                                        {/* Preset Selector */}
-                                        {kpiComparisonMode === 'preset' && (
+                                    <CardContent className="py-4">
+                                        <div className="space-y-4">
+                                            {/* Comparison Mode Selector */}
                                             <div className="space-y-1">
-                                                <Label className="text-xs">Quick Compare</Label>
-                                                <Select value={kpiPreset} onValueChange={setKpiPreset}>
-                                                    <SelectTrigger>
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="last_7_vs_prev_7">Last 7 days vs Previous 7 days</SelectItem>
-                                                        <SelectItem value="last_30_vs_prev_30">Last 30 days vs Previous 30 days</SelectItem>
-                                                        <SelectItem value="last_2_months_vs_prev_2_months">Last 2 months vs Previous 2 months</SelectItem>
-                                                        <SelectItem value="last_3_months_vs_prev_3_months">Last 3 months vs Previous 3 months</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        )}
-
-                                        {/* Date Comparison Display Box */}
-                                        <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-2">
-                                            <div className="text-xs font-medium text-muted-foreground">Comparing Periods</div>
-                                            <div className="space-y-1.5">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="h-2 w-2 rounded-full bg-cyan-500"></div>
-                                                    <div className="text-xs">
-                                                        <span className="font-medium">Current: </span>
-                                                        <span className="text-muted-foreground">{comparisonDateRanges.periodA}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="h-2 w-2 rounded-full bg-orange-500"></div>
-                                                    <div className="text-xs">
-                                                        <span className="font-medium">Previous: </span>
-                                                        <span className="text-muted-foreground">{comparisonDateRanges.periodB}</span>
-                                                    </div>
+                                                <Label className="text-xs font-semibold">Comparison Mode</Label>
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        variant={comparisonMode === 'auto' ? 'default' : 'outline'}
+                                                        size="sm"
+                                                        onClick={() => setComparisonMode('auto')}
+                                                        className="flex-1"
+                                                    >
+                                                        Auto
+                                                    </Button>
+                                                    <Button
+                                                        variant={comparisonMode === 'preset' ? 'default' : 'outline'}
+                                                        size="sm"
+                                                        onClick={() => setComparisonMode('preset')}
+                                                        className="flex-1"
+                                                    >
+                                                        Presets
+                                                    </Button>
+                                                    <Button
+                                                        variant={comparisonMode === 'custom' ? 'default' : 'outline'}
+                                                        size="sm"
+                                                        onClick={() => setComparisonMode('custom')}
+                                                        className="flex-1"
+                                                    >
+                                                        Custom
+                                                    </Button>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        {/* Dimension and Metric Selectors */}
-                                        <div className="flex flex-wrap gap-4 items-end">
-                                            <div className="space-y-1 min-w-[150px]">
-                                                <Label className="text-xs">Compare By (X-Axis)</Label>
-                                                <Select value={comparisonDimension} onValueChange={setComparisonDimension}>
-                                                    <SelectTrigger><SelectValue /></SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="platform">Platform</SelectItem>
-                                                        <SelectItem value="channel">Channel</SelectItem>
-                                                        <SelectItem value="funnel_stage">Funnel Stage</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
+                                            {/* Preset Selector */}
+                                            {kpiComparisonMode === 'preset' && (
+                                                <div className="space-y-1">
+                                                    <Label className="text-xs">Quick Compare</Label>
+                                                    <Select value={kpiPreset} onValueChange={setKpiPreset}>
+                                                        <SelectTrigger>
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="last_7_vs_prev_7">Last 7 days vs Previous 7 days</SelectItem>
+                                                            <SelectItem value="last_30_vs_prev_30">Last 30 days vs Previous 30 days</SelectItem>
+                                                            <SelectItem value="last_2_months_vs_prev_2_months">Last 2 months vs Previous 2 months</SelectItem>
+                                                            <SelectItem value="last_3_months_vs_prev_3_months">Last 3 months vs Previous 3 months</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            )}
+
+                                            {/* Date Comparison Display Box */}
+                                            <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-2">
+                                                <div className="text-xs font-medium text-muted-foreground">Comparing Periods</div>
+                                                <div className="space-y-1.5">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="h-2 w-2 rounded-full bg-cyan-500"></div>
+                                                        <div className="text-xs">
+                                                            <span className="font-medium">Current: </span>
+                                                            <span className="text-muted-foreground">{comparisonDateRanges.periodA}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="h-2 w-2 rounded-full bg-orange-500"></div>
+                                                        <div className="text-xs">
+                                                            <span className="font-medium">Previous: </span>
+                                                            <span className="text-muted-foreground">{comparisonDateRanges.periodB}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="space-y-1 min-w-[150px]">
-                                                <Label className="text-xs">Metric (Y-Axis)</Label>
-                                                <Select value={comparisonMetric} onValueChange={setComparisonMetric}>
-                                                    <SelectTrigger><SelectValue /></SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="spend">Spend ($)</SelectItem>
-                                                        <SelectItem value="impressions">Impressions</SelectItem>
-                                                        <SelectItem value="clicks">Clicks</SelectItem>
-                                                        <SelectItem value="conversions">Conversions</SelectItem>
-                                                        <SelectItem value="ctr">CTR (%)</SelectItem>
-                                                        <SelectItem value="cpc">CPC ($)</SelectItem>
-                                                        <SelectItem value="cpa">CPA ($)</SelectItem>
-                                                        <SelectItem value="roas">ROAS</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            {/* Dual Axis Controls */}
-                                            <div className="flex items-center space-x-2 pt-5">
-                                                <input
-                                                    type="checkbox"
-                                                    id="dualAxis"
-                                                    checked={isDualAxis}
-                                                    onChange={(e) => {
-                                                        setIsDualAxis(e.target.checked);
-                                                        if (!e.target.checked) {
-                                                            setComparisonMetric2("");
-                                                            setComparisonData2([]);
-                                                        }
-                                                    }}
-                                                    className="h-4 w-4 rounded border-gray-300"
-                                                />
-                                                <Label htmlFor="dualAxis" className="text-xs cursor-pointer">Dual Axis</Label>
-                                            </div>
-                                            {isDualAxis && (
+
+                                            {/* Dimension and Metric Selectors */}
+                                            <div className="flex flex-wrap gap-4 items-end">
                                                 <div className="space-y-1 min-w-[150px]">
-                                                    <Label className="text-xs">Secondary Y-Axis</Label>
-                                                    <Select value={comparisonMetric2} onValueChange={setComparisonMetric2}>
-                                                        <SelectTrigger><SelectValue placeholder="Select metric" /></SelectTrigger>
+                                                    <Label className="text-xs">Compare By (X-Axis)</Label>
+                                                    <Select value={comparisonDimension} onValueChange={setComparisonDimension}>
+                                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="platform">Platform</SelectItem>
+                                                            <SelectItem value="channel">Channel</SelectItem>
+                                                            <SelectItem value="funnel_stage">Funnel Stage</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="space-y-1 min-w-[150px]">
+                                                    <Label className="text-xs">Metric (Y-Axis)</Label>
+                                                    <Select value={comparisonMetric} onValueChange={setComparisonMetric}>
+                                                        <SelectTrigger><SelectValue /></SelectTrigger>
                                                         <SelectContent>
                                                             <SelectItem value="spend">Spend ($)</SelectItem>
                                                             <SelectItem value="impressions">Impressions</SelectItem>
@@ -2320,499 +2388,544 @@ function AdsOverviewContent() {
                                                             <SelectItem value="ctr">CTR (%)</SelectItem>
                                                             <SelectItem value="cpc">CPC ($)</SelectItem>
                                                             <SelectItem value="cpa">CPA ($)</SelectItem>
-                                                            <SelectItem value="roas">ROAS</SelectItem>
+                                                            {dataAvailability.metrics.roas && <SelectItem value="roas">ROAS</SelectItem>}
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* KPI Cards with Comparison Period Selector */}
-                            {kpiMetrics && (
-                                <div className="space-y-4">
-                                    {/* Period Comparison Controls */}
-                                    <Card className="bg-muted/30">
-                                        <CardContent className="py-4">
-                                            <div className="flex flex-wrap items-start gap-4">
-                                                {/* Mode Selector */}
-                                                <div className="space-y-1">
-                                                    <Label className="text-xs font-semibold">Comparison Mode</Label>
-                                                    <div className="flex gap-1">
-                                                        <Button
-                                                            variant={kpiComparisonMode === 'auto' ? 'default' : 'outline'}
-                                                            size="sm"
-                                                            onClick={() => setKpiComparisonMode('auto')}
-                                                            className="h-8 px-3"
-                                                        >
-                                                            Auto
-                                                        </Button>
-                                                        <Button
-                                                            variant={kpiComparisonMode === 'preset' ? 'default' : 'outline'}
-                                                            size="sm"
-                                                            onClick={() => setKpiComparisonMode('preset')}
-                                                            className="h-8 px-3"
-                                                        >
-                                                            Presets
-                                                        </Button>
-                                                        <Button
-                                                            variant={kpiComparisonMode === 'custom' ? 'default' : 'outline'}
-                                                            size="sm"
-                                                            onClick={() => setKpiComparisonMode('custom')}
-                                                            className="h-8 px-3"
-                                                        >
-                                                            Custom
-                                                        </Button>
-                                                    </div>
+                                                {/* Dual Axis Controls */}
+                                                <div className="flex items-center space-x-2 pt-5">
+                                                    <input
+                                                        type="checkbox"
+                                                        id="dualAxis"
+                                                        checked={isDualAxis}
+                                                        onChange={(e) => {
+                                                            setIsDualAxis(e.target.checked);
+                                                            if (!e.target.checked) {
+                                                                setComparisonMetric2("");
+                                                                setComparisonData2([]);
+                                                            }
+                                                        }}
+                                                        className="h-4 w-4 rounded border-gray-300"
+                                                    />
+                                                    <Label htmlFor="dualAxis" className="text-xs cursor-pointer">Dual Axis</Label>
                                                 </div>
-
-                                                {/* Auto Mode - Period Type Selector */}
-                                                {kpiComparisonMode === 'auto' && (
-                                                    <div className="space-y-1">
-                                                        <Label className="text-xs">Compare Period</Label>
-                                                        <Select value={kpiComparisonPeriod} onValueChange={setKpiComparisonPeriod}>
-                                                            <SelectTrigger className="w-[160px] h-8">
-                                                                <SelectValue />
-                                                            </SelectTrigger>
+                                                {isDualAxis && (
+                                                    <div className="space-y-1 min-w-[150px]">
+                                                        <Label className="text-xs">Secondary Y-Axis</Label>
+                                                        <Select value={comparisonMetric2} onValueChange={setComparisonMetric2}>
+                                                            <SelectTrigger><SelectValue placeholder="Select metric" /></SelectTrigger>
                                                             <SelectContent>
-                                                                <SelectItem value="yoy">Year over Year</SelectItem>
-                                                                <SelectItem value="qoq">Quarter over Quarter</SelectItem>
-                                                                <SelectItem value="mom">Month over Month</SelectItem>
-                                                                <SelectItem value="wow">Week over Week</SelectItem>
+                                                                <SelectItem value="spend">Spend ($)</SelectItem>
+                                                                <SelectItem value="impressions">Impressions</SelectItem>
+                                                                <SelectItem value="clicks">Clicks</SelectItem>
+                                                                <SelectItem value="conversions">Conversions</SelectItem>
+                                                                <SelectItem value="ctr">CTR (%)</SelectItem>
+                                                                <SelectItem value="cpc">CPC ($)</SelectItem>
+                                                                <SelectItem value="cpa">CPA ($)</SelectItem>
+                                                                {dataAvailability.metrics.roas && <SelectItem value="roas">ROAS</SelectItem>}
                                                             </SelectContent>
                                                         </Select>
                                                     </div>
-                                                )}
-
-                                                {/* Preset Mode - Quick Presets */}
-                                                {kpiComparisonMode === 'preset' && (
-                                                    <div className="space-y-1">
-                                                        <Label className="text-xs">Quick Compare</Label>
-                                                        <Select value={kpiPreset} onValueChange={setKpiPreset}>
-                                                            <SelectTrigger className="w-[220px] h-8">
-                                                                <SelectValue />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                <SelectItem value="last_7_vs_prev_7">Last 7 days vs Previous 7 days</SelectItem>
-                                                                <SelectItem value="last_30_vs_prev_30">Last 30 days vs Previous 30 days</SelectItem>
-                                                                <SelectItem value="last_90_vs_prev_90">Last 90 days vs Previous 90 days</SelectItem>
-                                                                <SelectItem value="ytd_vs_prev_ytd">Year to Date vs Prior Year</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </div>
-                                                )}
-
-                                                {/* Custom Mode - Date Range Pickers */}
-                                                {kpiComparisonMode === 'custom' && (
-                                                    <>
-                                                        <div className="space-y-1">
-                                                            <Label className="text-xs">Period A (Current)</Label>
-                                                            <DateRangePicker
-                                                                date={kpiPeriodA}
-                                                                onDateChange={setKpiPeriodA}
-                                                            />
-                                                        </div>
-                                                        <div className="space-y-1">
-                                                            <Label className="text-xs">Period B (Comparison)</Label>
-                                                            <DateRangePicker
-                                                                date={kpiPeriodB}
-                                                                onDateChange={setKpiPeriodB}
-                                                            />
-                                                        </div>
-                                                    </>
                                                 )}
                                             </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                {/* KPI Cards with Comparison Period Selector */}
+                                {kpiMetrics && (
+                                    <div className="space-y-4">
+                                        {/* Period Comparison Controls */}
+                                        <Card className="bg-muted/30">
+                                            <CardContent className="py-4">
+                                                <div className="flex flex-wrap items-start gap-4">
+                                                    {/* Mode Selector */}
+                                                    <div className="space-y-1">
+                                                        <Label className="text-xs font-semibold">Comparison Mode</Label>
+                                                        <div className="flex gap-1">
+                                                            <Button
+                                                                variant={kpiComparisonMode === 'auto' ? 'default' : 'outline'}
+                                                                size="sm"
+                                                                onClick={() => setKpiComparisonMode('auto')}
+                                                                className="h-8 px-3"
+                                                            >
+                                                                Auto
+                                                            </Button>
+                                                            <Button
+                                                                variant={kpiComparisonMode === 'preset' ? 'default' : 'outline'}
+                                                                size="sm"
+                                                                onClick={() => setKpiComparisonMode('preset')}
+                                                                className="h-8 px-3"
+                                                            >
+                                                                Presets
+                                                            </Button>
+                                                            <Button
+                                                                variant={kpiComparisonMode === 'custom' ? 'default' : 'outline'}
+                                                                size="sm"
+                                                                onClick={() => setKpiComparisonMode('custom')}
+                                                                className="h-8 px-3"
+                                                            >
+                                                                Custom
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Auto Mode - Period Type Selector */}
+                                                    {kpiComparisonMode === 'auto' && (
+                                                        <div className="space-y-1">
+                                                            <Label className="text-xs">Compare Period</Label>
+                                                            <Select value={kpiComparisonPeriod} onValueChange={setKpiComparisonPeriod}>
+                                                                <SelectTrigger className="w-[160px] h-8">
+                                                                    <SelectValue />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="yoy">Year over Year</SelectItem>
+                                                                    <SelectItem value="qoq">Quarter over Quarter</SelectItem>
+                                                                    <SelectItem value="mom">Month over Month</SelectItem>
+                                                                    <SelectItem value="wow">Week over Week</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Preset Mode - Quick Presets */}
+                                                    {kpiComparisonMode === 'preset' && (
+                                                        <div className="space-y-1">
+                                                            <Label className="text-xs">Quick Compare</Label>
+                                                            <Select value={kpiPreset} onValueChange={setKpiPreset}>
+                                                                <SelectTrigger className="w-[220px] h-8">
+                                                                    <SelectValue />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="last_7_vs_prev_7">Last 7 days vs Previous 7 days</SelectItem>
+                                                                    <SelectItem value="last_30_vs_prev_30">Last 30 days vs Previous 30 days</SelectItem>
+                                                                    <SelectItem value="last_90_vs_prev_90">Last 90 days vs Previous 90 days</SelectItem>
+                                                                    <SelectItem value="ytd_vs_prev_ytd">Year to Date vs Prior Year</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Custom Mode - Date Range Pickers */}
+                                                    {kpiComparisonMode === 'custom' && (
+                                                        <>
+                                                            <div className="space-y-1">
+                                                                <Label className="text-xs">Period A (Current)</Label>
+                                                                <DateRangePicker
+                                                                    date={kpiPeriodA}
+                                                                    onDateChange={setKpiPeriodA}
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <Label className="text-xs">Period B (Comparison)</Label>
+                                                                <DateRangePicker
+                                                                    date={kpiPeriodB}
+                                                                    onDateChange={setKpiPeriodB}
+                                                                />
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+
+                                        {/* KPI Title */}
+                                        <h3 className="text-lg font-semibold">Key Performance Indicators</h3>
+
+
+                                        {/* KPI Card Groups */}
+                                        <div className="grid gap-4 md:grid-cols-3">
+                                            {/* SPEND & IMPRESSIONS Group */}
+                                            <Card className="bg-gradient-to-r from-green-500/90 to-green-600/90 text-white border-0">
+                                                <CardHeader className="pb-2 pt-3">
+                                                    <CardTitle className="text-xs font-bold uppercase tracking-wider opacity-90">
+                                                        Spend & Impressions
+                                                    </CardTitle>
+                                                </CardHeader>
+                                                <CardContent className="pt-0">
+                                                    <div className={`grid ${dataAvailability.metrics.roas ? 'grid-cols-4' : 'grid-cols-3'} gap-3`}>
+                                                        <div>
+                                                            <p className="text-[10px] uppercase opacity-70">Cost</p>
+                                                            <p className="text-lg font-bold">${(kpiMetrics.spend.current / 1000000).toFixed(1)}M</p>
+                                                            <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.spend.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
+                                                                {kpiMetrics.spend.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.spend.delta).toFixed(0)}%
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] uppercase opacity-70">CPM</p>
+                                                            <p className="text-lg font-bold">${kpiMetrics.cpm.current.toFixed(2)}</p>
+                                                            <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.cpm.delta >= 0 ? 'text-red-200' : 'text-green-200'}`}>
+                                                                {kpiMetrics.cpm.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.cpm.delta).toFixed(0)}%
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] uppercase opacity-70">Impressions</p>
+                                                            <p className="text-lg font-bold">{(kpiMetrics.impressions.current / 1000000).toFixed(1)}M</p>
+                                                            <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.impressions.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
+                                                                {kpiMetrics.impressions.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.impressions.delta).toFixed(0)}%
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] uppercase opacity-70">Reach</p>
+                                                            <p className="text-lg font-bold">{(kpiMetrics.reach.current / 1000000).toFixed(1)}M</p>
+                                                            <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.reach.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
+                                                                {kpiMetrics.reach.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.reach.delta).toFixed(0)}%
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+
+                                            {/* CLICKS Group */}
+                                            <Card className="bg-gradient-to-r from-amber-500/90 to-orange-500/90 text-white border-0">
+                                                <CardHeader className="pb-2 pt-3">
+                                                    <CardTitle className="text-xs font-bold uppercase tracking-wider opacity-90">
+                                                        Clicks
+                                                    </CardTitle>
+                                                </CardHeader>
+                                                <CardContent className="pt-0">
+                                                    <div className="grid grid-cols-3 gap-3">
+                                                        <div>
+                                                            <p className="text-[10px] uppercase opacity-70">Clicks</p>
+                                                            <p className="text-lg font-bold">{(kpiMetrics.clicks.current / 1000000).toFixed(1)}M</p>
+                                                            <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.clicks.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
+                                                                {kpiMetrics.clicks.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.clicks.delta).toFixed(0)}%
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] uppercase opacity-70">CTR</p>
+                                                            <p className="text-lg font-bold">{kpiMetrics.ctr.current.toFixed(2)}%</p>
+                                                            <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.ctr.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
+                                                                {kpiMetrics.ctr.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.ctr.delta).toFixed(0)}%
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] uppercase opacity-70">CPC</p>
+                                                            <p className="text-lg font-bold">${kpiMetrics.cpc.current.toFixed(2)}</p>
+                                                            <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.cpc.delta >= 0 ? 'text-red-200' : 'text-green-200'}`}>
+                                                                {kpiMetrics.cpc.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.cpc.delta).toFixed(0)}%
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+
+                                            {/* CONVERSIONS Group */}
+                                            <Card className="bg-gradient-to-r from-blue-500/90 to-blue-600/90 text-white border-0">
+                                                <CardHeader className="pb-2 pt-3">
+                                                    <CardTitle className="text-xs font-bold uppercase tracking-wider opacity-90">
+                                                        Conversions
+                                                    </CardTitle>
+                                                </CardHeader>
+                                                <CardContent className="pt-0">
+                                                    <div className={`grid ${dataAvailability.metrics.roas ? 'grid-cols-4' : 'grid-cols-3'} gap-3`}>
+                                                        <div>
+                                                            <p className="text-[10px] uppercase opacity-70">Conversions</p>
+                                                            <p className="text-lg font-bold">{(kpiMetrics.conversions.current / 1000000).toFixed(1)}M</p>
+                                                            <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.conversions.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
+                                                                {kpiMetrics.conversions.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.conversions.delta).toFixed(0)}%
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] uppercase opacity-70">Conv Rate</p>
+                                                            <p className="text-lg font-bold">{kpiMetrics.convRate.current.toFixed(2)}%</p>
+                                                            <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.convRate.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
+                                                                {kpiMetrics.convRate.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.convRate.delta).toFixed(0)}%
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] uppercase opacity-70">CPA</p>
+                                                            <p className="text-lg font-bold">${kpiMetrics.cpa.current.toFixed(2)}</p>
+                                                            <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.cpa.delta >= 0 ? 'text-red-200' : 'text-green-200'}`}>
+                                                                {kpiMetrics.cpa.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.cpa.delta).toFixed(0)}%
+                                                            </p>
+                                                        </div>
+                                                        {dataAvailability.metrics.roas && (
+                                                            <div>
+                                                                <p className="text-[10px] uppercase opacity-70">ROAS</p>
+                                                                <p className="text-lg font-bold">{kpiMetrics.roas.current.toFixed(2)}x</p>
+                                                                <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.roas.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
+                                                                    {kpiMetrics.roas.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.roas.delta).toFixed(0)}%
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </div>
+                                    </div>
+                                )}
+
+
+                                {/* Comparison Chart */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center justify-between">
+                                            Comparison Chart {isDualAxis && `(Dual Axis)`}
+                                            <div className="flex items-center gap-4 text-xs font-normal">
+                                                <div className="flex items-center gap-1">
+                                                    <div className="w-3 h-3 rounded-full" style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }}></div>
+                                                    Current ({comparisonMetric})
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <div className="w-3 h-3 rounded-full" style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}></div>
+                                                    Previous ({comparisonMetric})
+                                                </div>
+                                                {isDualAxis && comparisonMetric2 && (
+                                                    <div className="flex items-center gap-1">
+                                                        <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                                                        {comparisonMetric2} (Right Axis)
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </CardTitle>
+                                        <CardDescription>
+                                            {isDualAxis && comparisonMetric2
+                                                ? `${comparisonMetric} vs ${comparisonMetric2} across ${comparisonDimension}`
+                                                : `Side-by-side view of ${comparisonMetric} across ${comparisonDimension}`
+                                            }
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {loading ? (
+                                            <div className="flex items-center justify-center h-[400px]">
+                                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                            </div>
+                                        ) : (
+                                            <div className="h-[400px]">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <ComposedChart data={comparisonData}>
+                                                        <defs>
+                                                            <linearGradient id="currentGradient" x1="0" y1="0" x2="0" y2="1">
+                                                                <stop offset="0%" stopColor="#06b6d4" />
+                                                                <stop offset="100%" stopColor="#0891b2" />
+                                                            </linearGradient>
+                                                            <linearGradient id="previousGradient" x1="0" y1="0" x2="0" y2="1">
+                                                                <stop offset="0%" stopColor="#f97316" />
+                                                                <stop offset="100%" stopColor="#ea580c" />
+                                                            </linearGradient>
+                                                        </defs>
+                                                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                                        <XAxis dataKey="dimension" className="text-xs" />
+                                                        <YAxis yAxisId="left" className="text-xs" />
+                                                        {isDualAxis && comparisonMetric2 && (
+                                                            <YAxis yAxisId="right" orientation="right" className="text-xs" stroke="#f59e0b" />
+                                                        )}
+                                                        <Tooltip
+                                                            contentStyle={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)', borderRadius: '8px' }}
+                                                        />
+                                                        <Legend />
+                                                        <Bar yAxisId="left" dataKey="current" name={`Current ${comparisonMetric}`} fill="url(#currentGradient)" radius={[4, 4, 0, 0]} />
+                                                        <Bar yAxisId="left" dataKey="previous" name={`Previous ${comparisonMetric}`} fill="url(#previousGradient)" radius={[4, 4, 0, 0]} />
+                                                        {isDualAxis && comparisonMetric2 && (
+                                                            <Line
+                                                                yAxisId="right"
+                                                                type="monotone"
+                                                                dataKey="secondary"
+                                                                name={comparisonMetric2.toUpperCase()}
+                                                                stroke="#f59e0b"
+                                                                strokeWidth={3}
+                                                                dot={{ fill: '#f59e0b', r: 5 }}
+                                                            />
+                                                        )}
+                                                    </ComposedChart>
+                                                </ResponsiveContainer>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+
+
+                                {/* Channel Year-over-Year Comparison Table */}
+                                <Card>
+                                    <CardHeader>
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <CardTitle className="flex items-center gap-2">
+                                                    <TrendingUp className="h-5 w-5" />
+                                                    Channel Year-over-Year Comparison
+                                                </CardTitle>
+                                                <CardDescription>
+                                                    Comparing {channelCompYear1} vs {channelCompYear2} metrics by channel
+                                                </CardDescription>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Select value={String(channelCompYear1)} onValueChange={(v) => setChannelCompYear1(Number(v))}>
+                                                    <SelectTrigger className="w-[100px]">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="2025">2025</SelectItem>
+                                                        <SelectItem value="2024">2024</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                <span className="text-muted-foreground">vs</span>
+                                                <Select value={String(channelCompYear2)} onValueChange={(v) => setChannelCompYear2(Number(v))}>
+                                                    <SelectTrigger className="w-[100px]">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="2025">2025</SelectItem>
+                                                        <SelectItem value="2024">2024</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {channelCompLoading ? (
+                                            <div className="flex items-center justify-center h-[300px]">
+                                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                            </div>
+                                        ) : (
+                                            <div className="rounded-md border overflow-x-auto">
+                                                <table className="w-full text-sm">
+                                                    <thead className="bg-muted/50 sticky top-0">
+                                                        <tr className="border-b">
+                                                            <th className="px-4 py-3 text-left font-medium sticky left-0 bg-muted/50">Channel</th>
+                                                            <th className="px-3 py-3 text-right font-medium text-xs">Spend {channelCompYear1}</th>
+                                                            <th className="px-3 py-3 text-right font-medium text-xs">Spend {channelCompYear2}</th>
+                                                            <th className="px-3 py-3 text-right font-medium text-xs">% Change</th>
+                                                            <th className="px-3 py-3 text-right font-medium text-xs">CTR {channelCompYear1}</th>
+                                                            <th className="px-3 py-3 text-right font-medium text-xs">CTR {channelCompYear2}</th>
+                                                            <th className="px-3 py-3 text-right font-medium text-xs">% Change</th>
+                                                            <th className="px-3 py-3 text-right font-medium text-xs">Conv {channelCompYear1}</th>
+                                                            <th className="px-3 py-3 text-right font-medium text-xs">Conv {channelCompYear2}</th>
+                                                            <th className="px-3 py-3 text-right font-medium text-xs">% Change</th>
+                                                            <th className="px-3 py-3 text-right font-medium text-xs">CPA {channelCompYear1}</th>
+                                                            <th className="px-3 py-3 text-right font-medium text-xs">CPA {channelCompYear2}</th>
+                                                            <th className="px-3 py-3 text-right font-medium text-xs">% Change</th>
+                                                            {dataAvailability.metrics.roas && (
+                                                                <>
+                                                                    <th className="px-3 py-3 text-right font-medium text-xs">ROAS {channelCompYear1}</th>
+                                                                    <th className="px-3 py-3 text-right font-medium text-xs">ROAS {channelCompYear2}</th>
+                                                                    <th className="px-3 py-3 text-right font-medium text-xs">% Change</th>
+                                                                </>
+                                                            )}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {channelCompData.map((row, idx) => (
+                                                            <tr key={idx} className="border-b hover:bg-muted/30 transition-colors">
+                                                                <td className="px-4 py-3 font-medium sticky left-0 bg-background">{row.channel}</td>
+                                                                {/* Spend */}
+                                                                <td className="px-3 py-2 text-right">${(row.spend2025 / 1000).toFixed(1)}k</td>
+                                                                <td className="px-3 py-2 text-right text-muted-foreground">${(row.spend2024 / 1000).toFixed(1)}k</td>
+                                                                <td className={`px-3 py-2 text-right font-medium ${row.spendChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                                                    {row.spendChange >= 0 ? '+' : ''}{row.spendChange.toFixed(1)}%
+                                                                </td>
+                                                                {/* CTR */}
+                                                                <td className="px-3 py-2 text-right">{row.ctr2025.toFixed(2)}%</td>
+                                                                <td className="px-3 py-2 text-right text-muted-foreground">{row.ctr2024.toFixed(2)}%</td>
+                                                                <td className={`px-3 py-2 text-right font-medium ${row.ctrChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                                                    {row.ctrChange >= 0 ? '+' : ''}{row.ctrChange.toFixed(1)}%
+                                                                </td>
+                                                                {/* Conversions */}
+                                                                <td className="px-3 py-2 text-right">{row.conversions2025.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+                                                                <td className="px-3 py-2 text-right text-muted-foreground">{row.conversions2024.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+                                                                <td className={`px-3 py-2 text-right font-medium ${row.conversionsChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                                                    {row.conversionsChange >= 0 ? '+' : ''}{row.conversionsChange.toFixed(1)}%
+                                                                </td>
+                                                                {/* CPA - lower is better, so green when negative */}
+                                                                <td className="px-3 py-2 text-right">${row.cpa2025.toFixed(2)}</td>
+                                                                <td className="px-3 py-2 text-right text-muted-foreground">${row.cpa2024.toFixed(2)}</td>
+                                                                <td className={`px-3 py-2 text-right font-medium ${row.cpaChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                                                    {row.cpaChange >= 0 ? '+' : ''}{row.cpaChange.toFixed(1)}%
+                                                                </td>
+                                                                {/* ROAS */}
+                                                                {dataAvailability.metrics.roas && (
+                                                                    <>
+                                                                        <td className="px-3 py-2 text-right">{row.roas2025.toFixed(2)}x</td>
+                                                                        <td className="px-3 py-2 text-right text-muted-foreground">{row.roas2024.toFixed(2)}x</td>
+                                                                        <td className={`px-3 py-2 text-right font-medium ${row.roasChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                                                            {row.roasChange >= 0 ? '+' : ''}{row.roasChange.toFixed(1)}%
+                                                                        </td>
+                                                                    </>
+                                                                )}
+                                                            </tr>
+                                                        ))}
+                                                        {channelCompData.length === 0 && !channelCompLoading && (
+                                                            <tr>
+                                                                <td colSpan={dataAvailability.metrics.roas ? 16 : 13} className="px-4 py-8 text-center text-muted-foreground">
+                                                                    No channel comparison data available.
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                        </AnimatePresence>
+                    </TabsContent>
+
+                    {/* Calendar Tab */}
+                    <TabsContent value="calendar" className="space-y-6">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key="calendar"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="space-y-6"
+                            >
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2">
+                                            <Calendar className="h-5 w-5" />
+                                            Daily Spend Heatmap
+                                        </CardTitle>
+                                        <CardDescription>GitHub-style activity grid</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="h-[300px] overflow-hidden">
+                                        <HeatmapCalendar
+                                            data={trendData}
+                                            valueKey="spend"
+                                        />
+                                    </CardContent>
+                                </Card>
+
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Daily Clicks</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="h-[300px] overflow-hidden">
+                                            <HeatmapCalendar
+                                                data={trendData}
+                                                valueKey="clicks"
+                                            />
                                         </CardContent>
                                     </Card>
 
-                                    {/* KPI Title */}
-                                    <h3 className="text-lg font-semibold">Key Performance Indicators</h3>
-
-
-                                    {/* KPI Card Groups */}
-                                    <div className="grid gap-4 md:grid-cols-3">
-                                        {/* SPEND & IMPRESSIONS Group */}
-                                        <Card className="bg-gradient-to-r from-green-500/90 to-green-600/90 text-white border-0">
-                                            <CardHeader className="pb-2 pt-3">
-                                                <CardTitle className="text-xs font-bold uppercase tracking-wider opacity-90">
-                                                    Spend & Impressions
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <CardContent className="pt-0">
-                                                <div className="grid grid-cols-4 gap-3">
-                                                    <div>
-                                                        <p className="text-[10px] uppercase opacity-70">Cost</p>
-                                                        <p className="text-lg font-bold">${(kpiMetrics.spend.current / 1000000).toFixed(1)}M</p>
-                                                        <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.spend.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
-                                                            {kpiMetrics.spend.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.spend.delta).toFixed(0)}%
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] uppercase opacity-70">CPM</p>
-                                                        <p className="text-lg font-bold">${kpiMetrics.cpm.current.toFixed(2)}</p>
-                                                        <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.cpm.delta >= 0 ? 'text-red-200' : 'text-green-200'}`}>
-                                                            {kpiMetrics.cpm.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.cpm.delta).toFixed(0)}%
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] uppercase opacity-70">Impressions</p>
-                                                        <p className="text-lg font-bold">{(kpiMetrics.impressions.current / 1000000).toFixed(1)}M</p>
-                                                        <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.impressions.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
-                                                            {kpiMetrics.impressions.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.impressions.delta).toFixed(0)}%
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] uppercase opacity-70">Reach</p>
-                                                        <p className="text-lg font-bold">{(kpiMetrics.reach.current / 1000000).toFixed(1)}M</p>
-                                                        <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.reach.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
-                                                            {kpiMetrics.reach.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.reach.delta).toFixed(0)}%
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-
-                                        {/* CLICKS Group */}
-                                        <Card className="bg-gradient-to-r from-amber-500/90 to-orange-500/90 text-white border-0">
-                                            <CardHeader className="pb-2 pt-3">
-                                                <CardTitle className="text-xs font-bold uppercase tracking-wider opacity-90">
-                                                    Clicks
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <CardContent className="pt-0">
-                                                <div className="grid grid-cols-3 gap-3">
-                                                    <div>
-                                                        <p className="text-[10px] uppercase opacity-70">Clicks</p>
-                                                        <p className="text-lg font-bold">{(kpiMetrics.clicks.current / 1000000).toFixed(1)}M</p>
-                                                        <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.clicks.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
-                                                            {kpiMetrics.clicks.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.clicks.delta).toFixed(0)}%
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] uppercase opacity-70">CTR</p>
-                                                        <p className="text-lg font-bold">{kpiMetrics.ctr.current.toFixed(2)}%</p>
-                                                        <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.ctr.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
-                                                            {kpiMetrics.ctr.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.ctr.delta).toFixed(0)}%
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] uppercase opacity-70">CPC</p>
-                                                        <p className="text-lg font-bold">${kpiMetrics.cpc.current.toFixed(2)}</p>
-                                                        <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.cpc.delta >= 0 ? 'text-red-200' : 'text-green-200'}`}>
-                                                            {kpiMetrics.cpc.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.cpc.delta).toFixed(0)}%
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-
-                                        {/* CONVERSIONS Group */}
-                                        <Card className="bg-gradient-to-r from-blue-500/90 to-blue-600/90 text-white border-0">
-                                            <CardHeader className="pb-2 pt-3">
-                                                <CardTitle className="text-xs font-bold uppercase tracking-wider opacity-90">
-                                                    Conversions
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <CardContent className="pt-0">
-                                                <div className="grid grid-cols-4 gap-3">
-                                                    <div>
-                                                        <p className="text-[10px] uppercase opacity-70">Conversions</p>
-                                                        <p className="text-lg font-bold">{(kpiMetrics.conversions.current / 1000000).toFixed(1)}M</p>
-                                                        <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.conversions.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
-                                                            {kpiMetrics.conversions.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.conversions.delta).toFixed(0)}%
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] uppercase opacity-70">Conv Rate</p>
-                                                        <p className="text-lg font-bold">{kpiMetrics.convRate.current.toFixed(2)}%</p>
-                                                        <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.convRate.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
-                                                            {kpiMetrics.convRate.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.convRate.delta).toFixed(0)}%
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] uppercase opacity-70">CPA</p>
-                                                        <p className="text-lg font-bold">${kpiMetrics.cpa.current.toFixed(2)}</p>
-                                                        <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.cpa.delta >= 0 ? 'text-red-200' : 'text-green-200'}`}>
-                                                            {kpiMetrics.cpa.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.cpa.delta).toFixed(0)}%
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] uppercase opacity-70">ROAS</p>
-                                                        <p className="text-lg font-bold">{kpiMetrics.roas.current.toFixed(2)}x</p>
-                                                        <p className={`text-[10px] flex items-center gap-0.5 ${kpiMetrics.roas.delta >= 0 ? 'text-green-200' : 'text-red-200'}`}>
-                                                            {kpiMetrics.roas.delta >= 0 ? '↗' : '↘'}{Math.abs(kpiMetrics.roas.delta).toFixed(0)}%
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </div>
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Daily Conversions</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="h-[300px] overflow-hidden">
+                                            <HeatmapCalendar
+                                                data={trendData}
+                                                valueKey="conversions"
+                                            />
+                                        </CardContent>
+                                    </Card>
                                 </div>
-                            )}
+                            </motion.div>
+                        </AnimatePresence>
+                    </TabsContent>
+                </Tabs>
 
-
-                            {/* Comparison Chart */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center justify-between">
-                                        Comparison Chart {isDualAxis && `(Dual Axis)`}
-                                        <div className="flex items-center gap-4 text-xs font-normal">
-                                            <div className="flex items-center gap-1">
-                                                <div className="w-3 h-3 rounded-full" style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }}></div>
-                                                Current ({comparisonMetric})
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <div className="w-3 h-3 rounded-full" style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}></div>
-                                                Previous ({comparisonMetric})
-                                            </div>
-                                            {isDualAxis && comparisonMetric2 && (
-                                                <div className="flex items-center gap-1">
-                                                    <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                                                    {comparisonMetric2} (Right Axis)
-                                                </div>
-                                            )}
-                                        </div>
-                                    </CardTitle>
-                                    <CardDescription>
-                                        {isDualAxis && comparisonMetric2
-                                            ? `${comparisonMetric} vs ${comparisonMetric2} across ${comparisonDimension}`
-                                            : `Side-by-side view of ${comparisonMetric} across ${comparisonDimension}`
-                                        }
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    {loading ? (
-                                        <div className="flex items-center justify-center h-[400px]">
-                                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                                        </div>
-                                    ) : (
-                                        <div className="h-[400px]">
-                                            <ResponsiveContainer width="100%" height="100%">
-                                                <ComposedChart data={comparisonData}>
-                                                    <defs>
-                                                        <linearGradient id="currentGradient" x1="0" y1="0" x2="0" y2="1">
-                                                            <stop offset="0%" stopColor="#06b6d4" />
-                                                            <stop offset="100%" stopColor="#0891b2" />
-                                                        </linearGradient>
-                                                        <linearGradient id="previousGradient" x1="0" y1="0" x2="0" y2="1">
-                                                            <stop offset="0%" stopColor="#f97316" />
-                                                            <stop offset="100%" stopColor="#ea580c" />
-                                                        </linearGradient>
-                                                    </defs>
-                                                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                                                    <XAxis dataKey="dimension" className="text-xs" />
-                                                    <YAxis yAxisId="left" className="text-xs" />
-                                                    {isDualAxis && comparisonMetric2 && (
-                                                        <YAxis yAxisId="right" orientation="right" className="text-xs" stroke="#f59e0b" />
-                                                    )}
-                                                    <Tooltip
-                                                        contentStyle={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)', borderRadius: '8px' }}
-                                                    />
-                                                    <Legend />
-                                                    <Bar yAxisId="left" dataKey="current" name={`Current ${comparisonMetric}`} fill="url(#currentGradient)" radius={[4, 4, 0, 0]} />
-                                                    <Bar yAxisId="left" dataKey="previous" name={`Previous ${comparisonMetric}`} fill="url(#previousGradient)" radius={[4, 4, 0, 0]} />
-                                                    {isDualAxis && comparisonMetric2 && (
-                                                        <Line
-                                                            yAxisId="right"
-                                                            type="monotone"
-                                                            dataKey="secondary"
-                                                            name={comparisonMetric2.toUpperCase()}
-                                                            stroke="#f59e0b"
-                                                            strokeWidth={3}
-                                                            dot={{ fill: '#f59e0b', r: 5 }}
-                                                        />
-                                                    )}
-                                                </ComposedChart>
-                                            </ResponsiveContainer>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-
-
-                            {/* Channel Year-over-Year Comparison Table */}
-                            <Card>
-                                <CardHeader>
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <CardTitle className="flex items-center gap-2">
-                                                <TrendingUp className="h-5 w-5" />
-                                                Channel Year-over-Year Comparison
-                                            </CardTitle>
-                                            <CardDescription>
-                                                Comparing {channelCompYear1} vs {channelCompYear2} metrics by channel
-                                            </CardDescription>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Select value={String(channelCompYear1)} onValueChange={(v) => setChannelCompYear1(Number(v))}>
-                                                <SelectTrigger className="w-[100px]">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="2025">2025</SelectItem>
-                                                    <SelectItem value="2024">2024</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <span className="text-muted-foreground">vs</span>
-                                            <Select value={String(channelCompYear2)} onValueChange={(v) => setChannelCompYear2(Number(v))}>
-                                                <SelectTrigger className="w-[100px]">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="2025">2025</SelectItem>
-                                                    <SelectItem value="2024">2024</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    {channelCompLoading ? (
-                                        <div className="flex items-center justify-center h-[300px]">
-                                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                                        </div>
-                                    ) : (
-                                        <div className="rounded-md border overflow-x-auto">
-                                            <table className="w-full text-sm">
-                                                <thead className="bg-muted/50 sticky top-0">
-                                                    <tr className="border-b">
-                                                        <th className="px-4 py-3 text-left font-medium sticky left-0 bg-muted/50">Channel</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">Spend {channelCompYear1}</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">Spend {channelCompYear2}</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">% Change</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">CTR {channelCompYear1}</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">CTR {channelCompYear2}</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">% Change</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">Conv {channelCompYear1}</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">Conv {channelCompYear2}</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">% Change</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">CPA {channelCompYear1}</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">CPA {channelCompYear2}</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">% Change</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">ROAS {channelCompYear1}</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">ROAS {channelCompYear2}</th>
-                                                        <th className="px-3 py-3 text-right font-medium text-xs">% Change</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {channelCompData.map((row, idx) => (
-                                                        <tr key={idx} className="border-b hover:bg-muted/30 transition-colors">
-                                                            <td className="px-4 py-3 font-medium sticky left-0 bg-background">{row.channel}</td>
-                                                            {/* Spend */}
-                                                            <td className="px-3 py-2 text-right">${(row.spend2025 / 1000).toFixed(1)}k</td>
-                                                            <td className="px-3 py-2 text-right text-muted-foreground">${(row.spend2024 / 1000).toFixed(1)}k</td>
-                                                            <td className={`px-3 py-2 text-right font-medium ${row.spendChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                                {row.spendChange >= 0 ? '+' : ''}{row.spendChange.toFixed(1)}%
-                                                            </td>
-                                                            {/* CTR */}
-                                                            <td className="px-3 py-2 text-right">{row.ctr2025.toFixed(2)}%</td>
-                                                            <td className="px-3 py-2 text-right text-muted-foreground">{row.ctr2024.toFixed(2)}%</td>
-                                                            <td className={`px-3 py-2 text-right font-medium ${row.ctrChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                                {row.ctrChange >= 0 ? '+' : ''}{row.ctrChange.toFixed(1)}%
-                                                            </td>
-                                                            {/* Conversions */}
-                                                            <td className="px-3 py-2 text-right">{row.conversions2025.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
-                                                            <td className="px-3 py-2 text-right text-muted-foreground">{row.conversions2024.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
-                                                            <td className={`px-3 py-2 text-right font-medium ${row.conversionsChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                                {row.conversionsChange >= 0 ? '+' : ''}{row.conversionsChange.toFixed(1)}%
-                                                            </td>
-                                                            {/* CPA - lower is better, so green when negative */}
-                                                            <td className="px-3 py-2 text-right">${row.cpa2025.toFixed(2)}</td>
-                                                            <td className="px-3 py-2 text-right text-muted-foreground">${row.cpa2024.toFixed(2)}</td>
-                                                            <td className={`px-3 py-2 text-right font-medium ${row.cpaChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                                {row.cpaChange >= 0 ? '+' : ''}{row.cpaChange.toFixed(1)}%
-                                                            </td>
-                                                            {/* ROAS */}
-                                                            <td className="px-3 py-2 text-right">{row.roas2025.toFixed(2)}x</td>
-                                                            <td className="px-3 py-2 text-right text-muted-foreground">{row.roas2024.toFixed(2)}x</td>
-                                                            <td className={`px-3 py-2 text-right font-medium ${row.roasChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                                {row.roasChange >= 0 ? '+' : ''}{row.roasChange.toFixed(1)}%
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                    {channelCompData.length === 0 && !channelCompLoading && (
-                                                        <tr>
-                                                            <td colSpan={16} className="px-4 py-8 text-center text-muted-foreground">
-                                                                No channel comparison data available.
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    </AnimatePresence>
-                </TabsContent>
-
-                {/* Calendar Tab */}
-                <TabsContent value="calendar" className="space-y-6">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key="calendar"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="space-y-6"
-                        >
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Calendar className="h-5 w-5" />
-                                        Daily Spend Heatmap
-                                    </CardTitle>
-                                    <CardDescription>GitHub-style activity grid</CardDescription>
-                                </CardHeader>
-                                <CardContent className="h-[300px] overflow-hidden">
-                                    <HeatmapCalendar
-                                        data={trendData}
-                                        valueKey="spend"
-                                    />
-                                </CardContent>
-                            </Card>
-
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Daily Clicks</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="h-[300px] overflow-hidden">
-                                        <HeatmapCalendar
-                                            data={trendData}
-                                            valueKey="clicks"
-                                        />
-                                    </CardContent>
-                                </Card>
-
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Daily Conversions</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="h-[300px] overflow-hidden">
-                                        <HeatmapCalendar
-                                            data={trendData}
-                                            valueKey="conversions"
-                                        />
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </motion.div>
-                    </AnimatePresence>
-                </TabsContent>
-            </Tabs>
-
-            {/* Drill-down Modal */}
-            <DrillDownModal
-                isOpen={drillDownOpen}
-                onClose={() => setDrillDownOpen(false)}
-                dimension={drillDownData.dimension}
-                value={drillDownData.value}
-                data={drillDownData.data}
-            />
+                {/* Drill-down Modal */}
+                <DrillDownModal
+                    isOpen={drillDownOpen}
+                    onClose={() => setDrillDownOpen(false)}
+                    dimension={drillDownData.dimension}
+                    value={drillDownData.value}
+                    data={drillDownData.data}
+                />
+            </div>
         </div>
     );
 }

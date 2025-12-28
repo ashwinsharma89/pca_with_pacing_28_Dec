@@ -16,13 +16,17 @@ interface PerformanceTableProps {
     selectedPlatform?: string | null;
     onFunnelStageClick?: (funnelStage: string) => void;
     selectedFunnelStage?: string | null;
+    schema?: {
+        metrics?: Record<string, boolean>;
+    };
 }
 
-export function PerformanceTable({ title, description, data, type, onMonthClick, selectedMonth, onPlatformClick, selectedPlatform, onFunnelStageClick, selectedFunnelStage }: PerformanceTableProps) {
+export function PerformanceTable({ title, description, data, type, onMonthClick, selectedMonth, onPlatformClick, selectedPlatform, onFunnelStageClick, selectedFunnelStage, schema }: PerformanceTableProps) {
     const [sortKey, setSortKey] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-    const columns = type === 'funnel' ? [
+    // Define all possible columns
+    const allColumns = type === 'funnel' ? [
         { key: 'platform', label: 'Funnel Stage' },
         { key: 'spend', label: 'Spend' },
         { key: 'impressions', label: 'Impressions' },
@@ -43,6 +47,16 @@ export function PerformanceTable({ title, description, data, type, onMonthClick,
         { key: 'cpa', label: 'CPA' },
         { key: 'roas', label: 'ROAS' }
     ];
+
+    // Filter columns based on schema availability
+    const columns = allColumns.filter(col => {
+        // Always show the primary dimension column
+        if (['month', 'platform', 'channel'].includes(col.key)) return true;
+        // If no schema, show all columns (backwards compatibility)
+        if (!schema?.metrics) return true;
+        // Check if metric is available
+        return schema.metrics[col.key] !== false;
+    });
 
     // Sort data
     const sortedData = React.useMemo(() => {
