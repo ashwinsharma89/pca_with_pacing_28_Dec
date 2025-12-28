@@ -14,6 +14,8 @@ An AI-powered system for automated campaign performance analysis across multiple
 - **Agentic Reasoning**: Cross-channel analysis, attribution modeling, achievement detection
 - **Natural Language Q&A**: Ask questions about your campaign data in plain English
 - **RAG-Powered Insights**: Knowledge base with industry benchmarks and best practices
+- **Pacing Reports**: Dynamic Excel reports with pivot analysis and budget tracking
+- **Regression Analysis**: SHAP explainability, channel contributions, and budget recommendations
 - **Automated Report Generation**: PowerPoint reports with data, visuals, and insights
 - **API-First Design**: RESTful API for programmatic access
 
@@ -113,7 +115,7 @@ Open [http://localhost:3000](http://localhost:3000) to access the dashboard.
 
 ## Knowledge Base & Advanced RAG
 
-The PCA Agent now ships with an ingestion + retrieval pipeline that powers hybrid RAG across every reasoning surface (EnhancedReasoningEngine, query clarifier, NL-to-SQL, Streamlit UI).
+The PCA Agent now ships with an ingestion + retrieval pipeline that powers hybrid RAG across every reasoning surface (EnhancedReasoningEngine, query clarifier, NL-to-SQL, Next.js frontend).
 
 ### 1. Prepare sources
 - Curate URLs/YouTube/PDFs in `knowledge_sources/` (see `knowledge_sources/README.md`)
@@ -157,15 +159,15 @@ builder.build_from_documents(docs)
 
 ### 5. Monitoring
 - Every retrieval call writes metrics to `data/vector_store/retrieval_metrics.jsonl`
-- Launch `streamlit_apps/pages/5_📈_Retrieval_Monitoring.py` to visualize:
+- Metrics include:
   - Query volume over time
   - Vector vs keyword candidate counts
   - Cohere rerank usage
   - Filter/category/priority distributions
   - Raw log for debugging
 
-### 6. Streamlit Q&A context panel
-- On the "💬 Q&A" page, each answer now displays the SQL Knowledge Context (best practices, schema, top retrieved snippets) so analysts can validate reasoning.
+### 6. Q&A Context Panel
+- On the "💬 Chat" page in the Next.js frontend, each answer displays the SQL Knowledge Context (best practices, schema, top retrieved snippets) so analysts can validate reasoning.
 
 ### 7. Troubleshooting tips
 - Missing FAISS index → rerun ingestion or delete `data/vector_store/*` and rebuild
@@ -245,10 +247,10 @@ PCA_Agent/
 ├── tests/                   # Unit tests
 ├── data/                    # Sample data
 │   └── sample_dashboards/
-├── frontend/           # Next.js Production Frontend
-├── src/                # Backend source code
-├── tests/              # Unit and integration tests
-├── archived/           # Deprecated components (Streamlit, v1 Frontend)
+├── frontend/           # Next.js Production Frontend (React, TypeScript, TailwindCSS)
+├── src/                # Backend source code (FastAPI, Python 3.11+)
+├── tests/              # Unit and integration tests (856+ tests)
+├── archived/           # Deprecated components (legacy frontends)
 └── README.md
 ```
 
