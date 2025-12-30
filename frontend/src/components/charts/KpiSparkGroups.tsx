@@ -222,16 +222,32 @@ export function KpiSparkGroups({ data, schema }: KpiSparkGroupsProps) {
                     <div className="bg-emerald-500 py-2 px-4">
                         <span className="text-white text-xs font-bold uppercase tracking-widest">Spend & Impressions</span>
                     </div>
-                    <CardContent className="p-6 space-y-4">
-                        <div className="flex justify-between items-end">
-                            <MetricItem label="Cost" value={`$${formatNumber(current.spend)}`} />
-                            <MetricItem label="CPM" value={`$${(current.cpm ?? 0).toFixed(2)}`} />
-                            <MetricItem label="Impressions" value={formatNumber(current.impressions)} />
-                        </div>
-                        <div className="flex justify-between px-2 pt-2">
-                            <ChangeIndicator val={calculateChange(current.spend, previous.spend)} />
-                            <ChangeIndicator val={calculateChange(current.cpm, previous.cpm)} />
-                            <ChangeIndicator val={calculateChange(current.impressions, previous.impressions)} />
+                    <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
+                            <div className="flex flex-col items-center flex-1">
+                                <MetricItem label="Cost" value={`$${formatNumber(current.spend)}`} />
+                                <div className="mt-1">
+                                    <ChangeIndicator val={calculateChange(current.spend, previous.spend)} />
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-center flex-1">
+                                <MetricItem label="CPM" value={`$${(current.cpm ?? 0).toFixed(2)}`} />
+                                <div className="mt-1">
+                                    <ChangeIndicator val={calculateChange(current.cpm, previous.cpm)} />
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-center flex-1">
+                                <MetricItem label="Impressions" value={formatNumber(current.impressions)} />
+                                <div className="mt-1">
+                                    <ChangeIndicator val={calculateChange(current.impressions, previous.impressions)} />
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-center flex-1">
+                                <MetricItem label="Reach" value={formatNumber(current.reach)} />
+                                <div className="mt-1">
+                                    <ChangeIndicator val={calculateChange(current.reach, previous.reach)} />
+                                </div>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -241,16 +257,26 @@ export function KpiSparkGroups({ data, schema }: KpiSparkGroupsProps) {
                     <div className="bg-amber-500 py-2 px-4">
                         <span className="text-white text-xs font-bold uppercase tracking-widest">Clicks</span>
                     </div>
-                    <CardContent className="p-6 space-y-4">
-                        <div className="flex justify-between items-end">
-                            <MetricItem label="Clicks" value={formatNumber(current.clicks)} />
-                            <MetricItem label="CTR" value={`${(current.ctr ?? 0).toFixed(2)}%`} />
-                            <MetricItem label="CPC" value={`$${(current.cpc ?? 0).toFixed(2)}`} />
-                        </div>
-                        <div className="flex justify-between px-2 pt-2">
-                            <ChangeIndicator val={calculateChange(current.clicks, previous.clicks)} />
-                            <ChangeIndicator val={calculateChange(current.ctr, previous.ctr)} />
-                            <ChangeIndicator val={calculateChange(current.cpc, previous.cpc)} />
+                    <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
+                            <div className="flex flex-col items-center flex-1">
+                                <MetricItem label="Clicks" value={formatNumber(current.clicks)} />
+                                <div className="mt-1">
+                                    <ChangeIndicator val={calculateChange(current.clicks, previous.clicks)} />
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-center flex-1">
+                                <MetricItem label="CTR" value={`${(current.ctr ?? 0).toFixed(2)}%`} />
+                                <div className="mt-1">
+                                    <ChangeIndicator val={calculateChange(current.ctr, previous.ctr)} />
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-center flex-1">
+                                <MetricItem label="CPC" value={`$${(current.cpc ?? 0).toFixed(2)}`} />
+                                <div className="mt-1">
+                                    <ChangeIndicator val={calculateChange(current.cpc, previous.cpc)} />
+                                </div>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -260,16 +286,26 @@ export function KpiSparkGroups({ data, schema }: KpiSparkGroupsProps) {
                     <div className="bg-blue-500 py-2 px-4">
                         <span className="text-white text-xs font-bold uppercase tracking-widest">Conversions</span>
                     </div>
-                    <CardContent className="p-6 space-y-4">
-                        <div className="flex justify-between items-end">
-                            <MetricItem label="Conversions" value={formatNumber(current.conversions)} />
-                            <MetricItem label="CPA" value={`$${(current.cpa ?? 0).toFixed(2)}`} />
-                            <MetricItem label="ROAS" value={`${(current.roas ?? 0).toFixed(2)}x`} />
-                        </div>
-                        <div className="flex justify-between px-2 pt-2">
-                            <ChangeIndicator val={calculateChange(current.conversions, previous.conversions)} />
-                            <ChangeIndicator val={calculateChange(current.cpa, previous.cpa)} />
-                            <ChangeIndicator val={calculateChange(current.roas, previous.roas)} />
+                    <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
+                            <div className="flex flex-col items-center flex-1">
+                                <MetricItem label="Conversions" value={formatNumber(current.conversions)} />
+                                <div className="mt-1">
+                                    <ChangeIndicator val={calculateChange(current.conversions, previous.conversions)} />
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-center flex-1">
+                                <MetricItem label="CPA" value={`$${(current.cpa ?? 0).toFixed(2)}`} />
+                                <div className="mt-1">
+                                    <ChangeIndicator val={calculateChange(current.cpa, previous.cpa)} />
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-center flex-1">
+                                <MetricItem label="ROAS" value={`${(current.roas ?? 0).toFixed(2)}x`} />
+                                <div className="mt-1">
+                                    <ChangeIndicator val={calculateChange(current.roas, previous.roas)} />
+                                </div>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -289,15 +325,15 @@ export function KpiSparkGroups({ data, schema }: KpiSparkGroupsProps) {
                     <div className={`${group.color} py-2 px-4`}>
                         <span className="text-white text-xs font-bold uppercase tracking-widest">{group.title}</span>
                     </div>
-                    <CardContent className="p-6 space-y-4">
-                        <div className="flex justify-between items-end">
+                    <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
                             {group.metrics.map((m, i) => (
-                                <MetricItem key={i} label={m.label} value={m.value} />
-                            ))}
-                        </div>
-                        <div className="flex justify-between px-2 pt-2">
-                            {group.changes.map((c, i) => (
-                                <ChangeIndicator key={i} val={c} />
+                                <div key={i} className="flex flex-col items-center flex-1">
+                                    <MetricItem label={m.label} value={m.value} />
+                                    <div className="mt-1">
+                                        <ChangeIndicator val={group.changes[i]} />
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     </CardContent>

@@ -1,0 +1,192 @@
+2025-12-28 21:53:18.565 | WARNING  | src.knowledge.knowledge_ingestion:<module>:26 - PyPDF2 not installed. Install with: pip install PyPDF2
+[32m2025-12-28 21:53:18[0m | [1mINFO    [0m | [36msrc.utils.logger[0m:[36msetup_logger[0m:[36m131[0m - [1mLogger initialized with production features[0m
+/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/google/rpc/__init__.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+/Users/ashwin/Desktop/pca_agent copy/src/query_engine/nl_to_sql.py:25: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+[32m2025-12-28 21:53:19[0m | [31m[1mERROR   [0m | [36msrc.knowledge.vector_store[0m:[36m__init__[0m:[36m338[0m - [31m[1mVector retriever unavailable: Vector index not found at data/vector_store/faiss.index. Build it first.[0m
+[32m2025-12-28 21:53:19[0m | [31m[1mERROR   [0m | [36msrc.knowledge.vector_store[0m:[36m__init__[0m:[36m344[0m - [31m[1mKeyword retriever unavailable: rank_bm25 is not installed. Install with `pip install rank-bm25`.[0m
+[32m2025-12-28 21:53:19[0m | [31m[1mERROR   [0m | [36msrc.knowledge.vector_store[0m:[36m__init__[0m:[36m350[0m - [31m[1mCohere reranker unavailable: cohere package not installed. Install with `pip install cohere`.[0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36m__init__[0m:[36m64[0m - [1mTier 1: Gemini 2.5 Flash (FREE)[0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36m__init__[0m:[36m79[0m - [1mTier 3: OpenAI GPT-4o[0m
+[32m2025-12-28 21:53:19[0m | [33m[1mWARNING [0m | [36msrc.utils.anthropic_helpers[0m:[36m_log_client_error[0m:[36m33[0m - [33m[1mAnthropic client failed due to an unsupported 'proxies' argument. Set ANTHROPIC_API_KEY only when the SDK supports proxies in this environment.[0m
+[32m2025-12-28 21:53:19[0m | [33m[1mWARNING [0m | [36msrc.query_engine.nl_to_sql[0m:[36m__init__[0m:[36m89[0m - [33m[1mAnthropic client unavailable. Skipping Claude tier.[0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36m__init__[0m:[36m98[0m - [1mAvailable models: ['gemini', 'openai'][0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36m__init__[0m:[36m105[0m - [1mInitialized NaturalLanguageQueryEngine[0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.multi_table_manager[0m:[36mregister_table[0m:[36m104[0m - [1mRegistered table 'all_campaigns' (metadata only) with 5 rows and 35 columns[0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mload_parquet_data[0m:[36m211[0m - [1mRegistered Parquet file /Users/ashwin/Desktop/pca_agent copy/data/campaigns.parquet as table 'all_campaigns'[0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mgenerate_sql[0m:[36m382[0m - [1m=== GENERATING SQL FOR QUESTION: top performing campaigns with minimum spend of 10k ===[0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mgenerate_sql[0m:[36m383[0m - [1mSchema info available: True[0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mgenerate_sql[0m:[36m385[0m - [1mColumns: ['Date', 'Channel', 'Placement', 'Funnel', 'Ad Type', 'Total Spent', 'Site Visit', 'Impressions', 'Clicks', 'Platform', 'Campaign_Name_Full', 'Placement_Name_Full', 'Creative_Name_Full', 'Audience_Segment', 'Device_Type', 'Geographic_Region', 'Age_Group', 'Campaign_Objective', 'Targeting_Type', 'Creative_Format', 'Creative_Elements', 'Creative_ID', 'Budget_Type', 'Bid_Strategy', 'Landing_Page_Type', 'Attribution_Window', 'Frequency_Cap', 'Dayparting_Schedule', 'Gender_Targeting', 'Language_Targeting', 'Customer_Lifecycle_Stage', 'Seasonality_Factor', 'Competitive_Strategy', 'Revenue_2024', 'Revenue_2025'][0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mgenerate_sql[0m:[36m386[0m - [1mSchema description length: 6838 chars[0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mgenerate_sql[0m:[36m387[0m - [1mSchema description preview: Table: all_campaigns
+Columns:
+- Date (object)
+- Channel (object)
+- Placement (object)
+- Funnel (object)
+- Ad Type (object)
+- Total Spent (float64)
+- Site Visit (float64)
+- Impressions (float64)
+- Clicks (float64)
+- Platform (object)
+- Campaign_Name_Full (object)
+- Placement_Name_Full (object)
+- Crea...[0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mgenerate_sql[0m:[36m642[0m - [1mFULL PROMPT LENGTH: 33632 chars[0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mgenerate_sql[0m:[36m643[0m - [1mPROMPT PREVIEW (first 500 chars):
+You are a SQL expert specializing in marketing campaign analytics. Convert the following natural language question into a DuckDB SQL query.
+
+
+
+# Marketing Analytics Glossary
+
+## Key Metrics
+- **ROAS (Return on Ad Spend)**: Revenue generated per dollar spent. Formula: Revenue / Spend
+- **CPA (Cost Per Acquisition)**: Cost to acquire one customer. Formula: Spend / Conversions
+- **CTR (Click-Through Rate)**: Percentage of impressions that result in clicks. Formula: (Clicks / Impressions) * 100
+- **[0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mgenerate_sql[0m:[36m644[0m - [1mPROMPT END (last 200 chars):
+form/channel names - only use values explicitly shown in the schema
+- Platform names are case-sensitive and must match exactly
+
+Question: top performing campaigns with minimum spend of 10k
+
+SQL Query:[0m
+[32m2025-12-28 21:53:19[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mgenerate_sql[0m:[36m652[0m - [1mAttempting to use gemini (gemini-2.5-flash)...[0m
+[32m2025-12-28 21:53:25[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mgenerate_sql[0m:[36m680[0m - [1mSuccessfully used gemini (FREE)[0m
+[32m2025-12-28 21:53:25[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mgenerate_sql[0m:[36m736[0m - [1mRAW LLM RESPONSE: SELECT
+  Campaign_Name_Full,
+  SUM("Total Spent") AS Total_Spend,
+  SUM(Impressions) AS Total_Impressions,
+  SUM(Clicks) AS Total_Clicks,
+  SUM("Site Visit") AS Total_Conversions,
+  SUM(Revenue_2024) AS Total_Revenue,
+  ROUND((SUM(Clicks) / NULLIF(SUM(Impressions), 0)) * 100, 2) AS CTR,
+  ROUND(SUM("Total Spent") / NULLIF(SUM(Clicks), 0), 2) AS CPC,
+  ROUND((SUM("Total Spent") / NULLIF(SUM(Impressions), 0)) * 1000, 2) AS CPM,
+  ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS CPA,
+  ROUND((SUM("Site Visit") / NULLIF(SUM(Clicks), 0)) * 100, 2) AS Conversion_Rate,
+  ROUND(SUM(Revenue_2024) / NULLIF(SUM("Total Spent"), 0), 2) AS ROAS
+FROM all_campaigns
+GROUP BY
+  Campaign_Name_Full
+HAVING
+  SUM("Total Spent") >= 10000
+ORDER BY
+  ROAS DESC
+LIMIT 10[0m
+[32m2025-12-28 21:53:25[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mgenerate_sql[0m:[36m740[0m - [1mAFTER CLEANUP: SELECT
+  Campaign_Name_Full,
+  SUM("Total Spent") AS Total_Spend,
+  SUM(Impressions) AS Total_Impressions,
+  SUM(Clicks) AS Total_Clicks,
+  SUM("Site Visit") AS Total_Conversions,
+  SUM(Revenue_2024) AS Total_Revenue,
+  ROUND((SUM(Clicks) / NULLIF(SUM(Impressions), 0)) * 100, 2) AS CTR,
+  ROUND(SUM("Total Spent") / NULLIF(SUM(Clicks), 0), 2) AS CPC,
+  ROUND((SUM("Total Spent") / NULLIF(SUM(Impressions), 0)) * 1000, 2) AS CPM,
+  ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS CPA,
+  ROUND((SUM("Site Visit") / NULLIF(SUM(Clicks), 0)) * 100, 2) AS Conversion_Rate,
+  ROUND(SUM(Revenue_2024) / NULLIF(SUM("Total Spent"), 0), 2) AS ROAS
+FROM all_campaigns
+GROUP BY
+  Campaign_Name_Full
+HAVING
+  SUM("Total Spent") >= 10000
+ORDER BY
+  ROAS DESC
+LIMIT 10[0m
+[32m2025-12-28 21:53:25[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mgenerate_sql[0m:[36m744[0m - [1mAFTER SANITIZE: SELECT
+  Campaign_Name_Full,
+  SUM("Total Spent") AS Total_Spend,
+  SUM(Impressions) AS Total_Impressions,
+  SUM(Clicks) AS Total_Clicks,
+  SUM("Site Visit") AS Total_Conversions,
+  SUM(Revenue_2024) AS Total_Revenue,
+  ROUND((SUM(Clicks) / NULLIF(SUM(Impressions), 0)) * 100, 2) AS CTR,
+  ROUND(SUM("Total Spent") / NULLIF(SUM(Clicks), 0), 2) AS CPC,
+  ROUND((SUM("Total Spent") / NULLIF(SUM(Impressions), 0)) * 1000, 2) AS CPM,
+  ROUND(SUM("Total Spent") / NULLIF(SUM("Site Visit"), 0), 2) AS CPA,
+  ROUND((SUM("Site Visit") / NULLIF(SUM(Clicks), 0)) * 100, 2) AS Conversion_Rate,
+  ROUND(SUM(Revenue_2024) / NULLIF(SUM("Total Spent"), 0), 2) AS ROAS
+FROM all_campaigns
+GROUP BY
+  Campaign_Name_Full
+HAVING
+  SUM("Total Spent") >= 10000
+ORDER BY
+  ROAS DESC
+LIMIT 10[0m
+[32m2025-12-28 21:53:25[0m | [1mINFO    [0m | [36msrc.query_engine.nl_to_sql[0m:[36mexecute_query[0m:[36m850[0m - [1mQuery executed successfully, returned 10 rows[0m
+[32m2025-12-28 21:53:25[0m | [34m[1mDEBUG   [0m | [36msrc.query_engine.nl_to_sql[0m:[36m_generate_answer[0m:[36m1024[0m - [34m[1mFailed to get date range from campaigns table: Catalog Error: Table with name campaigns does not exist!
+Did you mean "all_campaigns"?
+
+LINE 1: SELECT MIN(Date) as min_date, MAX(Date) as max_date FROM campaigns
+                                                                 ^[0m
+Traceback (most recent call last):
+  File "/Users/ashwin/Desktop/pca_agent copy/last_check.py", line 29, in <module>
+    run()
+  File "/Users/ashwin/Desktop/pca_agent copy/last_check.py", line 19, in run
+    result = engine.ask(question)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/src/query_engine/nl_to_sql.py", line 913, in ask
+    answer = self._generate_answer(question, results)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/src/query_engine/nl_to_sql.py", line 1130, in _generate_answer
+    response = model.generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/google/generativeai/generative_models.py", line 331, in generate_content
+    response = self._client.generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/google/ai/generativelanguage_v1beta/services/generative_service/client.py", line 835, in generate_content
+    response = rpc(
+               ^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/google/api_core/gapic_v1/method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/google/api_core/retry/retry_unary.py", line 294, in retry_wrapped_func
+    return retry_target(
+           ^^^^^^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/google/api_core/retry/retry_unary.py", line 147, in retry_target
+    result = target()
+             ^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/google/api_core/timeout.py", line 130, in func_with_timeout
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/google/api_core/grpc_helpers.py", line 75, in error_remapped_callable
+    return callable_(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/grpc/_interceptor.py", line 276, in __call__
+    response, ignored_call = self._with_call(
+                             ^^^^^^^^^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/grpc/_interceptor.py", line 328, in _with_call
+    call = self._interceptor.intercept_unary_unary(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/google/ai/generativelanguage_v1beta/services/generative_service/transports/grpc.py", line 79, in intercept_unary_unary
+    response = continuation(client_call_details, request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/grpc/_interceptor.py", line 314, in continuation
+    response, call = self._thunk(new_method).with_call(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/grpc/_channel.py", line 1177, in with_call
+    state, call = self._blocking(
+                  ^^^^^^^^^^^^^^^
+  File "/Users/ashwin/Desktop/pca_agent copy/.venv312/lib/python3.12/site-packages/grpc/_channel.py", line 1150, in _blocking
+    event = call.next_event()
+            ^^^^^^^^^^^^^^^^^
+  File "src/python/grpcio/grpc/_cython/_cygrpc/channel.pyx.pxi", line 388, in grpc._cython.cygrpc.SegregatedCall.next_event
+  File "src/python/grpcio/grpc/_cython/_cygrpc/channel.pyx.pxi", line 211, in grpc._cython.cygrpc._next_call_event
+  File "src/python/grpcio/grpc/_cython/_cygrpc/channel.pyx.pxi", line 205, in grpc._cython.cygrpc._next_call_event
+  File "src/python/grpcio/grpc/_cython/_cygrpc/completion_queue.pyx.pxi", line 97, in grpc._cython.cygrpc._latent_event
+  File "src/python/grpcio/grpc/_cython/_cygrpc/completion_queue.pyx.pxi", line 80, in grpc._cython.cygrpc._internal_latent_event
+  File "src/python/grpcio/grpc/_cython/_cygrpc/completion_queue.pyx.pxi", line 61, in grpc._cython.cygrpc._next
+KeyboardInterrupt

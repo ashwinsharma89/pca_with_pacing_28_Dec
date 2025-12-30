@@ -19,10 +19,6 @@ import { Separator } from '@/components/ui/separator';
 
 // Original charts
 import { TreemapChart } from '@/components/charts/TreemapChart';
-import { RadarSpiderChart } from '@/components/charts/RadarSpiderChart';
-import { BubbleChart } from '@/components/charts/BubbleChart';
-import { WaterfallChart } from '@/components/charts/WaterfallChart';
-import { HeatmapCalendar } from '@/components/charts/HeatmapCalendar';
 import { GradientAreaChart } from '@/components/charts/GradientAreaChart';
 import { DrillDownModal } from '@/components/charts/DrillDownModal';
 import { ComparisonModeSelector } from '@/components/charts/ComparisonModeSelector';
@@ -31,25 +27,21 @@ import { ComparisonModeSelector } from '@/components/charts/ComparisonModeSelect
 import { FunnelChart } from '@/components/charts/FunnelChart';
 import { GaugeChart } from '@/components/charts/GaugeChart';
 import { AnimatedCounter } from '@/components/charts/AnimatedCounter';
-import { LollipopChart } from '@/components/charts/LollipopChart';
 import { DonutWithStats } from '@/components/charts/DonutWithStats';
-import { SlopeChart } from '@/components/charts/SlopeChart';
-import { AIInsightCard } from '@/components/charts/AIInsightCard';
 import { PerformanceScorecard } from '@/components/charts/PerformanceScorecard';
 import { BulletChart } from '@/components/charts/BulletChart';
 import { SparklineGrid } from '@/components/charts/SparklineGrid';
 import { StackedPercentageArea } from '@/components/charts/StackedPercentageArea';
 import { MetricSpotlight } from '@/components/charts/MetricSpotlight';
 import { PulseIndicator, StatusRow } from '@/components/charts/PulseIndicator';
-import { TimelineAnnotation } from '@/components/charts/TimelineAnnotation';
 import { ComparisonBar } from '@/components/charts/MiniBarChart';
 import { KpiSparkGroups } from '@/components/charts/KpiSparkGroups';
 import { PerformanceTable } from '@/components/charts/PerformanceTable';
 
 import {
-    LayoutGrid, BarChart3, Calendar, TrendingUp, Layers, Activity,
-    Sparkles, Target, Gauge, Filter, Lightbulb, Award, ArrowUpRight, ArrowDownRight, Loader2,
-    DollarSign, Zap
+    LayoutGrid, TrendingUp, Layers, Activity,
+    Sparkles, Target, Gauge, Filter, Award, ArrowUpRight, ArrowDownRight, Loader2,
+    DollarSign, Zap, RotateCcw
 } from 'lucide-react';
 
 // Dynamically import Recharts
@@ -80,6 +72,7 @@ function AdsOverviewContent() {
     const [loading, setLoading] = useState(true);
     const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
     const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
+    const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
     const [selectedFunnelStage, setSelectedFunnelStage] = useState<string | null>(null);
 
     // Comparison state for Performance tab
@@ -158,7 +151,9 @@ function AdsOverviewContent() {
         cpm: 0,
         cpc: 0,
         conversions: 0,
-        roas: 0
+        roas: 0,
+        revenue: 0,
+        reach: 0
     });
 
     const [trendData, setTrendData] = useState<any[]>([]);
@@ -269,75 +264,53 @@ function AdsOverviewContent() {
         });
 
         // Convert to array and sort by month
-        return Object.values(monthlyAgg)
-            .sort((a: any, b: any) => a.monthKey.localeCompare(b.monthKey))
-            .map((m: any) => ({
+        const sortedData = Object.values(monthlyAgg)
+            .sort((a: any, b: any) => a.monthKey.localeCompare(b.monthKey));
+
+        // Calculate cumulative sums and derived metrics
+        let cumulativeClicks = 0;
+        let cumulativeConversions = 0;
+        let cumulativeImpressions = 0;
+
+        return sortedData.map((m: any) => {
+            cumulativeClicks += m.clicks;
+            cumulativeConversions += m.conversions;
+            cumulativeImpressions += m.impressions;
+
+            return {
                 ...m,
                 cpc: m.clicks > 0 ? m.spend / m.clicks : 0,
                 ctr: m.impressions > 0 ? (m.clicks / m.impressions) * 100 : 0,
                 roas: m.spend > 0 ? (m.revenue || 0) / m.spend : 0,
-                costPerConv: m.conversions > 0 ? m.spend / m.conversions : 0
-            }));
+                costPerConv: m.conversions > 0 ? m.spend / m.conversions : 0,
+                // Cumulative sums for better line visibility
+                cumulativeClicks,
+                cumulativeConversions,
+                cumulativeImpressions
+            };
+        });
     }, [trendData]);
 
     // Aggregate platform performance data
-    const aggregatedPlatformData = useMemo(() => {
-        if (!dashboardStats.platform_performance || dashboardStats.platform_performance.length === 0) {
-            return [];
-        }
 
-        if (selectedMonth) {
-            // Filter by selected month
-            return dashboardStats.platform_performance.filter((p: any) => p.month === selectedMonth);
-        } else {
-            // Aggregate across all months
-            const platformTotals: { [key: string]: any } = {};
-            dashboardStats.platform_performance.forEach((p: any) => {
-                if (!platformTotals[p.platform]) {
-                    platformTotals[p.platform] = {
-                        platform: p.platform,
-                        spend: 0,
-                        impressions: 0,
-                        clicks: 0,
-                        conversions: 0,
-                        cpm: 0,
-                        ctr: 0,
-                        cpc: 0,
-                        cpa: 0,
-                        revenue: 0
-                    };
-                }
-                platformTotals[p.platform].spend += p.spend || 0;
-                platformTotals[p.platform].impressions += p.impressions || 0;
-                platformTotals[p.platform].clicks += p.clicks || 0;
-                platformTotals[p.platform].conversions += p.conversions || 0;
-                platformTotals[p.platform].revenue += p.revenue || 0;
-            });
-
-            // Recalculate derived metrics
-            return Object.values(platformTotals).map((p: any) => ({
-                ...p,
-                cpm: p.impressions > 0 ? (p.spend / p.impressions * 1000) : 0,
-                ctr: p.impressions > 0 ? (p.clicks / p.impressions * 100) : 0,
-                cpc: p.clicks > 0 ? (p.spend / p.clicks) : 0,
-                cpa: p.conversions > 0 ? (p.spend / p.conversions) : 0,
-                roas: p.spend > 0 ? ((p.revenue || 0) / p.spend) : 0
-            })).sort((a, b) => b.spend - a.spend);
-        }
-    }, [dashboardStats.platform_performance, selectedMonth]);
 
     // Compute monthly performance for table from trendData (updates with filters)
     // When a platform is selected, use platform_performance data to filter by that platform
     const computedMonthlyPerformance = useMemo(() => {
-        // If a platform is selected, filter from platform_performance data (which has month granularity)
-        if (selectedPlatform && dashboardStats.platform_performance && dashboardStats.platform_performance.length > 0) {
-            const filteredByPlatform = dashboardStats.platform_performance.filter(
-                (p: any) => p.platform === selectedPlatform
-            );
+        // Use the most granular source: platform_performance (now has month, platform, AND channel)
+        let filteredData = dashboardStats.platform_performance || [];
 
-            // Aggregate by month for the selected platform
+        if (selectedPlatform) {
+            filteredData = filteredData.filter((p: any) => p.platform === selectedPlatform);
+        }
+        if (selectedChannel) {
+            filteredData = filteredData.filter((p: any) => p.channel === selectedChannel);
+        }
+
+        if (filteredData.length > 0) {
+            // Aggregate by month
             const monthlyAgg: { [key: string]: any } = {};
-            filteredByPlatform.forEach((p: any) => {
+            filteredData.forEach((p: any) => {
                 const monthKey = p.month;
                 if (!monthlyAgg[monthKey]) {
                     monthlyAgg[monthKey] = {
@@ -345,7 +318,8 @@ function AdsOverviewContent() {
                         spend: 0,
                         clicks: 0,
                         conversions: 0,
-                        impressions: 0
+                        impressions: 0,
+                        revenue: 0
                     };
                 }
                 monthlyAgg[monthKey].spend += p.spend || 0;
@@ -367,24 +341,41 @@ function AdsOverviewContent() {
                 .sort((a: any, b: any) => b.month.localeCompare(a.month));
         }
 
-        // Default: use trendData (no platform filtering)
+        // Fallback or No Selection: Aggregate dashboardStats.monthly_performance by month
+        // (if channel is selected, filter monthly_performance)
+        if (selectedChannel && dashboardStats.monthly_performance) {
+            const monthlyAgg: { [key: string]: any } = {};
+            dashboardStats.monthly_performance.filter((m: any) => m.channel === selectedChannel).forEach((m: any) => {
+                const monthKey = m.month;
+                if (!monthlyAgg[monthKey]) {
+                    monthlyAgg[monthKey] = { month: monthKey, spend: 0, clicks: 0, conversions: 0, impressions: 0, revenue: 0 };
+                }
+                monthlyAgg[monthKey].spend += m.spend || 0;
+                monthlyAgg[monthKey].clicks += m.clicks || 0;
+                monthlyAgg[monthKey].conversions += m.conversions || 0;
+                monthlyAgg[monthKey].impressions += m.impressions || 0;
+                monthlyAgg[monthKey].revenue += m.revenue || 0;
+            });
+            return Object.values(monthlyAgg).map((m: any) => ({
+                ...m,
+                cpm: m.impressions > 0 ? (m.spend / m.impressions * 1000) : 0,
+                ctr: m.impressions > 0 ? (m.clicks / m.impressions * 100) : 0,
+                cpc: m.clicks > 0 ? (m.spend / m.clicks) : 0,
+                cpa: m.conversions > 0 ? (m.spend / m.conversions) : 0,
+                roas: m.spend > 0 ? ((m.revenue || 0) / m.spend) : 0
+            })).sort((a: any, b: any) => b.month.localeCompare(a.month));
+        }
+
+        // Default: use trendData summarized by month
         if (!trendData || trendData.length === 0) return [];
 
         const monthlyAgg: { [key: string]: any } = {};
-
         trendData.forEach((d: any) => {
             const date = new Date(d.date);
             const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
             if (!monthlyAgg[monthKey]) {
-                monthlyAgg[monthKey] = {
-                    month: monthKey,
-                    spend: 0,
-                    clicks: 0,
-                    conversions: 0,
-                    impressions: 0,
-                    revenue: 0
-                };
+                monthlyAgg[monthKey] = { month: monthKey, spend: 0, clicks: 0, conversions: 0, impressions: 0, revenue: 0 };
             }
 
             monthlyAgg[monthKey].spend += d.spend || 0;
@@ -404,20 +395,24 @@ function AdsOverviewContent() {
                 roas: m.spend > 0 ? ((m.revenue || 0) / m.spend) : 0
             }))
             .sort((a: any, b: any) => b.month.localeCompare(a.month));
-    }, [trendData, selectedPlatform, dashboardStats.platform_performance]);
+    }, [trendData, selectedPlatform, selectedChannel, dashboardStats.platform_performance, dashboardStats.monthly_performance]);
 
     // Compute platform performance for table from platformData (updates with filters)
     // When a month is selected, use platform_performance data to filter by that month
     const computedPlatformPerformance = useMemo(() => {
-        // If a month is selected, filter from platform_performance data (which has month granularity)
-        if (selectedMonth && dashboardStats.platform_performance && dashboardStats.platform_performance.length > 0) {
-            const filteredByMonth = dashboardStats.platform_performance.filter(
-                (p: any) => p.month === selectedMonth
-            );
+        let filteredData = dashboardStats.platform_performance || [];
 
-            // Aggregate by platform for the selected month
+        if (selectedMonth) {
+            filteredData = filteredData.filter((p: any) => p.month === selectedMonth);
+        }
+        if (selectedChannel) {
+            filteredData = filteredData.filter((p: any) => p.channel === selectedChannel);
+        }
+
+        if (filteredData.length > 0) {
+            // Aggregate by platform
             const platformAgg: { [key: string]: any } = {};
-            filteredByMonth.forEach((p: any) => {
+            filteredData.forEach((p: any) => {
                 const platformKey = p.platform;
                 if (!platformAgg[platformKey]) {
                     platformAgg[platformKey] = {
@@ -437,36 +432,97 @@ function AdsOverviewContent() {
             });
 
             return Object.values(platformAgg)
-                .map((p: any) => ({
-                    ...p,
-                    cpm: p.impressions > 0 ? (p.spend / p.impressions * 1000) : 0,
-                    ctr: p.impressions > 0 ? (p.clicks / p.impressions * 100) : 0,
-                    cpc: p.clicks > 0 ? (p.spend / p.clicks) : 0,
-                    cpa: p.conversions > 0 ? (p.spend / p.conversions) : 0,
-                    roas: p.spend > 0 ? ((p.revenue || 0) / p.spend) : 0
+                .map((m: any) => ({
+                    ...m,
+                    cpm: m.impressions > 0 ? (m.spend / m.impressions * 1000) : 0,
+                    ctr: m.impressions > 0 ? (m.clicks / m.impressions * 100) : 0,
+                    cpc: m.clicks > 0 ? (m.spend / m.clicks) : 0,
+                    cpa: m.conversions > 0 ? (m.spend / m.conversions) : 0,
+                    roas: m.spend > 0 ? ((m.revenue || 0) / m.spend) : 0
                 }))
                 .sort((a: any, b: any) => b.spend - a.spend);
         }
 
-        // Default: use platformData (no month filtering)
+        // Fallback or No Selection: use platformData (filtered by global filters)
         if (!platformData || platformData.length === 0) return [];
 
         return platformData.map((p: any) => ({
             platform: p.platform || p.name,
             spend: p.spend || 0,
-            impressions: p.impressions || 0,
             clicks: p.clicks || 0,
             conversions: p.conversions || 0,
-            cpm: p.cpm || 0,
-            ctr: p.ctr || 0,
-            cpc: p.cpc || 0,
-            cpa: p.cpa || (p.conversions > 0 ? p.spend / p.conversions : 0),
+            impressions: p.impressions || 0,
+            cpm: p.cpm || (p.impressions > 0 ? (p.spend / p.impressions * 1000) : 0),
+            ctr: p.ctr || (p.impressions > 0 ? (p.clicks / p.impressions * 100) : 0),
+            cpc: p.cpc || (p.clicks > 0 ? (p.spend / p.clicks) : 0),
+            cpa: p.cpa || (p.conversions > 0 ? (p.spend / p.conversions) : 0),
             roas: p.roas || (p.spend > 0 ? ((p.revenue || 0) / p.spend) : 0)
         })).sort((a: any, b: any) => b.spend - a.spend);
-    }, [platformData, selectedMonth, dashboardStats.platform_performance]);
+    }, [platformData, selectedMonth, selectedChannel, dashboardStats.platform_performance]);
 
     // Compute channel performance for table from channelData (updates with filters)
     const computedChannelPerformance = useMemo(() => {
+        let filteredData: any[] = [];
+
+        // Try to use platform_performance for maximum granularity (month, platform, channel)
+        if (dashboardStats.platform_performance && (selectedMonth || selectedPlatform)) {
+            filteredData = dashboardStats.platform_performance;
+            if (selectedMonth) filteredData = filteredData.filter((p: any) => p.month === selectedMonth);
+            if (selectedPlatform) filteredData = filteredData.filter((p: any) => p.platform === selectedPlatform);
+
+            // Aggregate by channel
+            const channelAgg: { [key: string]: any } = {};
+            filteredData.forEach((p: any) => {
+                const channelKey = p.channel;
+                if (!channelKey) return;
+                if (!channelAgg[channelKey]) {
+                    channelAgg[channelKey] = { channel: channelKey, spend: 0, clicks: 0, conversions: 0, impressions: 0, revenue: 0 };
+                }
+                channelAgg[channelKey].spend += p.spend || 0;
+                channelAgg[channelKey].clicks += p.clicks || 0;
+                channelAgg[channelKey].conversions += p.conversions || 0;
+                channelAgg[channelKey].impressions += p.impressions || 0;
+                channelAgg[channelKey].revenue += p.revenue || 0;
+            });
+
+            return Object.values(channelAgg)
+                .map((m: any) => ({
+                    ...m,
+                    cpm: m.impressions > 0 ? (m.spend / m.impressions * 1000) : 0,
+                    ctr: m.impressions > 0 ? (m.clicks / m.impressions * 100) : 0,
+                    cpc: m.clicks > 0 ? (m.spend / m.clicks) : 0,
+                    cpa: m.conversions > 0 ? (m.spend / m.conversions) : 0,
+                    roas: m.spend > 0 ? ((m.revenue || 0) / m.spend) : 0
+                }))
+                .sort((a: any, b: any) => b.spend - a.spend);
+        }
+
+        // Fallback: aggregation from monthly_performance if channel is present there
+        if (dashboardStats.monthly_performance && selectedMonth) {
+            const channelAgg: { [key: string]: any } = {};
+            dashboardStats.monthly_performance.filter((m: any) => m.month === selectedMonth).forEach((m: any) => {
+                const channelKey = m.channel;
+                if (!channelKey) return;
+                if (!channelAgg[channelKey]) {
+                    channelAgg[channelKey] = { channel: channelKey, spend: 0, clicks: 0, conversions: 0, impressions: 0, revenue: 0 };
+                }
+                channelAgg[channelKey].spend += m.spend || 0;
+                channelAgg[channelKey].clicks += m.clicks || 0;
+                channelAgg[channelKey].conversions += m.conversions || 0;
+                channelAgg[channelKey].impressions += m.impressions || 0;
+                channelAgg[channelKey].revenue += m.revenue || 0;
+            });
+            return Object.values(channelAgg).map((m: any) => ({
+                ...m,
+                cpm: m.impressions > 0 ? (m.spend / m.impressions * 1000) : 0,
+                ctr: m.impressions > 0 ? (m.clicks / m.impressions * 100) : 0,
+                cpc: m.clicks > 0 ? (m.spend / m.clicks) : 0,
+                cpa: m.conversions > 0 ? (m.spend / m.conversions) : 0,
+                roas: m.spend > 0 ? ((m.revenue || 0) / m.spend) : 0
+            })).sort((a: any, b: any) => b.spend - a.spend);
+        }
+
+        // Default: use channelData (filtered by global filters)
         if (!channelData || channelData.length === 0) return [];
 
         return channelData.map((c: any) => ({
@@ -481,7 +537,7 @@ function AdsOverviewContent() {
             cpa: c.cpa || (c.conversions > 0 ? (c.spend / c.conversions) : 0),
             roas: c.roas || (c.spend > 0 ? ((c.revenue || 0) / c.spend) : 0)
         })).sort((a: any, b: any) => b.spend - a.spend);
-    }, [channelData]);
+    }, [channelData, selectedMonth, selectedPlatform, dashboardStats.platform_performance, dashboardStats.monthly_performance]);
 
     // Calculate the date ranges being compared for display
     const comparisonDateRanges = useMemo(() => {
@@ -590,15 +646,15 @@ function AdsOverviewContent() {
         };
     }, [kpiComparisonMode, kpiComparisonPeriod, kpiPreset, kpiPeriodA, kpiPeriodB]);
 
-    // Auto-refresh data when filters change (with debouncing)
+    // Auto-refresh data on initial load and source filter changes only (filters apply on button click)
     useEffect(() => {
         const timer = setTimeout(() => {
             fetchData();
             fetchFilterOptions();
-        }, 500); // Debounce: wait 500ms after last filter change
+        }, 500); // Debounce: wait 500ms after source filter change
 
         return () => clearTimeout(timer);
-    }, [sourceFilter, filters, comparison]);
+    }, [sourceFilter, comparison]);
 
     useEffect(() => {
         fetchData();
@@ -629,14 +685,14 @@ function AdsOverviewContent() {
             fetchComparisonData();
             fetchKpiMetrics();
         }
-    }, [comparisonDimension, comparisonMetric, comparisonMetric2, isDualAxis, filters.dateRange, filters.platforms, filters.channels, filters.regions, filters.devices, filters.funnelStages, activeTab, kpiComparisonMode, kpiComparisonPeriod, kpiPreset, kpiPeriodA, kpiPeriodB]);
+    }, [comparisonDimension, comparisonMetric, comparisonMetric2, isDualAxis, filters.dateRange, filters.platforms, filters.channels, filters.regions, filters.devices, filters.funnelStages, activeTab, kpiComparisonMode, kpiComparisonPeriod, kpiPreset, kpiPeriodA, kpiPeriodB, dashboardStats]);
 
     // Refetch KPI metrics when comparison settings change (kept for backwards compatibility)
     useEffect(() => {
         if (activeTab === 'performance') {
             fetchKpiMetrics();
         }
-    }, [kpiComparisonMode, kpiComparisonPeriod, kpiPreset, kpiPeriodA, kpiPeriodB, filters.platforms, filters.channels, filters.regions, filters.devices, filters.funnelStages]);
+    }, [kpiComparisonMode, kpiComparisonPeriod, kpiPreset, kpiPeriodA, kpiPeriodB, filters.platforms, filters.channels, filters.regions, filters.devices, filters.funnelStages, dashboardStats]);
 
     // Fetch channel comparison table data
     useEffect(() => {
@@ -719,12 +775,21 @@ function AdsOverviewContent() {
 
             try {
                 console.log('Calling dashboard-stats...');
-                stats = await api.get('/campaigns/dashboard-stats', {
-                    ...filterParams,
-                    start_date: filterParams.startDate,
-                    end_date: filterParams.endDate,
-                    platforms: filterParams.platforms
-                });
+                // Build query string for dashboard-stats (api.get doesn't convert params to query string)
+                const statsParams = new URLSearchParams();
+                if (filterParams.startDate) statsParams.append('start_date', filterParams.startDate);
+                if (filterParams.endDate) statsParams.append('end_date', filterParams.endDate);
+                if (filterParams.platforms) statsParams.append('platforms', filterParams.platforms);
+                if (filterParams.channels) statsParams.append('channels', filterParams.channels);
+                if (filterParams.regions) statsParams.append('regions', filterParams.regions);
+                if (filterParams.devices) statsParams.append('devices', filterParams.devices);
+                if (filterParams.placements) statsParams.append('placements', filterParams.placements);
+                if (filterParams.adTypes) statsParams.append('adTypes', filterParams.adTypes);
+                if (filterParams.funnelStages) statsParams.append('funnelStages', filterParams.funnelStages);
+                const statsQueryString = statsParams.toString();
+                const statsUrl = `/campaigns/dashboard-stats${statsQueryString ? `?${statsQueryString}` : ''}`;
+                console.log('dashboard-stats URL:', statsUrl);
+                stats = await api.get(statsUrl);
                 console.log('dashboard-stats success:', !!stats);
             } catch (err) {
                 console.error('dashboard-stats failed:', err);
@@ -739,19 +804,24 @@ function AdsOverviewContent() {
                     impressions: acc.impressions + (p.impressions || 0),
                     clicks: acc.clicks + (p.clicks || 0),
                     conversions: acc.conversions + (p.conversions || 0),
-                    revenue: acc.revenue + (p.revenue || 0)
-                }), { spend: 0, impressions: 0, clicks: 0, conversions: 0, revenue: 0 });
+                    revenue: acc.revenue + (p.revenue || 0),
+                    reach: acc.reach + (p.reach || 0)
+                }), { spend: 0, impressions: 0, clicks: 0, conversions: 0, revenue: 0, reach: 0 });
 
                 const ctr = totals.impressions > 0 ? (totals.clicks / totals.impressions * 100) : 0;
                 const cpm = totals.impressions > 0 ? (totals.spend / totals.impressions * 1000) : 0;
                 const cpc = totals.clicks > 0 ? (totals.spend / totals.clicks) : 0;
                 const roas = totals.spend > 0 ? ((totals.revenue || 0) / totals.spend) : 0;
+                // Use actual reach if available, otherwise estimate from impressions
+                const reach = totals.reach > 0 ? totals.reach : Math.round(totals.impressions * 0.65);
 
                 setKpis({
                     spend: totals.spend,
                     impressions: totals.impressions,
                     clicks: totals.clicks,
                     conversions: totals.conversions,
+                    revenue: totals.revenue,
+                    reach,
                     ctr, cpm, cpc, roas
                 });
 
@@ -1143,81 +1213,16 @@ function AdsOverviewContent() {
             const dateRanges = getDateRanges();
             console.log('KPI Date Ranges:', dateRanges);
 
-            // Fetch metrics for both periods
-            const fetchPeriodMetrics = async (period: { start: string; end: string }) => {
-                const metrics = ['spend', 'impressions', 'clicks', 'conversions'];
-                const results: any = {};
+            // Use dashboard stats data which already includes reach
+            if (!dashboardStats?.summary_groups) {
+                console.warn('Dashboard stats not available for KPI comparison');
+                return;
+            }
 
-                for (const metric of metrics) {
-                    const params = new URLSearchParams({
-                        x_axis: 'platform',
-                        y_axis: metric,
-                        start_date: period.start,
-                        end_date: period.end
-                    });
+            const currentData = dashboardStats.summary_groups.current || {};
+            const previousData = dashboardStats.summary_groups.previous || {};
 
-                    // Add active filters
-                    if (filters.platforms && filters.platforms.length > 0) {
-                        params.set('platforms', filters.platforms.join(','));
-                    }
-                    if (filters.channels && filters.channels.length > 0) {
-                        params.set('channels', filters.channels.join(','));
-                    }
-                    if (filters.regions && filters.regions.length > 0) {
-                        params.set('regions', filters.regions.join(','));
-                    }
-                    if (filters.devices && filters.devices.length > 0) {
-                        params.set('devices', filters.devices.join(','));
-                    }
-                    if (filters.funnelStages && filters.funnelStages.length > 0) {
-                        params.set('funnels', filters.funnelStages.join(','));
-                    }
-
-                    const res: any = await api.get(`/campaigns/chart-data?${params}`);
-                    const items = res.data || [];
-                    results[metric] = items.reduce((sum: number, item: any) => sum + (item.value || 0), 0);
-
-                    // Add small delay between requests to avoid rate limiting
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-
-                return results;
-            };
-
-            // Fetch both periods sequentially to avoid rate limiting
-            const periodAData = await fetchPeriodMetrics(dateRanges.periodA);
-            await new Promise(resolve => setTimeout(resolve, 200)); // Small delay between periods
-            const periodBData = await fetchPeriodMetrics(dateRanges.periodB);
-
-            console.log('Period A (Current):', periodAData);
-            console.log('Period B (Previous):', periodBData);
-
-            // Calculate derived metrics for both periods
-            const calculateDerivedMetrics = (data: any) => {
-                const spend = data.spend || 0;
-                const impressions = data.impressions || 0;
-                const clicks = data.clicks || 0;
-                const conversions = data.conversions || 0;
-                const revenue = data.revenue || 0;
-
-                return {
-                    spend,
-                    impressions,
-                    clicks,
-                    conversions,
-                    revenue,
-                    cpm: impressions > 0 ? (spend / impressions) * 1000 : 0,
-                    ctr: impressions > 0 ? (clicks / impressions) * 100 : 0,
-                    cpc: clicks > 0 ? spend / clicks : 0,
-                    convRate: clicks > 0 ? (conversions / clicks) * 100 : 0,
-                    cpa: conversions > 0 ? spend / conversions : 0,
-                    roas: spend > 0 ? (revenue / spend) : 0,
-                    reach: Math.round(impressions * 0.65)
-                };
-            };
-
-            const currentMetrics = calculateDerivedMetrics(periodAData);
-            const previousMetrics = calculateDerivedMetrics(periodBData);
+            console.log('Using dashboard stats for KPI comparison:', { currentData, previousData });
 
             // Create metric objects with delta
             const createMetricWithDelta = (current: number, previous: number) => {
@@ -1226,21 +1231,24 @@ function AdsOverviewContent() {
             };
 
             setKpiMetrics({
-                spend: createMetricWithDelta(currentMetrics.spend, previousMetrics.spend),
-                cpm: createMetricWithDelta(currentMetrics.cpm, previousMetrics.cpm),
-                impressions: createMetricWithDelta(currentMetrics.impressions, previousMetrics.impressions),
-                reach: createMetricWithDelta(currentMetrics.reach, previousMetrics.reach),
-                clicks: createMetricWithDelta(currentMetrics.clicks, previousMetrics.clicks),
-                ctr: createMetricWithDelta(currentMetrics.ctr, previousMetrics.ctr),
-                cpc: createMetricWithDelta(currentMetrics.cpc, previousMetrics.cpc),
-                conversions: createMetricWithDelta(currentMetrics.conversions, previousMetrics.conversions),
-                convRate: createMetricWithDelta(currentMetrics.convRate, previousMetrics.convRate),
-                cpa: createMetricWithDelta(currentMetrics.cpa, previousMetrics.cpa),
-                roas: createMetricWithDelta(currentMetrics.roas, previousMetrics.roas),
+                spend: createMetricWithDelta(currentData.spend || 0, previousData.spend || 0),
+                cpm: createMetricWithDelta(currentData.cpm || 0, previousData.cpm || 0),
+                impressions: createMetricWithDelta(currentData.impressions || 0, previousData.impressions || 0),
+                reach: createMetricWithDelta(currentData.reach || 0, previousData.reach || 0),
+                clicks: createMetricWithDelta(currentData.clicks || 0, previousData.clicks || 0),
+                ctr: createMetricWithDelta(currentData.ctr || 0, previousData.ctr || 0),
+                cpc: createMetricWithDelta(currentData.cpc || 0, previousData.cpc || 0),
+                conversions: createMetricWithDelta(currentData.conversions || 0, previousData.conversions || 0),
+                convRate: createMetricWithDelta(
+                    currentData.clicks > 0 ? (currentData.conversions / currentData.clicks) * 100 : 0,
+                    previousData.clicks > 0 ? (previousData.conversions / previousData.clicks) * 100 : 0
+                ),
+                cpa: createMetricWithDelta(currentData.cpa || 0, previousData.cpa || 0),
+                roas: createMetricWithDelta(currentData.roas || 0, previousData.roas || 0),
             });
 
         } catch (error) {
-            console.error('Failed to fetch KPI metrics:', error);
+            console.error('Failed to set KPI metrics:', error);
         }
     };
 
@@ -1383,6 +1391,21 @@ function AdsOverviewContent() {
         fetchData();
     };
 
+    const resetFilters = () => {
+        setFilters({
+            platforms: [],
+            funnelStages: [],
+            channels: [],
+            devices: [],
+            placements: [],
+            regions: [],
+            adTypes: [],
+            dateRange: undefined
+        });
+        // Fetch data with cleared filters after state update
+        setTimeout(() => fetchData(), 0);
+    };
+
     const handleDrillDown = (dimension: string, value: string) => {
         setDrillDownData({
             dimension,
@@ -1478,11 +1501,7 @@ function AdsOverviewContent() {
         }
     }, [channelByFunnelData, selectedFunnelStage, channelData]);
 
-    const slopeData = useMemo(() => platformData.slice(0, 5).map(p => ({
-        name: p.name,
-        before: Math.round(p.spend * (0.8 + Math.random() * 0.4)),
-        after: p.spend
-    })), [platformData]);
+
 
     const scorecardData = useMemo(() => platformData.map(p => {
         const metrics = [];
@@ -1529,11 +1548,7 @@ function AdsOverviewContent() {
         return items;
     }, [kpis, trendData, dataAvailability.metrics.roas]);
 
-    const annotations = useMemo(() => [
-        { date: '2024-12-01', label: 'Black Friday Campaign', type: 'campaign' as const },
-        { date: '2024-12-15', label: 'Budget Increase', type: 'milestone' as const },
-        { date: '2024-12-10', label: 'Low CTR Alert', type: 'alert' as const }
-    ], []);
+
 
     if (loading) {
         return (
@@ -1583,51 +1598,67 @@ function AdsOverviewContent() {
                     </div>
                 </motion.div>
 
-                {/* Simple KPI Cards - 9 Metrics */}
+                {/* Simple KPI Cards - All Metrics in Single Line */}
                 <motion.div
-                    className={`grid gap-3 grid-cols-3 md:grid-cols-5 ${dataAvailability.metrics.roas ? 'lg:grid-cols-9' : 'lg:grid-cols-8'}`}
+                    className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-9"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                 >
-                    <Card className="p-3">
-                        <p className="text-xs text-muted-foreground">Spend</p>
-                        <p className="text-xl font-bold text-blue-500">${formatNumber(kpis.spend)}</p>
-                    </Card>
-                    <Card className="p-3">
-                        <p className="text-xs text-muted-foreground">Conversions</p>
-                        <p className="text-xl font-bold text-purple-500">{formatNumber(kpis.conversions)}</p>
-                    </Card>
-                    <Card className="p-3">
-                        <p className="text-xs text-muted-foreground">Impressions</p>
-                        <p className="text-xl font-bold text-cyan-500">{formatNumber(kpis.impressions)}</p>
-                    </Card>
-                    <Card className="p-3">
-                        <p className="text-xs text-muted-foreground">Clicks</p>
-                        <p className="text-xl font-bold text-green-500">{formatNumber(kpis.clicks)}</p>
-                    </Card>
-                    <Card className="p-3">
-                        <p className="text-xs text-muted-foreground">CTR</p>
-                        <p className="text-xl font-bold text-orange-500">{kpis.ctr.toFixed(2)}%</p>
-                    </Card>
-                    <Card className="p-3">
-                        <p className="text-xs text-muted-foreground">CPA</p>
-                        <p className="text-xl font-bold text-pink-500">${kpis.conversions > 0 ? (kpis.spend / kpis.conversions).toFixed(2) : '0.00'}</p>
-                    </Card>
-                    {dataAvailability.metrics.roas && (
-                        <Card className="p-3">
-                            <p className="text-xs text-muted-foreground">ROAS</p>
-                            <p className="text-xl font-bold text-amber-500">{kpis.roas.toFixed(2)}x</p>
-                        </Card>
-                    )}
-                    <Card className="p-3">
-                        <p className="text-xs text-muted-foreground">Conv Rate</p>
-                        <p className="text-xl font-bold text-emerald-500">{kpis.clicks > 0 ? ((kpis.conversions / kpis.clicks) * 100).toFixed(2) : '0.00'}%</p>
-                    </Card>
-                    <Card className="p-3">
-                        <p className="text-xs text-muted-foreground">CPC</p>
-                        <p className="text-xl font-bold text-indigo-500">${kpis.cpc.toFixed(2)}</p>
-                    </Card>
+                    {(() => {
+                        // Use dashboardStats.summary_groups.current for consistency with bottom KPI cards
+                        const stats = dashboardStats?.summary_groups?.current || {};
+                        const spend = stats.spend || 0;
+                        const conversions = stats.conversions || 0;
+                        const impressions = stats.impressions || 0;
+                        const clicks = stats.clicks || 0;
+                        const ctr = stats.ctr || (impressions > 0 ? (clicks / impressions * 100) : 0);
+                        const cpa = conversions > 0 ? (spend / conversions) : 0;
+                        const convRate = clicks > 0 ? ((conversions / clicks) * 100) : 0;
+                        const cpc = stats.cpc || (clicks > 0 ? (spend / clicks) : 0);
+                        const roas = stats.roas || 0;
+
+                        return (
+                            <>
+                                <Card className="p-3">
+                                    <p className="text-xs text-muted-foreground">Spend</p>
+                                    <p className="text-xl font-bold text-blue-500">${formatNumber(spend)}</p>
+                                </Card>
+                                <Card className="p-3">
+                                    <p className="text-xs text-muted-foreground">Conversions</p>
+                                    <p className="text-xl font-bold text-purple-500">{formatNumber(conversions)}</p>
+                                </Card>
+                                <Card className="p-3">
+                                    <p className="text-xs text-muted-foreground">Impressions</p>
+                                    <p className="text-xl font-bold text-cyan-500">{formatNumber(impressions)}</p>
+                                </Card>
+                                <Card className="p-3">
+                                    <p className="text-xs text-muted-foreground">Clicks</p>
+                                    <p className="text-xl font-bold text-green-500">{formatNumber(clicks)}</p>
+                                </Card>
+                                <Card className="p-3">
+                                    <p className="text-xs text-muted-foreground">CTR</p>
+                                    <p className="text-xl font-bold text-orange-500">{ctr.toFixed(2)}%</p>
+                                </Card>
+                                <Card className="p-3">
+                                    <p className="text-xs text-muted-foreground">CPA</p>
+                                    <p className="text-xl font-bold text-pink-500">${cpa.toFixed(2)}</p>
+                                </Card>
+                                <Card className="p-3">
+                                    <p className="text-xs text-muted-foreground">Conv Rate</p>
+                                    <p className="text-xl font-bold text-emerald-500">{convRate.toFixed(2)}%</p>
+                                </Card>
+                                <Card className="p-3">
+                                    <p className="text-xs text-muted-foreground">CPC</p>
+                                    <p className="text-xl font-bold text-indigo-500">${cpc.toFixed(2)}</p>
+                                </Card>
+                                <Card className="p-3">
+                                    <p className="text-xs text-muted-foreground">ROAS</p>
+                                    <p className="text-xl font-bold text-amber-500">{roas.toFixed(2)}x</p>
+                                </Card>
+                            </>
+                        );
+                    })()}
                 </motion.div>
 
 
@@ -1741,8 +1772,16 @@ function AdsOverviewContent() {
                                 </div>
                             )}
 
-                            <div className="flex items-end">
-                                <Button onClick={applyFilters} className="w-full gap-2 bg-primary/20 hover:bg-primary/30 border-primary/30 text-primary">
+                            <div className="flex items-end gap-2">
+                                <Button
+                                    onClick={resetFilters}
+                                    variant="outline"
+                                    className="flex-1 gap-2 border-gray-600 text-gray-300 hover:bg-gray-700"
+                                >
+                                    <RotateCcw className="h-4 w-4" />
+                                    Reset
+                                </Button>
+                                <Button onClick={applyFilters} className="flex-1 gap-2 bg-primary/20 hover:bg-primary/30 border-primary/30 text-primary">
                                     <Filter className="h-4 w-4" />
                                     Apply Filters
                                 </Button>
@@ -1753,7 +1792,7 @@ function AdsOverviewContent() {
 
                 {/* Tabs */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                    <TabsList className="grid w-full grid-cols-6">
+                    <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="overview" className="gap-2">
                             <LayoutGrid className="h-4 w-4" />
                             Overview
@@ -1762,21 +1801,9 @@ function AdsOverviewContent() {
                             <Filter className="h-4 w-4" />
                             Funnel
                         </TabsTrigger>
-                        <TabsTrigger value="charts" className="gap-2">
-                            <BarChart3 className="h-4 w-4" />
-                            Charts
-                        </TabsTrigger>
-                        <TabsTrigger value="insights" className="gap-2">
-                            <Lightbulb className="h-4 w-4" />
-                            Insights
-                        </TabsTrigger>
                         <TabsTrigger value="performance" className="gap-2">
                             <Award className="h-4 w-4" />
                             Performance
-                        </TabsTrigger>
-                        <TabsTrigger value="calendar" className="gap-2">
-                            <Calendar className="h-4 w-4" />
-                            Calendar
                         </TabsTrigger>
                     </TabsList>
 
@@ -1796,19 +1823,22 @@ function AdsOverviewContent() {
                                     <KpiSparkGroups
                                         data={{
                                             current: {
-                                                spend: trendData.reduce((sum, d) => sum + (d.spend || 0), 0),
-                                                impressions: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0),
-                                                clicks: trendData.reduce((sum, d) => sum + (d.clicks || 0), 0),
-                                                conversions: trendData.reduce((sum, d) => sum + (d.conversions || 0), 0),
-                                                cpm: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) * 1000 : 0,
-                                                ctr: trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) / trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) * 100 : 0,
-                                                cpc: trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) : 0,
-                                                cpa: trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) : 0,
-                                                roas: trendData.reduce((sum, d) => sum + (d.spend || 0), 0) > 0 ? (trendData.reduce((sum, d) => sum + (d.revenue || 0), 0)) / trendData.reduce((sum, d) => sum + (d.spend || 0), 0) : 0
+                                                // Prioritize dashboardStats for accurate combined metrics spanning full date range
+                                                spend: dashboardStats.summary_groups?.current?.spend ?? trendData.reduce((sum, d) => sum + (d.spend || 0), 0),
+                                                impressions: dashboardStats.summary_groups?.current?.impressions ?? trendData.reduce((sum, d) => sum + (d.impressions || 0), 0),
+                                                clicks: dashboardStats.summary_groups?.current?.clicks ?? trendData.reduce((sum, d) => sum + (d.clicks || 0), 0),
+                                                conversions: dashboardStats.summary_groups?.current?.conversions ?? trendData.reduce((sum, d) => sum + (d.conversions || 0), 0),
+                                                reach: dashboardStats.summary_groups?.current?.reach ?? trendData.reduce((sum, d) => sum + (d.reach || 0), 0),
+                                                revenue: dashboardStats.summary_groups?.current?.revenue ?? trendData.reduce((sum, d) => sum + (d.revenue || 0), 0),
+                                                cpm: dashboardStats.summary_groups?.current?.cpm ?? (trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) * 1000 : 0),
+                                                ctr: dashboardStats.summary_groups?.current?.ctr ?? (trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) / trendData.reduce((sum, d) => sum + (d.impressions || 0), 0) * 100 : 0),
+                                                cpc: dashboardStats.summary_groups?.current?.cpc ?? (trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.clicks || 0), 0) : 0),
+                                                cpa: dashboardStats.summary_groups?.current?.cpa ?? (trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) > 0 ? trendData.reduce((sum, d) => sum + (d.spend || 0), 0) / trendData.reduce((sum, d) => sum + (d.conversions || 0), 0) : 0),
+                                                roas: dashboardStats.summary_groups?.current?.roas ?? (trendData.reduce((sum, d) => sum + (d.spend || 0), 0) > 0 ? (trendData.reduce((sum, d) => sum + (d.revenue || 0), 0)) / trendData.reduce((sum, d) => sum + (d.spend || 0), 0) : 0)
                                             },
                                             previous: dashboardStats.summary_groups?.previous || {
                                                 spend: 0, impressions: 0, clicks: 0, conversions: 0,
-                                                cpm: 0, ctr: 0, cpc: 0, cpa: 0, roas: 0
+                                                cpm: 0, ctr: 0, cpc: 0, cpa: 0, roas: 0, reach: 0
                                             },
                                             sparkline: trendData.map(d => ({
                                                 date: d.date,
@@ -1834,85 +1864,55 @@ function AdsOverviewContent() {
                                             <CardDescription>Hover for more details</CardDescription>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
-                                            {/* Chart 1: Clicks with CPC overlay - only show if clicks available */}
-                                            {dataAvailability.metrics.clicks && (
-                                                <div className="h-[150px]" data-testid="chart-clicks">
+                                            {/* Chart 1: Spend with CTR overlay */}
+                                            {dataAvailability.metrics.spend && dataAvailability.metrics.ctr && (
+                                                <div className="h-[150px]" data-testid="chart-spend-ctr">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <span className="text-xs font-medium text-muted-foreground w-16">Clicks</span>
+                                                        <span className="text-xs font-medium text-muted-foreground w-16">Spend</span>
                                                         <div className="flex gap-3 text-xs">
-                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-amber-500 rounded-sm"></span> Clicks</span>
-                                                            {dataAvailability.metrics.cpc && <span className="flex items-center gap-1"><span className="w-3 h-3 bg-cyan-400 rounded-sm"></span> CPC</span>}
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-teal-500 rounded-sm"></span> Spend</span>
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-orange-400 rounded-sm"></span> CTR</span>
                                                         </div>
                                                     </div>
                                                     <ResponsiveContainer width="100%" height="100%">
                                                         <ComposedChart data={monthlyTrendData}>
                                                             <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
                                                             <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
-                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
-                                                            {dataAvailability.metrics.cpc && <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v.toFixed(2)}`} domain={['dataMin * 0.9', 'dataMax * 1.1']} />}
-                                                            <Bar yAxisId="left" dataKey="clicks" fill="#f59e0b" radius={[2, 2, 0, 0]} />
-                                                            {dataAvailability.metrics.cpc && <Line yAxisId="right" type="monotone" dataKey="cpc" stroke="#22d3ee" strokeWidth={2} dot={false} />}
+                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} domain={['auto', 'auto']} />
+                                                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(2)}%`} domain={[(dataMin: number) => dataMin * 0.8, (dataMax: number) => dataMax * 1.2]} />
+                                                            <Bar yAxisId="left" dataKey="spend" fill="#14b8a6" radius={[2, 2, 0, 0]} />
+                                                            <Line yAxisId="right" type="monotone" dataKey="ctr" stroke="#fb923c" strokeWidth={2} dot={false} />
                                                         </ComposedChart>
                                                     </ResponsiveContainer>
                                                 </div>
                                             )}
 
-                                            {/* Chart 2: Spend with Conversions overlay - only show if spend available */}
-                                            {dataAvailability.metrics.spend && (
-                                                <div className="h-[150px]" data-testid="chart-spend">
+                                            {/* Chart 2: Spend with Conversions overlay */}
+                                            {dataAvailability.metrics.spend && dataAvailability.metrics.conversions && (
+                                                <div className="h-[150px]" data-testid="chart-spend-conversions">
                                                     <div className="flex items-center gap-2 mb-1">
                                                         <span className="text-xs font-medium text-muted-foreground w-16">Spend</span>
                                                         <div className="flex gap-3 text-xs">
                                                             <span className="flex items-center gap-1"><span className="w-3 h-3 bg-blue-500 rounded-sm"></span> Spend</span>
-                                                            {dataAvailability.metrics.conversions && <span className="flex items-center gap-1"><span className="w-3 h-3 bg-purple-400 rounded-sm"></span> Conversions</span>}
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-purple-400 rounded-sm"></span> Conversions</span>
                                                         </div>
                                                     </div>
                                                     <ResponsiveContainer width="100%" height="100%">
                                                         <ComposedChart data={monthlyTrendData}>
                                                             <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
                                                             <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
-                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />
-                                                            {dataAvailability.metrics.conversions && <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} domain={['dataMin * 0.95', 'dataMax * 1.05']} />}
+                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} domain={['auto', 'auto']} />
+                                                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} domain={[(dataMin: number) => Math.floor(dataMin * 0.8), (dataMax: number) => Math.ceil(dataMax * 1.2)]} />
                                                             <Bar yAxisId="left" dataKey="spend" fill="#3b82f6" radius={[2, 2, 0, 0]} />
-                                                            {dataAvailability.metrics.conversions && <Line yAxisId="right" type="monotone" dataKey="conversions" stroke="#a78bfa" strokeWidth={2} dot={false} />}
+                                                            <Line yAxisId="right" type="monotone" dataKey="conversions" stroke="#a78bfa" strokeWidth={2} dot={false} />
                                                         </ComposedChart>
                                                     </ResponsiveContainer>
                                                 </div>
                                             )}
 
-                                            {/* Chart 3: Conversions with Cost/Conv overlay - only show if conversions available */}
-                                            {dataAvailability.metrics.conversions && (
-                                                <div className="h-[150px]" data-testid="chart-conversions">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <span className="text-xs font-medium text-muted-foreground w-16">Conv</span>
-                                                        <div className="flex gap-3 text-xs">
-                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-pink-500 rounded-sm"></span> Conversions</span>
-                                                            {dataAvailability.metrics.cpa && <span className="flex items-center gap-1"><span className="w-3 h-3 bg-emerald-400 rounded-sm"></span> Cost/Conv</span>}
-                                                        </div>
-                                                    </div>
-                                                    <ResponsiveContainer width="100%" height="100%">
-                                                        <ComposedChart data={monthlyTrendData}>
-                                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                                                            <XAxis
-                                                                dataKey="date"
-                                                                tick={{ fill: '#9ca3af', fontSize: 10 }}
-                                                                tickFormatter={(value) => {
-                                                                    const date = new Date(value);
-                                                                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                                                                }}
-                                                            />
-                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
-                                                            {dataAvailability.metrics.cpa && <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v.toFixed(0)}`} domain={['dataMin * 0.9', 'dataMax * 1.1']} />}
-                                                            <Bar yAxisId="left" dataKey="conversions" fill="#ec4899" radius={[2, 2, 0, 0]} />
-                                                            {dataAvailability.metrics.cpa && <Line yAxisId="right" type="monotone" dataKey="costPerConv" stroke="#34d399" strokeWidth={2} dot={false} />}
-                                                        </ComposedChart>
-                                                    </ResponsiveContainer>
-                                                </div>
-                                            )}
-
-                                            {/* Chart 4: Spend with ROAS overlay - only show if ROAS can be calculated */}
-                                            {dataAvailability.metrics.roas && (
-                                                <div className="h-[150px]" data-testid="chart-roas">
+                                            {/* Chart 3: Spend with ROAS overlay - only show if ROAS can be calculated */}
+                                            {dataAvailability.metrics.spend && dataAvailability.metrics.roas && (
+                                                <div className="h-[150px]" data-testid="chart-spend-roas">
                                                     <div className="flex items-center gap-2 mb-1">
                                                         <span className="text-xs font-medium text-muted-foreground w-16">Spend</span>
                                                         <div className="flex gap-3 text-xs">
@@ -1924,8 +1924,8 @@ function AdsOverviewContent() {
                                                         <ComposedChart data={monthlyTrendData}>
                                                             <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
                                                             <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
-                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />
-                                                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(1)}x`} domain={['dataMin * 0.9', 'dataMax * 1.1']} />
+                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} domain={['auto', 'auto']} />
+                                                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(1)}x`} domain={[(dataMin: number) => Math.max(0, dataMin * 0.7), (dataMax: number) => dataMax * 1.3]} />
                                                             <Bar yAxisId="left" dataKey="spend" fill="#6366f1" radius={[2, 2, 0, 0]} />
                                                             <Line yAxisId="right" type="monotone" dataKey="roas" stroke="#facc15" strokeWidth={2} dot={false} />
                                                         </ComposedChart>
@@ -1933,31 +1933,139 @@ function AdsOverviewContent() {
                                                 </div>
                                             )}
 
-                                            {/* Chart 5: Spend with CTR overlay - only show if CTR can be calculated */}
-                                            {dataAvailability.metrics.ctr && (
-                                                <div className="h-[150px]" data-testid="chart-ctr">
+                                            {/* Chart 4: Conversions with CPA overlay */}
+                                            {dataAvailability.metrics.conversions && dataAvailability.metrics.cpa && (
+                                                <div className="h-[150px]" data-testid="chart-conversions-cpa">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <span className="text-xs font-medium text-muted-foreground w-16">Spend</span>
+                                                        <span className="text-xs font-medium text-muted-foreground w-16">Conv</span>
                                                         <div className="flex gap-3 text-xs">
-                                                            {dataAvailability.metrics.spend && <span className="flex items-center gap-1"><span className="w-3 h-3 bg-teal-500 rounded-sm"></span> Spend</span>}
-                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-orange-400 rounded-sm"></span> CTR</span>
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-pink-500 rounded-sm"></span> Conversions</span>
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-emerald-400 rounded-sm"></span> CPA</span>
                                                         </div>
                                                     </div>
                                                     <ResponsiveContainer width="100%" height="100%">
                                                         <ComposedChart data={monthlyTrendData}>
                                                             <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                                                            <XAxis
-                                                                dataKey="date"
-                                                                tick={{ fill: '#9ca3af', fontSize: 10 }}
-                                                                tickFormatter={(value) => {
-                                                                    const date = new Date(value);
-                                                                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                                                                }}
-                                                            />
-                                                            {dataAvailability.metrics.spend && <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />}
-                                                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(2)}%`} domain={['dataMin - 0.05', 'dataMax + 0.05']} />
-                                                            {dataAvailability.metrics.spend && <Bar yAxisId="left" dataKey="spend" fill="#14b8a6" radius={[2, 2, 0, 0]} />}
-                                                            <Line yAxisId="right" type="monotone" dataKey="ctr" stroke="#fb923c" strokeWidth={2} dot={false} />
+                                                            <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
+                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} domain={['auto', 'auto']} />
+                                                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v.toFixed(0)}`} domain={[(dataMin: number) => Math.floor(dataMin * 0.8), (dataMax: number) => Math.ceil(dataMax * 1.2)]} />
+                                                            <Bar yAxisId="left" dataKey="conversions" fill="#ec4899" radius={[2, 2, 0, 0]} />
+                                                            <Line yAxisId="right" type="monotone" dataKey="costPerConv" stroke="#34d399" strokeWidth={2} dot={false} />
+                                                        </ComposedChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
+
+                                            {/* Chart 5: Clicks with CTR overlay */}
+                                            {dataAvailability.metrics.clicks && dataAvailability.metrics.ctr && (
+                                                <div className="h-[150px]" data-testid="chart-clicks-ctr">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-medium text-muted-foreground w-16">Clicks</span>
+                                                        <div className="flex gap-3 text-xs">
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-amber-500 rounded-sm"></span> Clicks</span>
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-cyan-400 rounded-sm"></span> CTR</span>
+                                                        </div>
+                                                    </div>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <ComposedChart data={monthlyTrendData}>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                                                            <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
+                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} domain={['auto', 'auto']} />
+                                                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(2)}%`} domain={[(dataMin: number) => dataMin * 0.8, (dataMax: number) => dataMax * 1.2]} />
+                                                            <Bar yAxisId="left" dataKey="clicks" fill="#f59e0b" radius={[2, 2, 0, 0]} />
+                                                            <Line yAxisId="right" type="monotone" dataKey="ctr" stroke="#22d3ee" strokeWidth={2} dot={false} />
+                                                        </ComposedChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
+
+                                            {/* Chart 6: Clicks with CPC overlay */}
+                                            {dataAvailability.metrics.clicks && dataAvailability.metrics.cpc && (
+                                                <div className="h-[150px]" data-testid="chart-clicks-cpc">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-medium text-muted-foreground w-16">Clicks</span>
+                                                        <div className="flex gap-3 text-xs">
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-amber-500 rounded-sm"></span> Clicks</span>
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-cyan-400 rounded-sm"></span> CPC</span>
+                                                        </div>
+                                                    </div>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <ComposedChart data={monthlyTrendData}>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                                                            <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
+                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} domain={['auto', 'auto']} />
+                                                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => `$${v.toFixed(2)}`} domain={[(dataMin: number) => dataMin * 0.8, (dataMax: number) => dataMax * 1.2]} />
+                                                            <Bar yAxisId="left" dataKey="clicks" fill="#f59e0b" radius={[2, 2, 0, 0]} />
+                                                            <Line yAxisId="right" type="monotone" dataKey="cpc" stroke="#22d3ee" strokeWidth={2} dot={false} />
+                                                        </ComposedChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
+
+                                            {/* Chart 7: Clicks with Cumulative Conversions overlay */}
+                                            {dataAvailability.metrics.clicks && dataAvailability.metrics.conversions && (
+                                                <div className="h-[150px]" data-testid="chart-clicks-conversions">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-medium text-muted-foreground w-16">Clicks</span>
+                                                        <div className="flex gap-3 text-xs">
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-amber-500 rounded-sm"></span> Clicks</span>
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-purple-400 rounded-sm"></span> Conversions</span>
+                                                        </div>
+                                                    </div>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <ComposedChart data={monthlyTrendData}>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                                                            <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
+                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} domain={['auto', 'auto']} />
+                                                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} domain={[(dataMin: number) => Math.floor(dataMin * 0.8), (dataMax: number) => Math.ceil(dataMax * 1.2)]} />
+                                                            <Bar yAxisId="left" dataKey="clicks" fill="#f59e0b" radius={[2, 2, 0, 0]} />
+                                                            <Line yAxisId="right" type="monotone" dataKey="conversions" stroke="#a78bfa" strokeWidth={2} dot={false} />
+                                                        </ComposedChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
+
+                                            {/* Chart 8: Impressions with Cumulative Clicks overlay */}
+                                            {dataAvailability.metrics.impressions && dataAvailability.metrics.clicks && (
+                                                <div className="h-[150px]" data-testid="chart-impressions-clicks">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-medium text-muted-foreground w-16">Impr</span>
+                                                        <div className="flex gap-3 text-xs">
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-slate-500 rounded-sm"></span> Impressions</span>
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-amber-400 rounded-sm"></span> Clicks</span>
+                                                        </div>
+                                                    </div>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <ComposedChart data={monthlyTrendData}>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                                                            <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
+                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} domain={['auto', 'auto']} />
+                                                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} domain={[(dataMin: number) => Math.floor(dataMin * 0.8), (dataMax: number) => Math.ceil(dataMax * 1.2)]} />
+                                                            <Bar yAxisId="left" dataKey="impressions" fill="#64748b" radius={[2, 2, 0, 0]} />
+                                                            <Line yAxisId="right" type="monotone" dataKey="clicks" stroke="#fbbf24" strokeWidth={2} dot={false} />
+                                                        </ComposedChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
+
+                                            {/* Chart 9: Impressions with Cumulative Conversions overlay */}
+                                            {dataAvailability.metrics.impressions && dataAvailability.metrics.conversions && (
+                                                <div className="h-[150px]" data-testid="chart-impressions-conversions">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-medium text-muted-foreground w-16">Impr</span>
+                                                        <div className="flex gap-3 text-xs">
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-slate-500 rounded-sm"></span> Impressions</span>
+                                                            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-purple-400 rounded-sm"></span> Conversions</span>
+                                                        </div>
+                                                    </div>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <ComposedChart data={monthlyTrendData}>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                                                            <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
+                                                            <YAxis yAxisId="left" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} domain={['auto', 'auto']} />
+                                                            <YAxis yAxisId="right" orientation="right" tick={{ fill: '#9ca3af', fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} domain={[(dataMin: number) => Math.floor(dataMin * 0.8), (dataMax: number) => Math.ceil(dataMax * 1.2)]} />
+                                                            <Bar yAxisId="left" dataKey="impressions" fill="#64748b" radius={[2, 2, 0, 0]} />
+                                                            <Line yAxisId="right" type="monotone" dataKey="conversions" stroke="#a78bfa" strokeWidth={2} dot={false} />
                                                         </ComposedChart>
                                                     </ResponsiveContainer>
                                                 </div>
@@ -1969,11 +2077,19 @@ function AdsOverviewContent() {
                                 {/* Channel Performance Table */}
                                 <div className="mb-6">
                                     <PerformanceTable
-                                        key={`channel-${JSON.stringify(computedChannelPerformance?.slice(0, 1))}`}
-                                        title="Channel Performance"
-                                        description="Performance breakdown across marketing channels"
+                                        key={`channel-${selectedMonth}-${selectedPlatform}-${JSON.stringify(computedChannelPerformance?.slice(0, 1))}`}
+                                        title={selectedMonth || selectedPlatform ? `Channel Performance (Filtered)` : "Channel Performance"}
+                                        description={selectedMonth || selectedPlatform
+                                            ? "Filtered by selected month/platform - Click selection again to show all"
+                                            : "Click a channel to filter Monthly & Platform Performance"}
                                         data={computedChannelPerformance}
                                         type="channel"
+                                        onChannelClick={(channel) => {
+                                            setSelectedChannel(channel === selectedChannel ? null : channel);
+                                            // Optional: clear other selections if you want exclusive focus
+                                            // if (channel !== selectedChannel) { setSelectedMonth(null); setSelectedPlatform(null); }
+                                        }}
+                                        selectedChannel={selectedChannel}
                                         schema={schema || undefined}
                                     />
                                 </div>
@@ -1981,39 +2097,39 @@ function AdsOverviewContent() {
                                 {/* Monthly & Platform Performance Tables */}
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     <PerformanceTable
-                                        key={`monthly-${selectedPlatform}-${JSON.stringify(dashboardStats.monthly_performance?.slice(0, 1))}`}
-                                        title={selectedPlatform ? `Monthly Performance (${selectedPlatform})` : "Monthly Performance"}
-                                        description={selectedPlatform
-                                            ? "Filtered by selected platform - Click platform again to show all"
-                                            : "Click a month to filter Platform Performance"}
+                                        key={`monthly-${selectedPlatform}-${selectedChannel}-${JSON.stringify(dashboardStats.monthly_performance?.slice(0, 1))}`}
+                                        title={selectedPlatform || selectedChannel ? `Monthly Performance (Filtered)` : "Monthly Performance"}
+                                        description={selectedPlatform || selectedChannel
+                                            ? "Filtered by selected criteria - Click again to clear"
+                                            : "Click a month to filter Platform & Channel Performance"}
                                         data={computedMonthlyPerformance}
                                         type="month"
                                         onMonthClick={(month) => {
                                             setSelectedMonth(month === selectedMonth ? null : month);
-                                            // Clear platform selection when month is clicked
-                                            if (month !== selectedMonth) setSelectedPlatform(null);
+                                            // Clear platform/channel selection when month is clicked for focused drill-down
+                                            if (month !== selectedMonth) {
+                                                setSelectedPlatform(null);
+                                                setSelectedChannel(null);
+                                            }
                                         }}
                                         selectedMonth={selectedMonth}
                                         schema={schema || undefined}
                                     />
                                     <PerformanceTable
-                                        key={`platform-${selectedMonth}-${JSON.stringify(aggregatedPlatformData?.slice(0, 1))}`}
-                                        title={selectedMonth ? `Platform Performance (${(() => {
-                                            const [year, month] = selectedMonth.split('-');
-                                            const date = new Date(parseInt(year), parseInt(month) - 1);
-                                            const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-                                            const yearShort = year.slice(-2);
-                                            return `${monthName} ${yearShort}`;
-                                        })()})` : "Platform Performance"}
-                                        description={selectedMonth
-                                            ? "Filtered by selected month - Click month again to show all"
-                                            : "Click a platform to filter Monthly Performance"}
+                                        key={`platform-${selectedMonth}-${selectedChannel}-${JSON.stringify(dashboardStats.platform_performance?.slice(0, 1))}`}
+                                        title={selectedMonth || selectedChannel ? `Platform Performance (Filtered)` : "Platform Performance"}
+                                        description={selectedMonth || selectedChannel
+                                            ? "Filtered by selected criteria - Click again to clear"
+                                            : "Click a platform to filter Monthly & Channel Performance"}
                                         data={computedPlatformPerformance}
                                         type="platform"
                                         onPlatformClick={(platform) => {
                                             setSelectedPlatform(platform === selectedPlatform ? null : platform);
-                                            // Clear month selection when platform is clicked
-                                            if (platform !== selectedPlatform) setSelectedMonth(null);
+                                            // Clear month/channel selection when platform is clicked
+                                            if (platform !== selectedPlatform) {
+                                                setSelectedMonth(null);
+                                                setSelectedChannel(null);
+                                            }
                                         }}
                                         selectedPlatform={selectedPlatform}
                                         schema={schema || undefined}
@@ -2143,141 +2259,9 @@ function AdsOverviewContent() {
                         </AnimatePresence>
                     </TabsContent>
 
-                    {/* Charts Tab */}
-                    <TabsContent value="charts" className="space-y-6">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key="charts"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                className="space-y-6"
-                            >
-                                <div className="grid gap-6 md:grid-cols-2">
-                                    {/* Lollipop Chart */}
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>Platform Spend</CardTitle>
-                                            <CardDescription>Lollipop visualization</CardDescription>
-                                        </CardHeader>
-                                        <CardContent className="h-[300px] overflow-hidden">
-                                            <LollipopChart
-                                                data={platformData}
-                                                dataKey="spend"
-                                            />
-                                        </CardContent>
-                                    </Card>
 
-                                    {/* Slope Chart */}
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>Period Comparison</CardTitle>
-                                            <CardDescription>This vs Last period</CardDescription>
-                                        </CardHeader>
-                                        <CardContent className="h-[300px] overflow-hidden">
-                                            <SlopeChart
-                                                data={slopeData}
-                                                valuePrefix="$"
-                                            />
-                                        </CardContent>
-                                    </Card>
-                                </div>
 
-                                <div className="grid gap-6 md:grid-cols-2">
-                                    {/* Bubble Chart */}
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>Spend vs Conversions</CardTitle>
-                                            <CardDescription>Bubble size = ROAS</CardDescription>
-                                        </CardHeader>
-                                        <CardContent className="h-[300px] overflow-hidden">
-                                            <BubbleChart
-                                                data={platformData}
-                                                onBubbleClick={(item) => handleDrillDown('Platform', item.name)}
-                                            />
-                                        </CardContent>
-                                    </Card>
 
-                                    {/* Waterfall */}
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>Channel Contribution</CardTitle>
-                                            <CardDescription>Cumulative conversions</CardDescription>
-                                        </CardHeader>
-                                        <CardContent className="h-[300px] overflow-hidden">
-                                            <WaterfallChart
-                                                data={channelData.length > 0 ? channelData : platformData}
-                                                dataKey="conversions"
-                                            />
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            </motion.div>
-                        </AnimatePresence>
-                    </TabsContent>
-
-                    {/* Insights Tab */}
-                    <TabsContent value="insights" className="space-y-6">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key="insights"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                className="space-y-6"
-                            >
-                                <div className="grid gap-6 md:grid-cols-2">
-                                    {/* AI Insights */}
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center gap-2">
-                                                <Lightbulb className="h-5 w-5" />
-                                                AI Insights
-                                            </CardTitle>
-                                            <CardDescription>Auto-generated recommendations</CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <AIInsightCard
-                                                data={{ platformData, ctr: kpis.ctr }}
-                                            />
-                                        </CardContent>
-                                    </Card>
-
-                                    {/* Timeline */}
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>Campaign Timeline</CardTitle>
-                                            <CardDescription>Key events and milestones</CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <TimelineAnnotation annotations={annotations} />
-                                        </CardContent>
-                                    </Card>
-                                </div>
-
-                                {/* Radar Chart */}
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Platform KPI Comparison</CardTitle>
-                                        <CardDescription>Multi-dimensional performance analysis</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="h-[300px] overflow-hidden">
-                                        <RadarSpiderChart
-                                            data={platformData}
-                                            metrics={['ctr', 'cpc', 'cpa', 'roas', 'cpm'].filter(m => {
-                                                if (m === 'roas') return dataAvailability.metrics.roas;
-                                                if (m === 'ctr') return dataAvailability.metrics.ctr;
-                                                if (m === 'cpc') return dataAvailability.metrics.cpc;
-                                                if (m === 'cpa') return dataAvailability.metrics.cpa;
-                                                if (m === 'cpm') return dataAvailability.metrics.cpm;
-                                                return true;
-                                            })}
-                                        />
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        </AnimatePresence>
-                    </TabsContent>
 
                     {/* Performance Tab - Comparison View */}
                     <TabsContent value="performance" className="space-y-6">
@@ -2807,7 +2791,22 @@ function AdsOverviewContent() {
                                                     <tbody>
                                                         {channelCompData.map((row, idx) => (
                                                             <tr key={idx} className="border-b hover:bg-muted/30 transition-colors">
-                                                                <td className="px-4 py-3 font-medium sticky left-0 bg-background">{row.channel}</td>
+                                                                <td
+                                                                    className="px-4 py-3 font-medium sticky left-0 bg-background cursor-pointer hover:text-blue-500 transition-colors"
+                                                                    onClick={() => {
+                                                                        setSelectedChannel(row.channel);
+                                                                        setActiveTab('overview');
+                                                                        // Small timeout to allow tab switch before scroll
+                                                                        setTimeout(() => {
+                                                                            window.scrollTo({ top: 1000, behavior: 'smooth' });
+                                                                        }, 100);
+                                                                    }}
+                                                                >
+                                                                    <div className="flex items-center gap-1">
+                                                                        {row.channel}
+                                                                        <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                                    </div>
+                                                                </td>
                                                                 {/* Spend */}
                                                                 <td className="px-3 py-2 text-right">${(row.spend2025 / 1000).toFixed(1)}k</td>
                                                                 <td className="px-3 py-2 text-right text-muted-foreground">${(row.spend2024 / 1000).toFixed(1)}k</td>
@@ -2861,60 +2860,6 @@ function AdsOverviewContent() {
                         </AnimatePresence>
                     </TabsContent>
 
-                    {/* Calendar Tab */}
-                    <TabsContent value="calendar" className="space-y-6">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key="calendar"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                className="space-y-6"
-                            >
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Calendar className="h-5 w-5" />
-                                            Daily Spend Heatmap
-                                        </CardTitle>
-                                        <CardDescription>GitHub-style activity grid</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="h-[300px] overflow-hidden">
-                                        <HeatmapCalendar
-                                            data={trendData}
-                                            valueKey="spend"
-                                        />
-                                    </CardContent>
-                                </Card>
-
-                                <div className="grid gap-6 md:grid-cols-2">
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>Daily Clicks</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="h-[300px] overflow-hidden">
-                                            <HeatmapCalendar
-                                                data={trendData}
-                                                valueKey="clicks"
-                                            />
-                                        </CardContent>
-                                    </Card>
-
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>Daily Conversions</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="h-[300px] overflow-hidden">
-                                            <HeatmapCalendar
-                                                data={trendData}
-                                                valueKey="conversions"
-                                            />
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            </motion.div>
-                        </AnimatePresence>
-                    </TabsContent>
                 </Tabs>
 
                 {/* Drill-down Modal */}

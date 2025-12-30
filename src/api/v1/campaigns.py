@@ -53,7 +53,7 @@ METRIC_COLUMN_ALIASES = {
     'cpm': ['CPM', 'cpm', 'Cost Per Mille', 'cost_per_mille'],
     'cpa': ['CPA', 'cpa', 'Cost Per Acquisition', 'cost_per_acquisition', 'Cost Per Conversion'],
     'roas': ['ROAS', 'roas', 'Return On Ad Spend', 'return_on_ad_spend'],
-    'revenue': ['Revenue', 'revenue', 'Sales', 'Sales Value', 'sales_value', 'Conversion Value', 'conversion_value', 'Total Revenue', 'total_revenue', 'Income', 'income'],
+    'revenue': ['Revenue', 'revenue', 'Sales', 'Sales Value', 'sales_value', 'Conversion Value', 'conversion_value', 'Total Revenue', 'total_revenue', 'Income', 'income', 'Revenue_2024', 'Revenue_2025'],
 }
 
 
@@ -377,12 +377,18 @@ async def get_global_visualizations(
                 revenue = float(group[revenue_col].sum()) if revenue_col else 0
                 roas = (revenue / spend) if spend > 0 and revenue_col else 0
                 
+                # Dynamic reach calculation
+                reach_col = find_column(group, 'reach')
+                reach = int(group[reach_col].sum()) if reach_col else 0
+                
                 result.append({
                     "name": str(name) if not isinstance(name, str) else name,
                     "spend": round(spend, 2),
                     "impressions": impressions,
                     "clicks": clicks,
                     "conversions": conversions,
+                    "revenue": round(revenue, 2),
+                    "reach": reach,
                     "ctr": round(ctr, 2),
                     "cpc": round(cpc, 2),
                     "cpa": round(cpa, 2),
@@ -403,12 +409,20 @@ async def get_global_visualizations(
                 clicks = int(group[clicks_col].sum()) if clicks_col else 0
                 conversions = int(group[conv_col].sum()) if conv_col else 0
                 
+                # Add revenue and reach
+                revenue_col = find_column(group, 'revenue')
+                revenue = float(group[revenue_col].sum()) if revenue_col else 0
+                reach_col = find_column(group, 'reach')
+                reach = int(group[reach_col].sum()) if reach_col else 0
+                
                 trend_data.append({
                     "date": date.strftime("%Y-%m-%d") if hasattr(date, 'strftime') else str(date),
                     "spend": round(spend, 2),
                     "impressions": impressions,
                     "clicks": clicks,
                     "conversions": conversions,
+                    "revenue": round(revenue, 2),
+                    "reach": reach,
                     "ctr": round((clicks / impressions * 100) if impressions > 0 else 0, 2),
                     "cpc": round((spend / clicks) if clicks > 0 else 0, 2),
                     "cpa": round((spend / conversions) if conversions > 0 else 0, 2)
@@ -471,16 +485,12 @@ async def get_dashboard_stats(
             return {"summary_groups": {}, "monthly_performance": [], "platform_performance": []}
             
         # 1. Handle Dates
-        if not end_date:
-            end_date = datetime.now().strftime("%Y-%m-%d")
-        if not start_date:
-            # Default to last 30 days
-            start_date = (datetime.strptime(end_date, "%Y-%m-%d") - timedelta(days=30)).strftime("%Y-%m-%d")
-            
-        d1 = datetime.strptime(start_date, "%Y-%m-%d")
-        d2 = datetime.strptime(end_date, "%Y-%m-%d")
-        delta = d2 - d1
-        prev_start_date = (d1 - delta).strftime("%Y-%m-%d")
+        # 1. Date initialization (will be handled after filtering)
+        d1 = None
+        d2 = None
+        prev_d1 = None
+        prev_d2 = None
+
         
         # 2. Build Filters - map to actual column names in CSV using aliases
         filter_params = {}
@@ -537,7 +547,7 @@ async def get_dashboard_stats(
         if not date_col:
             return {"summary_groups": {}, "monthly_performance": [], "platform_performance": []}
             
-        total_df[date_col] = pd.to_datetime(total_df[date_col], dayfirst=False, errors='coerce')
+        total_df[date_col] = pd.to_datetime(total_df[date_col], dayfirst=True, errors='coerce')
         total_df = total_df.dropna(subset=[date_col])
 
         # 2. Determine Date Range for Current Period
@@ -584,6 +594,13 @@ async def get_dashboard_stats(
             r = int(df[reach_col].sum()) if reach_col else 0
             c = int(df[clicks_col].sum()) if clicks_col else 0
             cv = int(df[conv_col].sum()) if conv_col else 0
+            
+            # Find revenue column for ROAS
+            revenue_col = find_column(df, 'revenue')
+            logger.debug(f"Revenue column search: found='{revenue_col}'")
+            revenue_sum = float(df[revenue_col].sum()) if revenue_col else 0
+            logger.debug(f"Revenue sum: ${revenue_sum:,.2f}")
+            
             return {
                 "spend": round(s, 2),
                 "impressions": i,
@@ -594,7 +611,7 @@ async def get_dashboard_stats(
                 "cpc": round((s / c) if c > 0 else 0, 2),
                 "cpm": round((s / i * 1000) if i > 0 else 0, 2),
                 "cpa": round((s / cv) if cv > 0 else 0, 2),
-                "roas": round((float(df[find_column(df, 'revenue')].sum()) / s) if s > 0 and find_column(df, 'revenue') else 0, 2)
+                "roas": round((revenue_sum / s) if s > 0 else 0, 2)
             }
             
         curr_summary = get_summary(curr_df)
@@ -612,30 +629,50 @@ async def get_dashboard_stats(
             })
         sparkline_data.sort(key=lambda x: x['date'])
         
-        # 4. Monthly Performance
+        # 4. Monthly Performance (granular by channel if available)
         monthly_perf = []
         total_df['Month'] = total_df[date_col].dt.strftime('%Y-%m')
-        for month, group in total_df.groupby('Month'):
-            monthly_perf.append({
-                "month": month,
-                **get_summary(group)
-            })
+        channel_col = find_column(total_df, 'channel')
+        
+        if channel_col:
+            # Group by Month and Channel
+            for (month, channel), group in total_df.groupby(['Month', channel_col]):
+                monthly_perf.append({
+                    "month": month,
+                    "channel": channel,
+                    **get_summary(group)
+                })
+        else:
+            for month, group in total_df.groupby('Month'):
+                monthly_perf.append({
+                    "month": month,
+                    **get_summary(group)
+                })
         monthly_perf.sort(key=lambda x: x['month'], reverse=True)
         
-        # 5. Platform Performance (by month and platform for filtering)
+        # 5. Platform Performance (granular by month, platform, and channel for linking)
         platform_perf = []
         if platform_col:
             # Ensure Month column exists
             if 'Month' not in total_df.columns:
                 total_df['Month'] = total_df[date_col].dt.strftime('%Y-%m')
             
-            # Group by both month and platform
-            for (month, platform), group in total_df.groupby(['Month', platform_col]):
-                platform_perf.append({
-                    "month": month,
-                    "platform": platform,
-                    **get_summary(group)
-                })
+            # Group by month, platform, AND channel for maximum linking flexibility
+            if channel_col:
+                for (month, platform, channel), group in total_df.groupby(['Month', platform_col, channel_col]):
+                    platform_perf.append({
+                        "month": month,
+                        "platform": platform,
+                        "channel": channel,
+                        **get_summary(group)
+                    })
+            else:
+                for (month, platform), group in total_df.groupby(['Month', platform_col]):
+                    platform_perf.append({
+                        "month": month,
+                        "platform": platform,
+                        **get_summary(group)
+                    })
         platform_perf.sort(key=lambda x: (x.get('month', ''), -x['spend']), reverse=True)
         
         # 4. Funnel stage aggregation
@@ -2250,18 +2287,37 @@ async def analyze_global_campaigns(
                 "recommendations": []
             }
             
+        # 2. Map standard metric columns before analysis
+        # Use existing find_column utility to handle variations like 'Total Spent' or 'Site Visit'
+        standard_cols = {
+            'spend': find_column(df, 'spend'),
+            'impressions': find_column(df, 'impressions'),
+            'clicks': find_column(df, 'clicks'),
+            'conversions': find_column(df, 'conversions'),
+            'date': find_column(df, 'date')
+        }
+        
+        # Rename to standard names expected by AI agents
+        rename_map = {}
+        for key, actual in standard_cols.items():
+            if actual:
+                rename_map[actual] = key.capitalize()
+        
+        if rename_map:
+            logger.info(f"Renaming columns for analysis: {rename_map}")
+            df = df.rename(columns=rename_map)
+            
         # Ensure correct types for analysis
         numeric_cols = ['Spend', 'Impressions', 'Clicks', 'Conversions', 'CTR', 'CPC', 'ROAS']
         for col in numeric_cols:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
-                
-        # Rename columns to match what MediaAnalyticsExpert expects if they are not already named correctly
-        # The expert typically expects 'Spend', 'Impressions', etc. which DuckDBManager already provides
-        
-        # Ensure Date is datetime
+                        
+        # Ensure Date is datetime with dayfirst=True for DD-MM-YYYY support
         if 'Date' in df.columns:
-            df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+            df['Date'] = pd.to_datetime(df['Date'], dayfirst=True, errors='coerce')
+        elif 'date' in df.columns:
+            df['Date'] = pd.to_datetime(df['date'], dayfirst=True, errors='coerce')
         
         # Map some internal names to what reasoning agent might expect if it uses lowercase
         column_map = {

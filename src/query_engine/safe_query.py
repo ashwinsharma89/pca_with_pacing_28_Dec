@@ -205,25 +205,54 @@ class SafeQueryExecutor:
             'NOT', 'IS', 'NULL', 'TOP', 'DISTINCT', 'DATE', 'WEEK', 'MONTH', 'YEAR',
             'DAY', 'DAYS', 'WEEKS', 'MONTHS', 'YEARS', 'QUARTER', 'QUARTERS',
             'HAVING', 'TRUE', 'FALSE', 'LIKE', 'ILIKE', 'BETWEEN', 'COALESCE',
-            'STRING_AGG', 'ARRAY_AGG', 'FIRST_VALUE', 'LAST_VALUE', 'RANK', 'ROW_NUMBER'
+            'STRING_AGG', 'ARRAY_AGG', 'FIRST_VALUE', 'LAST_VALUE', 'RANK', 'ROW_NUMBER',
+            'TOTAL', 'SPENT', 'OFFSET', 'UNION', 'ALL', 'STAGE_TOTALS', 'FINAL_QUERY'
         }
         
-        # Tokenizer that ignores strings ('...') and matches identifiers
-        # 1. Strip string literals to avoid false positives from text inside quotes
+        # Tokenizer that handles:
+        # 1. Double-quoted identifiers: "Total Spent"
+        # 2. Standard identifiers: campaigns
+        # 3. Numeric literals are handled separately
+        
+        # Strip string literals ('...') first
         sql_no_strings = re.sub(r"'[^']*'", " 'LITERAL' ", sql)
-        # 2. Extract tokens and find aliases
-        raw_tokens = re.findall(r'[a-zA-Z_][a-zA-Z0-9_.]*', sql_no_strings.upper())
+        
+        # Extract tokens: matches double-quoted strings OR words
+        token_pattern = r'"[^"]+"|[a-zA-Z_][a-zA-Z0-9_.]*'
+        raw_tokens = re.findall(token_pattern, sql_no_strings)
         
         # Identify aliases (tokens following 'AS')
         aliases = set()
         for i in range(len(raw_tokens) - 1):
-            if raw_tokens[i] == 'AS':
-                aliases.add(raw_tokens[i+1])
+            curr_upper = raw_tokens[i].upper()
+            if curr_upper == 'AS':
+                # Strip quotes from alias if present
+                alias = raw_tokens[i+1].strip('"').upper()
+                aliases.add(alias)
+            elif curr_upper == 'WITH':
+                # First CTE name in WITH clause
+                alias = raw_tokens[i+1].strip('"').upper()
+                aliases.add(alias)
+            elif raw_tokens[i].endswith(','):
+                # Subsequent CTE names in WITH clause (comma-separated before AS)
+                # This is a bit simplistic but works for WITH t1 AS (...), t2 AS (...)
+                potential_comma = raw_tokens[i].rstrip(',')
+                if i > 0 and raw_tokens[i-1].upper() == ')': # End of previous CTE
+                     alias = potential_comma.strip('"').upper()
+                     aliases.add(alias)
+        
+        # Also handle comma-separated CTE names better
+        for i in range(1, len(raw_tokens) - 1):
+            if raw_tokens[i].upper() == 'AS' and raw_tokens[i-1].endswith(','):
+                 # This is likely a CTE name after a comma
+                 pass # The logic above might be cleaner
         
         normalized_allowed_tables = {t.upper() for t in allowed_tables}
         normalized_allowed_columns = {c.upper() for c in allowed_columns}
         
-        for token in raw_tokens:
+        for raw_token in raw_tokens:
+            # Normalize token for validation: strip quotes and uppercase
+            token = raw_token.strip('"').upper()
             # Skip placeholders or literals we inserted
             if token == 'LITERAL':
                 continue

@@ -14,6 +14,8 @@ interface PerformanceTableProps {
     selectedMonth?: string | null;
     onPlatformClick?: (platform: string) => void;
     selectedPlatform?: string | null;
+    onChannelClick?: (channel: string) => void;
+    selectedChannel?: string | null;
     onFunnelStageClick?: (funnelStage: string) => void;
     selectedFunnelStage?: string | null;
     schema?: {
@@ -21,7 +23,7 @@ interface PerformanceTableProps {
     };
 }
 
-export function PerformanceTable({ title, description, data, type, onMonthClick, selectedMonth, onPlatformClick, selectedPlatform, onFunnelStageClick, selectedFunnelStage, schema }: PerformanceTableProps) {
+export function PerformanceTable({ title, description, data, type, onMonthClick, selectedMonth, onPlatformClick, selectedPlatform, onChannelClick, selectedChannel, onFunnelStageClick, selectedFunnelStage, schema }: PerformanceTableProps) {
     const [sortKey, setSortKey] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
@@ -160,12 +162,15 @@ export function PerformanceTable({ title, description, data, type, onMonthClick,
                             {sortedData.map((row, i) => {
                                 const isMonthRow = type === 'month';
                                 const isPlatformRow = type === 'platform';
+                                const isChannelRow = type === 'channel';
                                 const isFunnelRow = type === 'funnel';
                                 const isSelected = (isMonthRow && selectedMonth === row.month)
                                     || (isPlatformRow && selectedPlatform === row.platform)
+                                    || (isChannelRow && selectedChannel === row.channel)
                                     || (isFunnelRow && selectedFunnelStage === row.platform);
                                 const isClickable = (isMonthRow && onMonthClick)
                                     || (isPlatformRow && onPlatformClick)
+                                    || (isChannelRow && onChannelClick)
                                     || (isFunnelRow && onFunnelStageClick);
 
                                 return (
@@ -181,6 +186,8 @@ export function PerformanceTable({ title, description, data, type, onMonthClick,
                                                 onMonthClick(row.month);
                                             } else if (isPlatformRow && onPlatformClick) {
                                                 onPlatformClick(row.platform);
+                                            } else if (isChannelRow && onChannelClick) {
+                                                onChannelClick(row.channel);
                                             } else if (isFunnelRow && onFunnelStageClick) {
                                                 onFunnelStageClick(row.platform);
                                             }
@@ -195,7 +202,7 @@ export function PerformanceTable({ title, description, data, type, onMonthClick,
                                             return (
                                                 <TableCell
                                                     key={col.key}
-                                                    className={`py-2 text-xs font-medium ${isSelected && (col.key === 'month' || col.key === 'platform') ? 'font-bold text-blue-400' : ''}`}
+                                                    className={`py-2 text-xs font-medium ${isSelected && (['month', 'platform', 'channel'].includes(col.key)) ? 'font-bold text-blue-400' : ''}`}
                                                     style={{ backgroundColor: bgColor }}
                                                 >
                                                     {formatValue(col.key, row[col.key])}

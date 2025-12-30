@@ -56,12 +56,12 @@ class NaturalLanguageQueryEngine:
         self.available_models = []
         self.sql_helper = SQLKnowledgeHelper(enable_hybrid=True)
         
-        # 1. Gemini 2.5 Flash (FREE & FAST)
+        # 1. Gemini 1.5 Flash (FREE & FAST)
         google_key = os.getenv('GOOGLE_API_KEY')
         if google_key and GEMINI_AVAILABLE:
             genai.configure(api_key=google_key)
-            self.available_models.append(('gemini', 'gemini-2.5-flash'))
-            logger.info("Tier 1: Gemini 2.5 Flash (FREE)")
+            self.available_models.append(('gemini', 'gemini-1.5-flash'))
+            logger.info("Tier 1: Gemini 1.5 Flash (FREE)")
         
         # 2. DeepSeek (FREE CODING SPECIALIST)
         deepseek_key = os.getenv('DEEPSEEK_API_KEY')
@@ -73,18 +73,18 @@ class NaturalLanguageQueryEngine:
             self.available_models.append(('deepseek', 'deepseek-chat'))
             logger.info("Tier 2: DeepSeek Chat (FREE CODING SPECIALIST)")
         
-        # 3. OpenAI GPT-5.1 Codex
+        # 3. OpenAI GPT-4o
         if self.openai_client:
             self.available_models.append(('openai', 'gpt-4o'))
             logger.info("Tier 3: OpenAI GPT-4o")
         
-        # 4. Claude Sonnet 4.5
+        # 4. Claude 3.5 Sonnet
         anthropic_key = os.getenv('ANTHROPIC_API_KEY')
         if anthropic_key and anthropic_key.startswith('sk-ant-'):
             self.anthropic_client = create_anthropic_client(anthropic_key)
             if self.anthropic_client:
-                self.available_models.append(('claude', 'claude-sonnet-4-5-20250929'))
-                logger.info("Tier 4: Claude Sonnet 4.5")
+                self.available_models.append(('claude', 'claude-3-5-sonnet-latest'))
+                logger.info("Tier 4: Claude 3.5 Sonnet")
             else:
                 logger.warning("Anthropic client unavailable. Skipping Claude tier.")
         
@@ -179,9 +179,9 @@ class NaturalLanguageQueryEngine:
 
         self.conn = duckdb.connect(':memory:')
         
-        # Register the parquet file as a view using parameterized query
-        # DuckDB supports ? for file paths in read_parquet
-        self.conn.execute(f"CREATE VIEW {table_name} AS SELECT * FROM read_parquet(?)", [parquet_path])  # nosec B608
+        # Register the parquet file as a view using string injection (DuckDB does not support ? in CREATE VIEW/read_parquet)
+        # Path is already validated by validate_file_path above
+        self.conn.execute(f"CREATE VIEW {table_name} AS SELECT * FROM read_parquet('{parquet_path}')")  # nosec B608
         
         # Initialize optimizer, multi-table manager, and template generator
         self.optimizer = QueryOptimizer(self.conn)
@@ -200,10 +200,12 @@ class NaturalLanguageQueryEngine:
         }
         
         # Also register with multi-table manager for complex queries
+        # IMPORTANT: Use skip_db_registration=True to avoid shadowing our full Parquet view with a 5-row sample
         self.multi_table_manager.register_table(
             name=table_name,
             df=sample_df, # Just use sample for schema detection in manager
-            description=f"Persistent {table_name} table from Parquet"
+            description=f"Persistent {table_name} table from Parquet",
+            skip_db_registration=True
         )
         
         logger.info(f"Registered Parquet file {parquet_path} as table '{table_name}'")
@@ -531,6 +533,31 @@ ADVANCED PATTERNS:
 - Growth rate: ((current - previous) / NULLIF(previous, 0)) * 100
 - Drop-off rate: (stage1_count - stage2_count) / NULLIF(stage1_count, 0) * 100
 
+EFFICIENCY & WASTE ANALYSIS - CRITICAL:
+
+When user asks about "wasting money", "inefficient", "underperforming", "poor performance", or "worst campaigns":
+- DO NOT use absolute thresholds like "conversions < 100" that may not match the data
+- INSTEAD, use relative rankings to find the WORST performers compared to other campaigns
+- ORDER BY the inefficiency metric (e.g., CPA DESC, ROAS ASC, Conversion_Rate ASC)
+- Use LIMIT to show top N worst performers
+
+Examples:
+1. "Where am I wasting money?" should:
+   - Calculate CPA, ROAS, Conversion_Rate for all campaigns
+   - ORDER BY CPA DESC (highest cost per acquisition = most wasteful)
+   - LIMIT 10 to show top 10 worst performers
+   - NO absolute HAVING filter - just rank by inefficiency
+
+2. "Which campaigns are underperforming?" should:
+   - Calculate all efficiency metrics
+   - ORDER BY Conversion_Rate ASC or ROAS ASC
+   - LIMIT 10
+
+3. "Show inefficient spend" should:
+   - GROUP BY Campaign or Channel
+   - ORDER BY CPA DESC or ROAS ASC
+   - Include spend amount to show waste magnitude
+
 SQL BEST PRACTICES:
 
 - Use NULLIF to prevent division by zero
@@ -652,7 +679,7 @@ SQL Query:""" # nosec B608
                 if provider == 'claude':
                     response = self.anthropic_client.messages.create(
                         model=model_name,
-                        max_tokens=1000,
+                        max_tokens=2000,
                         temperature=0.1,
                         messages=[{
                             "role": "user",
@@ -670,7 +697,7 @@ SQL Query:""" # nosec B608
                         f"You are a SQL expert. Generate ONLY the SQL query, no explanations or markdown.\n\n{prompt}",
                         generation_config=genai.GenerationConfig(
                             temperature=0.1,
-                            max_output_tokens=1000
+                            max_output_tokens=2000
                         )
                     )
                     sql_query = response.text.strip()
@@ -686,7 +713,7 @@ SQL Query:""" # nosec B608
                             {"role": "user", "content": prompt}
                         ],
                         temperature=0.1,
-                        max_tokens=1000
+                        max_tokens=2000
                     )
                     sql_query = response.choices[0].message.content.strip()
                     self._last_model_used = f"{provider} ({model_name})"
@@ -701,7 +728,7 @@ SQL Query:""" # nosec B608
                             {"role": "user", "content": prompt}
                         ],
                         temperature=0.1,
-                        max_tokens=1000
+                        max_tokens=2000
                     )
                     sql_query = response.choices[0].message.content.strip()
                     self._last_model_used = f"{provider} ({model_name})"
@@ -716,7 +743,7 @@ SQL Query:""" # nosec B608
                             {"role": "user", "content": prompt}
                         ],
                         temperature=0.1,
-                        max_tokens=1000
+                        max_tokens=2000
                     )
                     sql_query = response.choices[0].message.content.strip()
                     self._last_model_used = f"{provider} ({model_name})"
@@ -740,6 +767,22 @@ SQL Query:""" # nosec B608
         # Sanitize SQL query to fix common issues
         sql_query = self._sanitize_sql(sql_query)
         logger.info(f"AFTER SANITIZE: {sql_query}")
+        
+        # Validate SQL completeness (detect truncated responses)
+        sql_upper = sql_query.upper()
+        open_parens = sql_query.count('(')
+        close_parens = sql_query.count(')')
+        
+        is_incomplete = (
+            ('SELECT' in sql_upper and 'FROM' not in sql_upper) or
+            open_parens != close_parens or
+            sql_query.rstrip().endswith(',') or
+            sql_query.rstrip().endswith('(')
+        )
+        
+        if is_incomplete:
+            logger.warning(f"Detected incomplete/truncated SQL from LLM: {sql_query[:200]}...")
+            raise ValueError(f"LLM returned incomplete SQL (truncated response). Triggering fallback.")
         
         # Validate SQL is not a dummy query
         if sql_query.upper().strip() == "SELECT 1" or not sql_query or len(sql_query) < 10:

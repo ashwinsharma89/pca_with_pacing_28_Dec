@@ -591,7 +591,11 @@ class MediaAnalyticsExpert:
             ('by_channel', 'Channel'),
             ('by_funnel', 'Funnel_Stage'),
             ('by_creative', 'Creative_Type'),
-            ('by_audience', 'Audience')
+            ('by_audience', 'Audience'),
+            ('by_device', 'Device'),
+            ('by_placement', 'Placement'),
+            ('by_region', 'Region'),
+            ('by_ad_type', 'Ad_Type')
         ]:
             if col_name in df.columns:
                 try:
@@ -1461,6 +1465,10 @@ OUTPUT FORMAT:
 Start with "BRIEF:" then the brief summary.
 Then "DETAILED:" then the detailed summary."""
 
+        logger.info(f"📊 SUMMARY DATA Keys: {list(summary_data.keys())}")
+        logger.info(f"📝 BRIEF PROMPT Length: {len(brief_prompt)}")
+        logger.info(f"📝 DETAILED PROMPT Length: {len(detailed_prompt)}")
+
         llm_start = time.time()
         combined_response = None
         
@@ -1493,6 +1501,9 @@ Then "DETAILED:" then the detailed summary."""
             except Exception as e:
                 logger.warning(f"❌ GPT-4o-mini failed: {e}")
         
+        if not combined_response:
+            logger.error("❌ ALL LLM calls for summary generation failed!")
+        
         # Parse combined response
         if combined_response:
             import re
@@ -1515,6 +1526,9 @@ Then "DETAILED:" then the detailed summary."""
                     split_point = len(combined_response) // 3
                     brief_summary = combined_response[:split_point].strip()
                     detailed_summary = combined_response[split_point:].strip()
+
+            logger.info(f"🔍 PARSED Brief length: {len(brief_summary) if brief_summary else 0}")
+            logger.info(f"🔍 PARSED Detailed length: {len(detailed_summary) if detailed_summary else 0}")
         
         if brief_summary:
             brief_summary = self._strip_italics(brief_summary.strip())
@@ -2820,6 +2834,10 @@ Channel Summary
 
 Write 3-4 sentences per channel/platform. For each: state spend, key metrics (CTR, CPC, CPA if available), performance vs benchmark, and one-line verdict (scale up, optimize, or reduce). Rank channels from best to worst performing.
 
+Dimension & Platform Insights
+
+Write 4-5 sentences analyzing performance across key dimensions: Funnel Stages, Platforms, Devices (Mobile vs Desktop), Regions, Placements, and Ad Types. Identify where efficiency is highest and where potential growth or waste is occurring.
+
 Key Strengths
 
 Write 3-4 bullet points identifying what is working well. Each bullet should name the specific element (campaign, platform, audience, creative), state the metric proving success, and briefly explain WHY it works. Focus on replicable patterns.
@@ -2836,9 +2854,16 @@ Executive Overview
 
 Write 5-6 sentences with complete context: campaign objectives, total investment, key results achieved, efficiency metrics vs industry benchmarks, trend direction over the analysis period, and overall health assessment with confidence level.
 
-Channel Deep-Dive
+Channel & Dimension Deep-Dive
 
-Clearly identify the Top 5 performing channels and Bottom 5 laggards. For EACH platform/channel (prioritizing the top/bottom performers), provide a dedicated paragraph covering:
+Clearly identify the Top 5 performing channels and Bottom 5 laggards. Provide a comprehensive analysis of:
+- **Platforms & Channels**: Detailed performance metrics and verdicts for each.
+- **Funnel Analysis**: Effectiveness across Awareness, Consideration, and Conversion stages.
+- **Device & Placement**: Performance comparison between Mobile/Desktop and various ad placements.
+- **Geography & Audience**: Regional performance trends and audience segment efficiency.
+- **Creatives & Ad Types**: Analysis of which creative formats and ad types are driving the highest ROAS/CPA.
+
+For EACH key segment, provide:
 - Investment: Spend amount and share of total budget
 - Performance: All available metrics (impressions, clicks, CTR, CPC, conversions, CPA, ROAS)
 - Benchmark Comparison: How each metric compares to industry standards (cite the benchmark source from knowledge base)
@@ -2948,6 +2973,10 @@ Generate the complete BRIEF and DETAILED RAG-enhanced analysis now:"""
         funnel_metrics = metrics.get('by_funnel', {})
         creative_metrics = metrics.get('by_creative', {})
         audience_metrics = metrics.get('by_audience', {})
+        device_metrics = metrics.get('by_device', {})
+        placement_metrics = metrics.get('by_placement', {})
+        region_metrics = metrics.get('by_region', {})
+        ad_type_metrics = metrics.get('by_ad_type', {})
         
         # CRITICAL: Filter out platforms/channels with 0 spend to prevent hallucination
         platform_metrics = {
@@ -3075,7 +3104,11 @@ Generate the complete BRIEF and DETAILED RAG-enhanced analysis now:"""
             'dimension_performance': {
                 'funnel': funnel_metrics,
                 'creative': creative_metrics,
-                'audience': audience_metrics
+                'audience': audience_metrics,
+                'device': device_metrics,
+                'placement': placement_metrics,
+                'region': region_metrics,
+                'ad_type': ad_type_metrics
             },
             'campaign_analysis': campaign_analysis,
             'insights_summary': [
@@ -3280,6 +3313,9 @@ Generate the complete BRIEF and DETAILED RAG-enhanced analysis now:"""
             
             logger.info(f"LLM response received: {len(llm_response)} chars")
             logger.info(f"LLM response preview: {llm_response[:300]}...")
+            
+            if not llm_response or len(llm_response.strip()) < 100:
+                logger.warning(f"⚠️ LLM response seems suspiciously short or empty: {len(llm_response) if llm_response else 0} chars")
             
             # Step 4: Parse and format response
             logger.info("Step 4: Parsing and formatting RAG response...")

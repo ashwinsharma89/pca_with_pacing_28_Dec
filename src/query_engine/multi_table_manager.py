@@ -70,7 +70,8 @@ class MultiTableManager:
         name: str,
         df: pd.DataFrame,
         primary_key: Optional[str] = None,
-        description: Optional[str] = None
+        description: Optional[str] = None,
+        skip_db_registration: bool = False
     ):
         """
         Register a table with the manager.
@@ -80,9 +81,11 @@ class MultiTableManager:
             df: DataFrame to register
             primary_key: Primary key column name
             description: Optional table description
+            skip_db_registration: If True, only stores metadata without registering with DuckDB
         """
-        # Register with DuckDB
-        self.conn.register(name, df)
+        # Register with DuckDB if not skipping
+        if not skip_db_registration:
+            self.conn.register(name, df)
         
         # Store metadata
         self.tables[name] = {
@@ -97,7 +100,8 @@ class MultiTableManager:
         if primary_key:
             self.primary_keys[name] = primary_key
         
-        logger.info(f"Registered table '{name}' with {len(df)} rows and {len(df.columns)} columns")
+        db_status = " (metadata only)" if skip_db_registration else ""
+        logger.info(f"Registered table '{name}'{db_status} with {len(df)} rows and {len(df.columns)} columns")
     
     def auto_detect_relationships(self) -> List[TableRelationship]:
         """

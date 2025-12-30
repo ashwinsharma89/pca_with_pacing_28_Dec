@@ -6,7 +6,7 @@ import { api } from '@/lib/api';
 interface AnalysisConfig {
     use_rag_summary: boolean;
     include_benchmarks: boolean;
-    analysis_depth: 'Quick' | 'Standard' | 'Deep';
+    analysis_depth: 'quick' | 'standard' | 'deep';
     include_recommendations: boolean;
 }
 
@@ -47,7 +47,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     const [config, setConfig] = useState<AnalysisConfig>({
         use_rag_summary: true,
         include_benchmarks: true,
-        analysis_depth: 'Standard',
+        analysis_depth: 'standard',
         include_recommendations: true
     });
 

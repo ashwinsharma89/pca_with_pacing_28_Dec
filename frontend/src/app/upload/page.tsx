@@ -332,13 +332,29 @@ export default function UploadPage() {
             {/* Success Summary View */}
             {result && result.summary ? (
                 <div className="space-y-6">
-                    <Alert className="border-green-500 text-green-700 bg-green-50 dark:bg-green-900/10">
-                        <CheckCircle2 className="h-4 w-4" />
-                        <AlertTitle>Upload Complete</AlertTitle>
-                        <AlertDescription>
-                            {result.message}
-                        </AlertDescription>
-                    </Alert>
+                    <div className="flex items-center justify-between">
+                        <Alert className="border-green-500 text-green-700 bg-green-50 dark:bg-green-900/10 flex-1 mr-4">
+                            <CheckCircle2 className="h-4 w-4" />
+                            <AlertTitle>Upload Complete</AlertTitle>
+                            <AlertDescription>
+                                {result.message}
+                            </AlertDescription>
+                        </Alert>
+                        <Button
+                            type="button"
+                            onClick={() => {
+                                setFile(null);
+                                setSheetPreview(null);
+                                setResult(null);
+                                setStatus(null);
+                                localStorage.removeItem('lastUploadResult');
+                                localStorage.removeItem('lastUploadStatus');
+                            }}
+                        >
+                            <Upload className="mr-2 h-4 w-4" />
+                            New Upload
+                        </Button>
+                    </div>
 
                     {/* Metrics Cards */}
                     <div className="grid gap-4 md:grid-cols-4">
@@ -377,17 +393,17 @@ export default function UploadPage() {
                     </div>
 
                     {/* Data Preview - Full Width */}
-                    <Card>
+                    <Card className="overflow-hidden">
                         <CardHeader>
                             <CardTitle>Data Preview</CardTitle>
                             <CardDescription>First 5 rows of imported data.</CardDescription>
                         </CardHeader>
-                        <CardContent className="h-[300px] overflow-auto">
+                        <CardContent className="h-[300px] overflow-y-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
                                         {result.schema?.map(col => (
-                                            <TableHead key={col.column} className="whitespace-nowrap">{col.column}</TableHead>
+                                            <TableHead key={col.column} className="text-xs max-w-[120px] truncate" title={col.column}>{col.column}</TableHead>
                                         ))}
                                     </TableRow>
                                 </TableHeader>
@@ -395,7 +411,7 @@ export default function UploadPage() {
                                     {result.preview?.map((row, i) => (
                                         <TableRow key={i}>
                                             {result.schema?.map(col => (
-                                                <TableCell key={col.column} className="whitespace-nowrap">
+                                                <TableCell key={col.column} className="text-xs max-w-[120px] truncate" title={row[col.column] !== null ? String(row[col.column]) : 'null'}>
                                                     {row[col.column] !== null ? formatCellValue(row[col.column]) : <span className="text-muted-foreground italic">null</span>}
                                                 </TableCell>
                                             ))}
@@ -407,12 +423,12 @@ export default function UploadPage() {
                     </Card>
 
                     {/* Schema Info - Below Data Preview */}
-                    <Card>
+                    <Card className="overflow-hidden">
                         <CardHeader>
                             <CardTitle>Data Schema</CardTitle>
                             <CardDescription>Detected columns and data types.</CardDescription>
                         </CardHeader>
-                        <CardContent className="max-h-[250px] overflow-auto">
+                        <CardContent className="max-h-[250px] overflow-y-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -435,24 +451,6 @@ export default function UploadPage() {
                             </Table>
                         </CardContent>
                     </Card>
-
-                    <div className="flex justify-end">
-                        <Button
-                            type="button"
-                            onClick={() => {
-                                // Clear all state to show the upload form again
-                                setFile(null);
-                                setSheetPreview(null);
-                                setResult(null);
-                                setStatus(null);
-                                // Also clear localStorage
-                                localStorage.removeItem('lastUploadResult');
-                                localStorage.removeItem('lastUploadStatus');
-                            }}
-                        >
-                            Upload Another File
-                        </Button>
-                    </div>
                 </div>
             ) : (
                 <div className="grid gap-6 md:grid-cols-2">
@@ -547,7 +545,8 @@ export default function UploadPage() {
                         </CardContent>
                     </Card>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }
