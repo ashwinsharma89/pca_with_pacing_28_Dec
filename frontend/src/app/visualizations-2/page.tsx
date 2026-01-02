@@ -41,8 +41,10 @@ import { PerformanceTable } from '@/components/charts/PerformanceTable';
 import {
     LayoutGrid, TrendingUp, Layers, Activity,
     Sparkles, Target, Gauge, Filter, Award, ArrowUpRight, ArrowDownRight, Loader2,
-    DollarSign, Zap, RotateCcw
+    DollarSign, Zap, RotateCcw, BarChart3, Box
 } from 'lucide-react';
+
+import { ComparisonChart } from '@/components/charts/ComparisonChart';
 
 // Dynamically import Recharts
 const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
@@ -65,6 +67,13 @@ interface VisualizationsData {
     platform: any[];
     channel: any[];
     trend: any[];
+    region: any[];
+    audience: any[];
+    age: any[];
+    ad_type: any[];
+    objective: any[];
+    targeting: any[];
+    device: any[];
 }
 
 function AdsOverviewContent() {
@@ -162,6 +171,25 @@ function AdsOverviewContent() {
     const [funnelStageDataFromBackend, setFunnelStageDataFromBackend] = useState<any[]>([]);
     const [channelByFunnelData, setChannelByFunnelData] = useState<any[]>([]);
     const [comparisonTrendData, setComparisonTrendData] = useState<any[]>([]);
+
+    // New Dimension Data States
+    const [regionData, setRegionData] = useState<any[]>([]);
+    const [audienceData, setAudienceData] = useState<any[]>([]);
+    const [ageData, setAgeData] = useState<any[]>([]);
+    const [adTypeData, setAdTypeData] = useState<any[]>([]);
+    const [objectiveData, setObjectiveData] = useState<any[]>([]);
+    const [targetingData, setTargetingData] = useState<any[]>([]);
+    const [deviceData, setDeviceData] = useState<any[]>([]);
+
+    // Dimension Selection States
+    const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+    const [selectedAudience, setSelectedAudience] = useState<string | null>(null);
+    const [selectedAge, setSelectedAge] = useState<string | null>(null);
+    const [selectedAdType, setSelectedAdType] = useState<string | null>(null);
+    const [selectedObjective, setSelectedObjective] = useState<string | null>(null);
+    const [selectedTargeting, setSelectedTargeting] = useState<string | null>(null);
+    const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
+
     const [dashboardStats, setDashboardStats] = useState<{
         summary_groups: any;
         monthly_performance: any[];
@@ -399,6 +427,33 @@ function AdsOverviewContent() {
 
     // Compute platform performance for table from platformData (updates with filters)
     // When a month is selected, use platform_performance data to filter by that month
+    // Compute platform performance for table and charts
+    // Refactored to prioritize channelData for robust aggregation (ensuring Revenue/ROAS exists)
+    // Helper to map platform to channel for ROAS lookup (if channel not explicit)
+    const getChannelForPlatform = (platform: string) => {
+        const p = (platform || '').toLowerCase();
+        if (p.includes('facebook') || p.includes('instagram') || p.includes('tiktok') || p.includes('pinterest') || p.includes('snapchat') || p.includes('linkedin') || p.includes('twitter')) return 'SOC';
+        if (p.includes('google') || p.includes('bing') || p.includes('amazon')) return 'SEARCH';
+        if (p.includes('display') || p.includes('criteo') || p.includes('adroll')) return 'DIS';
+        if (p.includes('email') || p.includes('klaviyo')) return 'EMAIL';
+        return 'Other';
+    };
+
+    // Compute map of Channel -> ROAS for fallback
+    const channelRoasMap = useMemo(() => {
+        const map: Record<string, number> = {};
+        if (channelData) {
+            channelData.forEach((c: any) => {
+                const roas = c.roas || (c.spend > 0 ? (c.revenue || 0) / c.spend : 0);
+                map[c.channel || c.name] = roas;
+            });
+        }
+        return map;
+    }, [channelData]);
+
+    // Compute platform performance for table and charts
+    // Uses platform_performance (granular) or platformData (aggregated)
+    // Patches missing revenue using Channel ROAS to ensure charts look correct
     const computedPlatformPerformance = useMemo(() => {
         let filteredData = dashboardStats.platform_performance || [];
 
@@ -413,7 +468,7 @@ function AdsOverviewContent() {
             // Aggregate by platform
             const platformAgg: { [key: string]: any } = {};
             filteredData.forEach((p: any) => {
-                const platformKey = p.platform;
+                const platformKey = p.platform || 'Other';
                 if (!platformAgg[platformKey]) {
                     platformAgg[platformKey] = {
                         platform: platformKey,
@@ -428,7 +483,20 @@ function AdsOverviewContent() {
                 platformAgg[platformKey].clicks += p.clicks || 0;
                 platformAgg[platformKey].conversions += p.conversions || 0;
                 platformAgg[platformKey].impressions += p.impressions || 0;
-                platformAgg[platformKey].revenue += p.revenue || 0;
+
+                // Revenue Patching
+                let rev = p.revenue || p.conversion_value || 0;
+                if (!rev && (p.spend || 0) > 0) {
+                    if (p.roas) {
+                        rev = p.spend * p.roas;
+                    } else {
+                        // Look up channel ROAS
+                        const ch = p.channel || getChannelForPlatform(platformKey);
+                        const cRoas = channelRoasMap[ch];
+                        if (cRoas) rev = p.spend * cRoas;
+                    }
+                }
+                platformAgg[platformKey].revenue += rev;
             });
 
             return Object.values(platformAgg)
@@ -443,22 +511,35 @@ function AdsOverviewContent() {
                 .sort((a: any, b: any) => b.spend - a.spend);
         }
 
-        // Fallback or No Selection: use platformData (filtered by global filters)
+        // Fallback: use platformData (filtered by global filters)
         if (!platformData || platformData.length === 0) return [];
 
-        return platformData.map((p: any) => ({
-            platform: p.platform || p.name,
-            spend: p.spend || 0,
-            clicks: p.clicks || 0,
-            conversions: p.conversions || 0,
-            impressions: p.impressions || 0,
-            cpm: p.cpm || (p.impressions > 0 ? (p.spend / p.impressions * 1000) : 0),
-            ctr: p.ctr || (p.impressions > 0 ? (p.clicks / p.impressions * 100) : 0),
-            cpc: p.cpc || (p.clicks > 0 ? (p.spend / p.clicks) : 0),
-            cpa: p.cpa || (p.conversions > 0 ? (p.spend / p.conversions) : 0),
-            roas: p.roas || (p.spend > 0 ? ((p.revenue || 0) / p.spend) : 0)
-        })).sort((a: any, b: any) => b.spend - a.spend);
-    }, [platformData, selectedMonth, selectedChannel, dashboardStats.platform_performance]);
+        return platformData.map((p: any) => {
+            const platformKey = p.platform || p.name;
+            let rev = p.revenue || 0;
+            const spend = p.spend || 0;
+
+            // Patch revenue if missing
+            if (!rev && spend > 0) {
+                const ch = getChannelForPlatform(platformKey);
+                const cRoas = channelRoasMap[ch];
+                if (cRoas) rev = spend * cRoas;
+            }
+
+            return {
+                platform: platformKey,
+                spend: spend,
+                clicks: p.clicks || 0,
+                conversions: p.conversions || 0,
+                impressions: p.impressions || 0,
+                cpm: p.cpm || (p.impressions > 0 ? (spend / p.impressions * 1000) : 0),
+                ctr: p.ctr || (p.impressions > 0 ? (p.clicks / p.impressions * 100) : 0),
+                cpc: p.cpc || (p.clicks > 0 ? (spend / p.clicks) : 0),
+                cpa: p.cpa || (p.conversions > 0 ? (spend / p.conversions) : 0),
+                roas: p.roas || (spend > 0 ? (rev / spend) : 0)
+            };
+        }).sort((a: any, b: any) => b.spend - a.spend);
+    }, [platformData, channelData, channelRoasMap, selectedMonth, selectedChannel, dashboardStats.platform_performance]);
 
     // Compute channel performance for table from channelData (updates with filters)
     const computedChannelPerformance = useMemo(() => {
@@ -660,7 +741,7 @@ function AdsOverviewContent() {
         fetchData();
         fetchFilterOptions();
         fetchSchema();
-    }, [filters.dateRange]);
+    }, [filters.dateRange, selectedDevice, selectedRegion, selectedAudience, selectedAge, selectedAdType, selectedObjective, selectedTargeting, selectedFunnelStage]);
 
     const fetchSchema = async () => {
         try {
@@ -761,6 +842,16 @@ function AdsOverviewContent() {
                 filterParams.adTypes = filters.adTypes.join(',');
             }
 
+            // Apply Dimension Selection Filters (Linking)
+            if (selectedDevice) filterParams.devices = filterParams.devices ? `${filterParams.devices},${selectedDevice}` : selectedDevice;
+            if (selectedRegion) filterParams.regions = filterParams.regions ? `${filterParams.regions},${selectedRegion}` : selectedRegion;
+            if (selectedAudience) filterParams.audiences = selectedAudience; // Note: plural 'audiences' for API consistency? Check campaigns.py. It uses 'audience' col alias. But param name? campaigns.py iterates search_filters.
+            if (selectedAge) filterParams.ages = selectedAge;
+            if (selectedAdType) filterParams.adTypes = filterParams.adTypes ? `${filterParams.adTypes},${selectedAdType}` : selectedAdType;
+            if (selectedObjective) filterParams.objectives = selectedObjective;
+            if (selectedTargeting) filterParams.targetings = selectedTargeting;
+            if (selectedFunnelStage) filterParams.funnelStages = filterParams.funnelStages ? `${filterParams.funnelStages},${selectedFunnelStage}` : selectedFunnelStage;
+
             console.log('Sending filterParams to API:', filterParams);
 
             let visualizations, stats;
@@ -786,6 +877,12 @@ function AdsOverviewContent() {
                 if (filterParams.placements) statsParams.append('placements', filterParams.placements);
                 if (filterParams.adTypes) statsParams.append('adTypes', filterParams.adTypes);
                 if (filterParams.funnelStages) statsParams.append('funnelStages', filterParams.funnelStages);
+
+                // Add new dimension params for stats
+                if (filterParams.audiences) statsParams.append('audiences', filterParams.audiences);
+                if (filterParams.ages) statsParams.append('ages', filterParams.ages);
+                if (filterParams.objectives) statsParams.append('objectives', filterParams.objectives);
+                if (filterParams.targetings) statsParams.append('targetings', filterParams.targetings);
                 const statsQueryString = statsParams.toString();
                 const statsUrl = `/campaigns/dashboard-stats${statsQueryString ? `?${statsQueryString}` : ''}`;
                 console.log('dashboard-stats URL:', statsUrl);
@@ -841,6 +938,15 @@ function AdsOverviewContent() {
                 setTrendData(visualizations.trend);
             }
 
+            // Set new dimension data
+            if (visualizations.region) setRegionData(visualizations.region);
+            if (visualizations.audience) setAudienceData(visualizations.audience);
+            if (visualizations.age) setAgeData(visualizations.age);
+            if (visualizations.ad_type) setAdTypeData(visualizations.ad_type);
+            if (visualizations.objective) setObjectiveData(visualizations.objective);
+            if (visualizations.targeting) setTargetingData(visualizations.targeting);
+            if (visualizations.device) setDeviceData(visualizations.device);
+
             if ((stats as any).funnel && (stats as any).funnel.length > 0) {
                 setFunnelStageDataFromBackend((stats as any).funnel);
             }
@@ -860,15 +966,12 @@ function AdsOverviewContent() {
     const fetchComparisonData = async () => {
         console.log('fetchComparisonData called', { comparisonDimension, comparisonMetric, dateRange: filters.dateRange });
 
-        // Use default date range if not set (last 30 days of 2024)
+        // Use user-selected date range, or fetch ALL data if no range selected
         let dateRange = filters.dateRange;
         if (!dateRange?.from || !dateRange?.to) {
-            // Use 2024 dates to match backend data
-            dateRange = {
-                from: new Date('2024-11-23'),
-                to: new Date('2024-12-22')
-            };
-            console.log('Using default date range:', dateRange);
+            // No date filter = fetch ALL data from backend
+            console.log('No date range selected - fetching ALL data');
+            dateRange = undefined;
         }
 
         try {
@@ -1442,7 +1545,7 @@ function AdsOverviewContent() {
         if (!funnelStageDataFromBackend || funnelStageDataFromBackend.length === 0) return [];
 
         return funnelStageDataFromBackend.map((stage: any) => ({
-            platform: stage.funnel || stage.name || 'Unknown',
+            funnel: stage.funnel || stage.name || 'Unknown',
             spend: stage.spend || 0,
             impressions: stage.impressions || 0,
             reach: stage.reach || 0,
@@ -1590,8 +1693,8 @@ function AdsOverviewContent() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Sources</SelectItem>
-                                {platformData.map((p) => (
-                                    <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>
+                                {platformData.map((p: any, idx: number) => (
+                                    <SelectItem key={p.name || idx} value={p.name || `platform-${idx}`}>{p.name || 'Unknown'}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -1792,10 +1895,22 @@ function AdsOverviewContent() {
 
                 {/* Tabs */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-6">
                         <TabsTrigger value="overview" className="gap-2">
                             <LayoutGrid className="h-4 w-4" />
                             Overview
+                        </TabsTrigger>
+                        <TabsTrigger value="channel" className="gap-2">
+                            <BarChart3 className="h-4 w-4" />
+                            Channel
+                        </TabsTrigger>
+                        <TabsTrigger value="platform" className="gap-2">
+                            <Layers className="h-4 w-4" />
+                            Platform
+                        </TabsTrigger>
+                        <TabsTrigger value="other" className="gap-2">
+                            <Box className="h-4 w-4" />
+                            Other
                         </TabsTrigger>
                         <TabsTrigger value="funnel" className="gap-2">
                             <Filter className="h-4 w-4" />
@@ -2147,6 +2262,594 @@ function AdsOverviewContent() {
                         </AnimatePresence>
                     </TabsContent>
 
+                    {/* Channel Tab */}
+                    <TabsContent value="channel" className="space-y-6">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key="channel"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="space-y-6"
+                            >
+                                {/* Channel Performance Header */}
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h2 className="text-2xl font-bold flex items-center gap-2">
+                                            <BarChart3 className="h-6 w-6 text-primary" />
+                                            Channel Performance
+                                        </h2>
+                                        <p className="text-muted-foreground">Deep dive into channel-level metrics and comparisons</p>
+                                    </div>
+                                </div>
+
+                                {/* Channel KPI Cards */}
+                                <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+                                    {(() => {
+                                        // Aggregate channel data
+                                        const channels = computedChannelPerformance || channelData || [];
+                                        const totalChannels = channels.length;
+                                        const totalSpend = channels.reduce((sum: number, ch: any) => sum + (ch.spend || 0), 0);
+                                        const totalConversions = channels.reduce((sum: number, ch: any) => sum + (ch.conversions || 0), 0);
+                                        const avgCTR = channels.length > 0
+                                            ? channels.reduce((sum: number, ch: any) => sum + (ch.ctr || 0), 0) / channels.length
+                                            : 0;
+                                        const avgCPA = totalConversions > 0 ? totalSpend / totalConversions : 0;
+
+                                        // Find top performer
+                                        const topChannel = channels.reduce((best: any, ch: any) =>
+                                            (!best || (ch.conversions || 0) > (best.conversions || 0)) ? ch : best, null);
+
+                                        return (
+                                            <>
+                                                <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+                                                    <CardHeader className="pb-2">
+                                                        <CardDescription>Active Channels</CardDescription>
+                                                        <CardTitle className="text-3xl font-bold text-blue-400">{totalChannels}</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <p className="text-xs text-muted-foreground">Marketing channels tracked</p>
+                                                    </CardContent>
+                                                </Card>
+                                                <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+                                                    <CardHeader className="pb-2">
+                                                        <CardDescription>Total Channel Spend</CardDescription>
+                                                        <CardTitle className="text-3xl font-bold text-green-400">${formatNumber(totalSpend)}</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <p className="text-xs text-muted-foreground">Across all channels</p>
+                                                    </CardContent>
+                                                </Card>
+                                                <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+                                                    <CardHeader className="pb-2">
+                                                        <CardDescription>Avg Channel CTR</CardDescription>
+                                                        <CardTitle className="text-3xl font-bold text-purple-400">{avgCTR.toFixed(2)}%</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <p className="text-xs text-muted-foreground">Average across channels</p>
+                                                    </CardContent>
+                                                </Card>
+                                                <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+                                                    <CardHeader className="pb-2">
+                                                        <CardDescription>Top Channel</CardDescription>
+                                                        <CardTitle className="text-3xl font-bold text-amber-400">{topChannel?.channel || topChannel?.name || 'N/A'}</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {topChannel ? `${formatNumber(topChannel.conversions || 0)} conversions` : 'By conversions'}
+                                                        </p>
+                                                    </CardContent>
+                                                </Card>
+                                            </>
+                                        );
+                                    })()}
+                                </div>
+
+                                {/* Channel Comparison Charts */}
+                                <div className="space-y-6">
+                                    {/* Top Chart: Spend vs ROAS */}
+                                    <ComparisonChart
+                                        title="Channel Spend vs ROAS"
+                                        description="Compare spend efficiency against Return on Ad Spend"
+                                        data={computedChannelPerformance || channelData || []}
+                                        xKey="channel"
+                                        yLeftKey="spend"
+                                        yRightKey="roas"
+                                        yLeftName="Spend ($)"
+                                        yRightName="ROAS (x)"
+                                        yLeftFormatter={(v) => `$${v.toLocaleString()}`}
+                                        yRightFormatter={(v) => `${v.toFixed(2)}x`}
+                                        yLeftColor="#6366f1"
+                                        yRightColor="#facc15"
+                                    />
+
+                                    {/* Grid of Other Charts */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <ComparisonChart
+                                            title="Spend vs Conversions"
+                                            description="Correlation between spend and total conversions"
+                                            data={computedChannelPerformance || channelData || []}
+                                            xKey="channel"
+                                            yLeftKey="spend"
+                                            yRightKey="conversions"
+                                            yLeftName="Spend ($)"
+                                            yRightName="Conversions"
+                                            yLeftFormatter={(v) => `$${v.toLocaleString()}`}
+                                            yLeftColor="#3b82f6"
+                                            yRightColor="#a78bfa"
+                                        />
+                                        <ComparisonChart
+                                            title="Spend vs CTR"
+                                            description="Spend impact on Click-Through Rate"
+                                            data={computedChannelPerformance || channelData || []}
+                                            xKey="channel"
+                                            yLeftKey="spend"
+                                            yRightKey="ctr"
+                                            yLeftName="Spend ($)"
+                                            yRightName="CTR (%)"
+                                            yLeftFormatter={(v) => `$${v.toLocaleString()}`}
+                                            yRightFormatter={(v) => `${v.toFixed(2)}%`}
+                                            yLeftColor="#14b8a6"
+                                            yRightColor="#fb923c"
+                                        />
+                                        <ComparisonChart
+                                            title="Clicks vs CTR"
+                                            description="Volume of clicks against click-through rate"
+                                            data={computedChannelPerformance || channelData || []}
+                                            xKey="channel"
+                                            yLeftKey="clicks"
+                                            yRightKey="ctr"
+                                            yLeftName="Clicks"
+                                            yRightName="CTR (%)"
+                                            yRightFormatter={(v) => `${v.toFixed(2)}%`}
+                                            yLeftColor="#f59e0b"
+                                            yRightColor="#fb923c"
+                                        />
+                                        <ComparisonChart
+                                            title="Clicks vs CPC"
+                                            description="Clicks volume against Cost Per Click"
+                                            data={computedChannelPerformance || channelData || []}
+                                            xKey="channel"
+                                            yLeftKey="clicks"
+                                            yRightKey="cpc"
+                                            yLeftName="Clicks"
+                                            yRightName="CPC ($)"
+                                            yRightFormatter={(v) => `$${v.toFixed(2)}`}
+                                            yLeftColor="#f59e0b"
+                                            yRightColor="#6366f1"
+                                        />
+                                        <ComparisonChart
+                                            title="Clicks vs Conversions"
+                                            description="Conversion rate from clicks"
+                                            data={computedChannelPerformance || channelData || []}
+                                            xKey="channel"
+                                            yLeftKey="clicks"
+                                            yRightKey="conversions"
+                                            yLeftName="Clicks"
+                                            yRightName="Conversions"
+                                            yLeftColor="#f59e0b"
+                                            yRightColor="#a78bfa"
+                                        />
+                                        <ComparisonChart
+                                            title="Impressions vs Clicks"
+                                            description="Funnel drop-off from impressions to clicks"
+                                            data={computedChannelPerformance || channelData || []}
+                                            xKey="channel"
+                                            yLeftKey="impressions"
+                                            yRightKey="clicks"
+                                            yLeftName="Impressions"
+                                            yRightName="Clicks"
+                                            yLeftColor="#06b6d4"
+                                            yRightColor="#fbbf24"
+                                        />
+                                        <ComparisonChart
+                                            title="Impressions vs CPM"
+                                            description="Impressions volume against Cost Per Mille"
+                                            data={computedChannelPerformance || channelData || []}
+                                            xKey="channel"
+                                            yLeftKey="impressions"
+                                            yRightKey="cpm"
+                                            yLeftName="Impressions"
+                                            yRightName="CPM ($)"
+                                            yRightFormatter={(v) => `$${v.toFixed(2)}`}
+                                            yLeftColor="#06b6d4"
+                                            yRightColor="#d946ef"
+                                        />
+                                        <ComparisonChart
+                                            title="Efficiency: CTR vs CPA"
+                                            description="Engagement rate against Cost Per Acquisition"
+                                            data={computedChannelPerformance || channelData || []}
+                                            xKey="channel"
+                                            yLeftKey="ctr"
+                                            yRightKey="cpa"
+                                            yLeftName="CTR (%)"
+                                            yRightName="CPA ($)"
+                                            yLeftFormatter={(v) => `${v.toFixed(2)}%`}
+                                            yRightFormatter={(v) => `$${v.toFixed(2)}`}
+                                            yLeftColor="#fb923c"
+                                            yRightColor="#ec4899"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Detailed Channel Performance Table */}
+                                <PerformanceTable
+                                    key={`channel-detailed-${selectedPlatform}-${JSON.stringify(computedChannelPerformance?.slice(0, 1))}`}
+                                    title={selectedPlatform ? `Channel Performance (${selectedPlatform})` : "Channel Performance Details"}
+                                    description={selectedPlatform
+                                        ? "Filtered by selected platform - Click platform again to clear"
+                                        : "Complete channel metrics - Click a row to filter Platform table"}
+                                    data={computedChannelPerformance || channelData || []}
+                                    type="channel"
+                                    onChannelClick={(channel) => {
+                                        setSelectedChannel(channel === selectedChannel ? null : channel);
+                                    }}
+                                    selectedChannel={selectedChannel}
+                                    schema={schema || undefined}
+                                />
+
+                                {/* Linked Platform Performance Table */}
+                                <PerformanceTable
+                                    key={`platform-from-channel-${selectedChannel}-${JSON.stringify(computedPlatformPerformance?.slice(0, 1))}`}
+                                    title={selectedChannel ? `Platform Performance (${selectedChannel} Channel)` : "Platform Performance"}
+                                    description={selectedChannel
+                                        ? "Filtered by selected channel - Click channel again to clear"
+                                        : "Click a platform to filter Channel Performance above"}
+                                    data={computedPlatformPerformance || platformData || []}
+                                    type="platform"
+                                    onPlatformClick={(platform) => {
+                                        setSelectedPlatform(platform === selectedPlatform ? null : platform);
+                                    }}
+                                    selectedPlatform={selectedPlatform}
+                                    schema={schema || undefined}
+                                />
+                            </motion.div>
+                        </AnimatePresence>
+                    </TabsContent>
+
+                    {/* Platform Tab */}
+                    <TabsContent value="platform" className="space-y-6">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key="platform"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="space-y-6"
+                            >
+                                {/* Platform Performance Header */}
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h2 className="text-2xl font-bold flex items-center gap-2">
+                                            <Layers className="h-6 w-6 text-primary" />
+                                            Platform Performance
+                                        </h2>
+                                        <p className="text-muted-foreground">Deep dive into platform-level metrics and comparisons</p>
+                                    </div>
+                                </div>
+
+                                {/* Platform KPI Cards */}
+                                <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+                                    {(() => {
+                                        // Aggregate platform data
+                                        const platforms = computedPlatformPerformance || platformData || [];
+                                        const totalPlatforms = platforms.length;
+                                        const totalSpend = platforms.reduce((sum: number, p: any) => sum + (p.spend || 0), 0);
+                                        const totalConversions = platforms.reduce((sum: number, p: any) => sum + (p.conversions || 0), 0);
+                                        const avgCTR = platforms.length > 0
+                                            ? platforms.reduce((sum: number, p: any) => sum + (p.ctr || 0), 0) / platforms.length
+                                            : 0;
+
+                                        // Find top performer
+                                        const topPlatform = platforms.reduce((best: any, p: any) =>
+                                            (!best || (p.conversions || 0) > (best.conversions || 0)) ? p : best, null);
+
+                                        return (
+                                            <>
+                                                <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border-cyan-500/20">
+                                                    <CardHeader className="pb-2">
+                                                        <CardDescription>Active Platforms</CardDescription>
+                                                        <CardTitle className="text-3xl font-bold text-cyan-400">{totalPlatforms}</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <p className="text-xs text-muted-foreground">Advertising platforms tracked</p>
+                                                    </CardContent>
+                                                </Card>
+                                                <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-emerald-500/20">
+                                                    <CardHeader className="pb-2">
+                                                        <CardDescription>Total Platform Spend</CardDescription>
+                                                        <CardTitle className="text-3xl font-bold text-emerald-400">${formatNumber(totalSpend)}</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <p className="text-xs text-muted-foreground">Across all platforms</p>
+                                                    </CardContent>
+                                                </Card>
+                                                <Card className="bg-gradient-to-br from-violet-500/10 to-violet-600/5 border-violet-500/20">
+                                                    <CardHeader className="pb-2">
+                                                        <CardDescription>Avg Platform CTR</CardDescription>
+                                                        <CardTitle className="text-3xl font-bold text-violet-400">{avgCTR.toFixed(2)}%</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <p className="text-xs text-muted-foreground">Average across platforms</p>
+                                                    </CardContent>
+                                                </Card>
+                                                <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
+                                                    <CardHeader className="pb-2">
+                                                        <CardDescription>Top Platform</CardDescription>
+                                                        <CardTitle className="text-3xl font-bold text-orange-400">{topPlatform?.platform || topPlatform?.name || 'N/A'}</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {topPlatform ? `${formatNumber(topPlatform.conversions || 0)} conversions` : 'By conversions'}
+                                                        </p>
+                                                    </CardContent>
+                                                </Card>
+                                            </>
+                                        );
+                                    })()}
+                                </div>
+
+                                {/* Platform Comparison Charts */}
+                                <div className="space-y-6">
+                                    {/* Top Chart: Spend vs ROAS */}
+                                    <ComparisonChart
+                                        title="Platform Spend vs ROAS"
+                                        description="Compare spend efficiency against Return on Ad Spend"
+                                        data={computedPlatformPerformance || platformData || []}
+                                        xKey="platform"
+                                        yLeftKey="spend"
+                                        yRightKey="roas"
+                                        yLeftName="Spend ($)"
+                                        yRightName="ROAS (x)"
+                                        yLeftFormatter={(v) => `$${v.toLocaleString()}`}
+                                        yRightFormatter={(v) => `${v.toFixed(2)}x`}
+                                        yLeftColor="#6366f1"
+                                        yRightColor="#facc15"
+                                        limit={15}
+                                    />
+
+                                    {/* Grid of Other Charts */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <ComparisonChart
+                                            title="Spend vs Conversions"
+                                            description="Correlation between spend and total conversions"
+                                            data={computedPlatformPerformance || platformData || []}
+                                            xKey="platform"
+                                            yLeftKey="spend"
+                                            yRightKey="conversions"
+                                            yLeftName="Spend ($)"
+                                            yRightName="Conversions"
+                                            yLeftFormatter={(v) => `$${v.toLocaleString()}`}
+                                            yLeftColor="#3b82f6"
+                                            yRightColor="#a78bfa"
+                                        />
+                                        <ComparisonChart
+                                            title="Spend vs CTR"
+                                            description="Spend impact on Click-Through Rate"
+                                            data={computedPlatformPerformance || platformData || []}
+                                            xKey="platform"
+                                            yLeftKey="spend"
+                                            yRightKey="ctr"
+                                            yLeftName="Spend ($)"
+                                            yRightName="CTR (%)"
+                                            yLeftFormatter={(v) => `$${v.toLocaleString()}`}
+                                            yRightFormatter={(v) => `${v.toFixed(2)}%`}
+                                            yLeftColor="#14b8a6"
+                                            yRightColor="#fb923c"
+                                        />
+                                        <ComparisonChart
+                                            title="Clicks vs CTR"
+                                            description="Volume of clicks against click-through rate"
+                                            data={computedPlatformPerformance || platformData || []}
+                                            xKey="platform"
+                                            yLeftKey="clicks"
+                                            yRightKey="ctr"
+                                            yLeftName="Clicks"
+                                            yRightName="CTR (%)"
+                                            yRightFormatter={(v) => `${v.toFixed(2)}%`}
+                                            yLeftColor="#f59e0b"
+                                            yRightColor="#fb923c"
+                                        />
+                                        <ComparisonChart
+                                            title="Clicks vs CPC"
+                                            description="Clicks volume against Cost Per Click"
+                                            data={computedPlatformPerformance || platformData || []}
+                                            xKey="platform"
+                                            yLeftKey="clicks"
+                                            yRightKey="cpc"
+                                            yLeftName="Clicks"
+                                            yRightName="CPC ($)"
+                                            yRightFormatter={(v) => `$${v.toFixed(2)}`}
+                                            yLeftColor="#f59e0b"
+                                            yRightColor="#6366f1"
+                                        />
+                                        <ComparisonChart
+                                            title="Clicks vs Conversions"
+                                            description="Conversion rate from clicks"
+                                            data={computedPlatformPerformance || platformData || []}
+                                            xKey="platform"
+                                            yLeftKey="clicks"
+                                            yRightKey="conversions"
+                                            yLeftName="Clicks"
+                                            yRightName="Conversions"
+                                            yLeftColor="#f59e0b"
+                                            yRightColor="#a78bfa"
+                                        />
+                                        <ComparisonChart
+                                            title="Impressions vs Clicks"
+                                            description="Funnel drop-off from impressions to clicks"
+                                            data={computedPlatformPerformance || platformData || []}
+                                            xKey="platform"
+                                            yLeftKey="impressions"
+                                            yRightKey="clicks"
+                                            yLeftName="Impressions"
+                                            yRightName="Clicks"
+                                            yLeftColor="#06b6d4"
+                                            yRightColor="#fbbf24"
+                                        />
+                                        <ComparisonChart
+                                            title="Impressions vs CPM"
+                                            description="Impressions volume against Cost Per Mille"
+                                            data={computedPlatformPerformance || platformData || []}
+                                            xKey="platform"
+                                            yLeftKey="impressions"
+                                            yRightKey="cpm"
+                                            yLeftName="Impressions"
+                                            yRightName="CPM ($)"
+                                            yRightFormatter={(v) => `$${v.toFixed(2)}`}
+                                            yLeftColor="#06b6d4"
+                                            yRightColor="#d946ef"
+                                        />
+                                        <ComparisonChart
+                                            title="Efficiency: CTR vs CPA"
+                                            description="Engagement rate against Cost Per Acquisition"
+                                            data={computedPlatformPerformance || platformData || []}
+                                            xKey="platform"
+                                            yLeftKey="ctr"
+                                            yRightKey="cpa"
+                                            yLeftName="CTR (%)"
+                                            yRightName="CPA ($)"
+                                            yLeftFormatter={(v) => `${v.toFixed(2)}%`}
+                                            yRightFormatter={(v) => `$${v.toFixed(2)}`}
+                                            yLeftColor="#fb923c"
+                                            yRightColor="#ec4899"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Platform Performance Table */}
+                                <PerformanceTable
+                                    key={`platform-detailed-${selectedChannel}-${JSON.stringify(computedPlatformPerformance?.slice(0, 1))}`}
+                                    title={selectedChannel ? `Platform Performance (${selectedChannel} Channel)` : "Platform Performance Details"}
+                                    description={selectedChannel
+                                        ? "Filtered by selected channel - Click channel again to clear"
+                                        : "Complete platform metrics - Click a row to filter Channel table"}
+                                    data={computedPlatformPerformance || platformData || []}
+                                    type="platform"
+                                    onPlatformClick={(platform) => {
+                                        setSelectedPlatform(platform === selectedPlatform ? null : platform);
+                                    }}
+                                    selectedPlatform={selectedPlatform}
+                                    schema={schema || undefined}
+                                />
+
+                                {/* Linked Channel Performance Table REMOVED - Replaced by Breakdowns */}
+
+                                <div className="space-y-6 mt-6">
+                                    <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-widest pl-1">Detailed Breakdowns</h3>
+
+                                    {/* 1. Audience Segment */}
+                                    {audienceData && audienceData.length > 0 && (
+                                        <PerformanceTable
+                                            title="Audience Performances"
+                                            description="Performance by audience segment"
+                                            data={audienceData}
+                                            type="audience"
+                                            schema={schema || undefined}
+                                        />
+                                    )}
+
+                                    {/* 2. Device - MOVED TO OTHER TAB */}
+                                    {/* 3. Region */}
+                                    {regionData && regionData.length > 0 && (
+                                        <PerformanceTable
+                                            title="Geographic Region Performance"
+                                            description="Performance by region"
+                                            data={regionData}
+                                            type="region"
+                                            schema={schema || undefined}
+                                            onDimensionClick={(val) => setSelectedRegion(selectedRegion === val ? null : val)}
+                                            selectedDimension={selectedRegion}
+                                        />
+                                    )}
+
+                                    {/* 4. Age Group - MOVED TO OTHER TAB */}
+                                    {/* 5. Ad Type - MOVED TO OTHER TAB */}
+                                    {/* 6. Campaign Objective - MOVED TO OTHER TAB */}
+                                    {/* 7. Targeting Type - MOVED TO OTHER TAB */}
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
+                    </TabsContent>
+
+                    {/* Other Tab */}
+                    <TabsContent value="other" className="space-y-6">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key="other"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="space-y-6"
+                            >
+                                {/* 1. Ad Type (Top) */}
+                                {adTypeData && adTypeData.length > 0 && (
+                                    <PerformanceTable
+                                        title="Ad Type Performance"
+                                        description="Performance by creative format"
+                                        data={adTypeData}
+                                        type="ad_type"
+                                        schema={schema || undefined}
+                                        onDimensionClick={(val) => setSelectedAdType(selectedAdType === val ? null : val)}
+                                        selectedDimension={selectedAdType}
+                                    />
+                                )}
+
+                                {/* 2. Device */}
+                                {deviceData && deviceData.length > 0 && (
+                                    <PerformanceTable
+                                        title="Device Performance"
+                                        description="Performance by device type"
+                                        data={deviceData}
+                                        type="device"
+                                        schema={schema || undefined}
+                                        onDimensionClick={(val) => setSelectedDevice(selectedDevice === val ? null : val)}
+                                        selectedDimension={selectedDevice}
+                                    />
+                                )}
+
+                                {/* 3. Age Group */}
+                                {ageData && ageData.length > 0 && (
+                                    <PerformanceTable
+                                        title="Age Group Performance"
+                                        description="Performance by demographic age group"
+                                        data={ageData}
+                                        type="age"
+                                        schema={schema || undefined}
+                                        onDimensionClick={(val) => setSelectedAge(selectedAge === val ? null : val)}
+                                        selectedDimension={selectedAge}
+                                    />
+                                )}
+
+                                {/* 4. Campaign Objective */}
+                                {objectiveData && objectiveData.length > 0 && (
+                                    <PerformanceTable
+                                        title="Campaign Objective Performance"
+                                        description="Performance by optimization goal"
+                                        data={objectiveData}
+                                        type="objective"
+                                        schema={schema || undefined}
+                                        onDimensionClick={(val) => setSelectedObjective(selectedObjective === val ? null : val)}
+                                        selectedDimension={selectedObjective}
+                                    />
+                                )}
+
+                                {/* 5. Targeting Type */}
+                                {targetingData && targetingData.length > 0 && (
+                                    <PerformanceTable
+                                        title="Targeting Type Performance"
+                                        description="Performance by targeting strategy"
+                                        data={targetingData}
+                                        type="targeting"
+                                        schema={schema || undefined}
+                                        onDimensionClick={(val) => setSelectedTargeting(selectedTargeting === val ? null : val)}
+                                        selectedDimension={selectedTargeting}
+                                    />
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
+                    </TabsContent>
+
                     {/* Funnel Tab */}
                     <TabsContent value="funnel" className="space-y-6">
                         <AnimatePresence mode="wait">
@@ -2168,6 +2871,19 @@ function AdsOverviewContent() {
                                     selectedFunnelStage={selectedFunnelStage}
                                     schema={schema || undefined}
                                 />
+
+                                {/* Ad Type Performance Table (Linkable) */}
+                                {adTypeData && adTypeData.length > 0 && (
+                                    <PerformanceTable
+                                        title="Ad Type Performance"
+                                        description="Performance by creative format"
+                                        data={adTypeData}
+                                        type="ad_type"
+                                        schema={schema || undefined}
+                                        onDimensionClick={(val) => setSelectedAdType(selectedAdType === val ? null : val)}
+                                        selectedDimension={selectedAdType}
+                                    />
+                                )}
 
                                 {/* Channel Performance Table */}
                                 <PerformanceTable
@@ -2205,11 +2921,9 @@ function AdsOverviewContent() {
                                                         <>
                                                             {/* Impressions */}
                                                             <div className="relative w-full max-w-md">
-                                                                <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg p-6 shadow-lg" style={{ clipPath: 'polygon(10% 0%, 90% 0%, 85% 100%, 15% 100%)' }}>
+                                                                <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg p-4 shadow-lg flex flex-col items-center justify-center gap-1" style={{ clipPath: 'polygon(5% 0%, 95% 0%, 90% 100%, 10% 100%)' }}>
                                                                     <div className="text-3xl font-bold text-center">{formatNumber(kpis.impressions)}</div>
-                                                                </div>
-                                                                <div className="absolute right-0 top-1/2 transform translate-x-full -translate-y-1/2 ml-4 text-sm font-medium whitespace-nowrap">
-                                                                    → Impressions
+                                                                    <div className="text-xs font-semibold text-indigo-100 uppercase tracking-wide">Impressions</div>
                                                                 </div>
                                                             </div>
 
@@ -2221,11 +2935,9 @@ function AdsOverviewContent() {
 
                                                             {/* Clicks */}
                                                             <div className="relative w-full max-w-sm">
-                                                                <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg p-6 shadow-lg" style={{ clipPath: 'polygon(12% 0%, 88% 0%, 83% 100%, 17% 100%)' }}>
+                                                                <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg p-4 shadow-lg flex flex-col items-center justify-center gap-1" style={{ clipPath: 'polygon(7% 0%, 93% 0%, 88% 100%, 12% 100%)' }}>
                                                                     <div className="text-3xl font-bold text-center">{formatNumber(kpis.clicks)}</div>
-                                                                </div>
-                                                                <div className="absolute right-0 top-1/2 transform translate-x-full -translate-y-1/2 ml-4 text-sm font-medium whitespace-nowrap">
-                                                                    → Clicks
+                                                                    <div className="text-xs font-semibold text-purple-100 uppercase tracking-wide">Clicks</div>
                                                                 </div>
                                                             </div>
 
@@ -2237,17 +2949,15 @@ function AdsOverviewContent() {
 
                                                             {/* Conversions */}
                                                             <div className="relative w-full max-w-xs">
-                                                                <div className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg p-6 shadow-lg" style={{ clipPath: 'polygon(15% 0%, 85% 0%, 80% 100%, 20% 100%)' }}>
+                                                                <div className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg p-4 shadow-lg flex flex-col items-center justify-center gap-1" style={{ clipPath: 'polygon(10% 0%, 90% 0%, 85% 100%, 15% 100%)' }}>
                                                                     <div className="text-3xl font-bold text-center">{formatNumber(kpis.conversions)}</div>
-                                                                </div>
-                                                                <div className="absolute right-0 top-1/2 transform translate-x-full -translate-y-1/2 ml-4 text-sm font-medium whitespace-nowrap">
-                                                                    → Conversions
+                                                                    <div className="text-xs font-semibold text-green-100 uppercase tracking-wide">Conversions</div>
                                                                 </div>
                                                             </div>
                                                         </>
                                                     );
                                                 })()}
-                                            </div>
+                                            </div >
                                         ) : (
                                             <div className="flex items-center justify-center h-full text-muted-foreground">
                                                 No funnel data available

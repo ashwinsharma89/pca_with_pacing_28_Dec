@@ -54,6 +54,11 @@ METRIC_COLUMN_ALIASES = {
     'cpa': ['CPA', 'cpa', 'Cost Per Acquisition', 'cost_per_acquisition', 'Cost Per Conversion'],
     'roas': ['ROAS', 'roas', 'Return On Ad Spend', 'return_on_ad_spend'],
     'revenue': ['Revenue', 'revenue', 'Sales', 'Sales Value', 'sales_value', 'Conversion Value', 'conversion_value', 'Total Revenue', 'total_revenue', 'Income', 'income', 'Revenue_2024', 'Revenue_2025'],
+    'audience': ['Audience', 'audience', 'Audience Segment', 'Segment', 'segment', 'Audience Name'],
+    'age': ['Age', 'age', 'Age Group', 'age_group', 'Demographic', 'demographic'],
+    'objective': ['Objective', 'objective', 'Campaign Objective', 'campaign_objective', 'Goal', 'goal'],
+    'targeting': ['Targeting', 'targeting', 'Targeting Type', 'targeting_type', 'Target Type'],
+    'revenue': ['Revenue', 'revenue', 'Total Revenue', 'total_revenue', 'Sales', 'sales', 'Purchase Value', 'purchase_value', 'Value', 'value', 'Revenue_2024', 'Revenue_2025']
 }
 
 
@@ -75,6 +80,35 @@ def find_column(df, metric_key: str):
         if alias.lower() in cols_lower:
             return cols_lower[alias.lower()]
     return None
+
+def consolidate_metric_column(df, metric_key):
+    """
+    Finds all columns matching aliases for a metric and consolidates them.
+    Priority is given to the first matching alias, filling NaNs with subsequent matches.
+    """
+    aliases = METRIC_COLUMN_ALIASES.get(metric_key, [])
+    cols_lower = {c.lower(): c for c in df.columns}
+    
+    found_cols = []
+    # Identify all columns that match any alias
+    for alias in aliases:
+        if alias.lower() in cols_lower:
+            actual_col = cols_lower[alias.lower()]
+            if actual_col not in found_cols:
+                found_cols.append(actual_col)
+    
+    if not found_cols:
+        return None
+
+    # Consolidate: start with first, combine_first with rest
+    series = df[found_cols[0]]
+    for col in found_cols[1:]:
+        # Use combine_first to fill nulls in 'series' with values from 'col'
+        # Convert to numeric to ensure proper merging (coercing errors)
+        s_next = pd.to_numeric(df[col], errors='coerce')
+        series = pd.to_numeric(series, errors='coerce').combine_first(s_next)
+        
+    return series
 
 
 from fastapi import UploadFile, File, Form
@@ -214,6 +248,14 @@ async def upload_campaign_data(
             summary['avg_ctr'] = (summary['total_clicks'] / summary['total_impressions']) * 100
         
         logger.info(f"Successfully imported {row_count} rows to Parquet in {time.time() - t_start:.2f}s")
+
+        # Clear agent workflow cache to ensure fresh analysis on new data
+        try:
+            from src.agents.agent_chain import clear_workflow_state
+            clear_workflow_state()
+            logger.info("Cleared agent workflow cache after new file upload")
+        except Exception as e:
+            logger.warning(f"Failed to clear workflow cache: {e}")
         
         # Clean preview data - replace NaN with None for JSON serialization
         preview_df = df.head(5).fillna('')
@@ -246,6 +288,63 @@ async def upload_campaign_data(
         logger.error(f"Upload failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/metrics")
+async def get_global_metrics(
+    request: Request,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Get aggregated key metrics for all campaigns.
+    Populates Portfolio Summary cards.
+    """
+    try:
+        from src.database.duckdb_manager import get_duckdb_manager
+        duckdb_mgr = get_duckdb_manager()
+        
+        df = duckdb_mgr.get_campaigns()
+        
+        if df.empty:
+            return {
+                "total_spend": 0,
+                "total_impressions": 0,
+                "total_clicks": 0,
+                "total_conversions": 0,
+                "avg_ctr": 0,
+                "avg_cpc": 0,
+                "avg_cpa": 0,
+                "conversion_rate": 0
+            }
+            
+        spend_col = find_column(df, 'spend')
+        impr_col = find_column(df, 'impressions')
+        clicks_col = find_column(df, 'clicks')
+        conv_col = find_column(df, 'conversions')
+        
+        total_spend = float(df[spend_col].sum()) if spend_col else 0
+        total_impr = int(df[impr_col].sum()) if impr_col else 0
+        total_clicks = int(df[clicks_col].sum()) if clicks_col else 0
+        total_conv = int(df[conv_col].sum()) if conv_col else 0
+        
+        avg_ctr = (total_clicks / total_impr * 100) if total_impr > 0 else 0
+        avg_cpc = (total_spend / total_clicks) if total_clicks > 0 else 0
+        avg_cpa = (total_spend / total_conv) if total_conv > 0 else 0
+        conversion_rate = (total_conv / total_clicks * 100) if total_clicks > 0 else 0
+        
+        return {
+            "total_spend": total_spend,
+            "total_impressions": total_impr,
+            "total_clicks": total_clicks,
+            "total_conversions": total_conv,
+            "avg_ctr": float(avg_ctr),
+            "avg_cpc": float(avg_cpc),
+            "avg_cpa": float(avg_cpa),
+            "conversion_rate": float(conversion_rate)
+        }
+    except Exception as e:
+        logger.error(f"Failed to get metrics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/visualizations")
 async def get_global_visualizations(
     request: Request,
@@ -260,6 +359,10 @@ async def get_global_visualizations(
     placements: Optional[str] = None,
     regions: Optional[str] = None,
     adTypes: Optional[str] = None,
+    audiences: Optional[str] = None,
+    ages: Optional[str] = None,
+    objectives: Optional[str] = None,
+    targetings: Optional[str] = None,
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """
@@ -290,7 +393,11 @@ async def get_global_visualizations(
                 'device': devices,
                 'placement': placements,
                 'region': regions,
-                'ad_type': adTypes
+                'ad_type': adTypes,
+                'audience': audiences,
+                'age': ages,
+                'objective': objectives,
+                'targeting': targetings
             }
             
             for key, val in mapping.items():
@@ -328,8 +435,12 @@ async def get_global_visualizations(
                 date_col = col
                 break
         
-        if date_col and (start_date or end_date):
+        if date_col:
             df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
+            
+            # NO automatic date filtering - show ALL data by default
+            # User can manually filter via date picker if needed
+
             if start_date:
                 try:
                     start_dt = pd.to_datetime(start_date)
@@ -357,9 +468,24 @@ async def get_global_visualizations(
         platform_col = find_column(df, 'platform')
         channel_col = find_column(df, 'channel')
         device_col = find_column(df, 'device')
+        region_col = find_column(df, 'region')
+        audience_col = find_column(df, 'audience')
+        age_col = find_column(df, 'age')
+        ad_type_col = find_column(df, 'ad_type')
+        objective_col = find_column(df, 'objective')
+        targeting_col = find_column(df, 'targeting')
+        
+        # DEBUG: Log total spend to trace data flow issue
+        if spend_col:
+            total_spend_raw = df[spend_col].sum()
+            logger.info(f"===== VISUALIZATION DEBUG =====")
+            logger.info(f"Total rows in df: {len(df)}")
+            logger.info(f"Spend column: {spend_col}")
+            logger.info(f"TOTAL SPEND (raw): ${total_spend_raw:,.2f}")
+            logger.info(f"================================")
         
         # Helper to calculate metrics
-        def calc_metrics(grp_df):
+        def calc_metrics(grp_df, key_name='name'):
             result = []
             for name, group in grp_df:
                 spend = float(group[spend_col].sum()) if spend_col else 0
@@ -382,7 +508,7 @@ async def get_global_visualizations(
                 reach = int(group[reach_col].sum()) if reach_col else 0
                 
                 result.append({
-                    "name": str(name) if not isinstance(name, str) else name,
+                    key_name: str(name) if not isinstance(name, str) else name,
                     "spend": round(spend, 2),
                     "impressions": impressions,
                     "clicks": clicks,
@@ -432,23 +558,59 @@ async def get_global_visualizations(
         # 2. Platform data
         platform_data = []
         if platform_col:
-            platform_data = calc_metrics(df.groupby(platform_col))
+            platform_data = calc_metrics(df.groupby(platform_col), 'platform')
         
         # 3. Channel data
         channel_data = []
         if channel_col:
-            channel_data = calc_metrics(df.groupby(channel_col))
+            channel_data = calc_metrics(df.groupby(channel_col), 'channel')
         
         # 4. Device data
         device_data = []
         if device_col:
-            device_data = calc_metrics(df.groupby(device_col))
+            device_data = calc_metrics(df.groupby(device_col), 'device')
+        
+        # 5. Region data
+        region_data = []
+        if region_col:
+            region_data = calc_metrics(df.groupby(region_col), 'region')
+            
+        # 6. Audience data
+        audience_data = []
+        if audience_col:
+            audience_data = calc_metrics(df.groupby(audience_col), 'audience')
+            
+        # 7. Age data
+        age_data = []
+        if age_col:
+            age_data = calc_metrics(df.groupby(age_col), 'age')
+
+        # 8. Ad Type data
+        ad_type_data = []
+        if ad_type_col:
+            ad_type_data = calc_metrics(df.groupby(ad_type_col), 'ad_type')
+            
+        # 9. Campaign Objective data
+        objective_data = []
+        if objective_col:
+            objective_data = calc_metrics(df.groupby(objective_col), 'objective')
+            
+        # 10. Targeting Type data
+        targeting_data = []
+        if targeting_col:
+            targeting_data = calc_metrics(df.groupby(targeting_col), 'targeting')
         
         return {
             "trend": trend_data,
             "device": device_data,
             "platform": platform_data,
-            "channel": channel_data
+            "channel": channel_data,
+            "region": region_data,
+            "audience": audience_data,
+            "age": age_data,
+            "ad_type": ad_type_data,
+            "objective": objective_data,
+            "targeting": targeting_data
         }
         
     except Exception as e:
@@ -468,6 +630,10 @@ async def get_dashboard_stats(
     funnelStages: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
+    audiences: Optional[str] = None,
+    ages: Optional[str] = None,
+    objectives: Optional[str] = None,
+    targetings: Optional[str] = None,
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """
@@ -506,8 +672,13 @@ async def get_dashboard_stats(
                 'channel': channels,
                 'device': devices,
                 'placement': placements,
+                'placement': placements,
                 'region': regions,
-                'ad_type': adTypes
+                'ad_type': adTypes,
+                'audience': audiences,
+                'age': ages,
+                'objective': objectives,
+                'targeting': targetings
             }
             
             for key, val in mapping.items():
@@ -537,17 +708,36 @@ async def get_dashboard_stats(
             return {"summary_groups": {}, "monthly_performance": [], "platform_performance": []}
             
         # Use global find_column with METRIC_COLUMN_ALIASES
-        spend_col = find_column(total_df, 'spend')
-        impr_col = find_column(total_df, 'impressions')
-        clicks_col = find_column(total_df, 'clicks')
-        conv_col = find_column(total_df, 'conversions')
+        # ROBUST FIX for mixed schemas (e.g. 'spend' vs 'Total Spent'):
+        # Consolidate main metric columns into normalized versions
+        norm_cols = {}
+        for metric in ['spend', 'impressions', 'clicks', 'conversions', 'reach', 'revenue']:
+            series = consolidate_metric_column(total_df, metric)
+            if series is not None:
+                # Assign to a new normalized column
+                norm_col_name = f"_norm_{metric}"
+                total_df[norm_col_name] = series
+                norm_cols[metric] = norm_col_name
+            else:
+                norm_cols[metric] = None
+        
+        # Use normalized columns for metrics
+        spend_col = norm_cols['spend']
+        impr_col = norm_cols['impressions']
+        clicks_col = norm_cols['clicks']
+        conv_col = norm_cols['conversions']
+        reach_col = norm_cols['reach']
+        revenue_col = norm_cols['revenue']
+        
+        # Dimensions still use find_column
         date_col = find_column(total_df, 'date')
         platform_col = find_column(total_df, 'platform')
         
         if not date_col:
             return {"summary_groups": {}, "monthly_performance": [], "platform_performance": []}
             
-        total_df[date_col] = pd.to_datetime(total_df[date_col], dayfirst=True, errors='coerce')
+        # Parse dates without dayfirst - data uses YYYY-MM-DD format
+        total_df[date_col] = pd.to_datetime(total_df[date_col], errors='coerce')
         total_df = total_df.dropna(subset=[date_col])
 
         # 2. Determine Date Range for Current Period
@@ -558,7 +748,9 @@ async def get_dashboard_stats(
             logger.info(f"Using full date range: {d1} to {d2}")
         else:
             if not end_date:
-                end_date = datetime.now().strftime("%Y-%m-%d")
+                # Use MAX DATE from data instead of NOW() if data is historical
+                max_data_date = total_df[date_col].max()
+                end_date = max_data_date.strftime("%Y-%m-%d")
             if not start_date:
                 # Default to last 30 days relative to end_date
                 start_date = (datetime.strptime(end_date, "%Y-%m-%d") - timedelta(days=30)).strftime("%Y-%m-%d")
@@ -589,15 +781,12 @@ async def get_dashboard_stats(
                 return {"spend": 0, "impressions": 0, "reach": 0, "clicks": 0, "conversions": 0, "ctr": 0, "cpc": 0, "cpm": 0, "cpa": 0, "roas": 0}
             s = float(df[spend_col].sum()) if spend_col else 0
             i = int(df[impr_col].sum()) if impr_col else 0
-            # Find reach column using global find_column
-            reach_col = find_column(df, 'reach')
+            # Use reach_col from outer scope (normalized)
             r = int(df[reach_col].sum()) if reach_col else 0
             c = int(df[clicks_col].sum()) if clicks_col else 0
             cv = int(df[conv_col].sum()) if conv_col else 0
             
-            # Find revenue column for ROAS
-            revenue_col = find_column(df, 'revenue')
-            logger.debug(f"Revenue column search: found='{revenue_col}'")
+            # Use revenue_col from outer scope (normalized)
             revenue_sum = float(df[revenue_col].sum()) if revenue_col else 0
             logger.debug(f"Revenue sum: ${revenue_sum:,.2f}")
             
@@ -611,7 +800,8 @@ async def get_dashboard_stats(
                 "cpc": round((s / c) if c > 0 else 0, 2),
                 "cpm": round((s / i * 1000) if i > 0 else 0, 2),
                 "cpa": round((s / cv) if cv > 0 else 0, 2),
-                "roas": round((revenue_sum / s) if s > 0 else 0, 2)
+                "roas": round((revenue_sum / s) if s > 0 else 0, 2),
+                "revenue": round(revenue_sum, 2)
             }
             
         curr_summary = get_summary(curr_df)
@@ -1469,198 +1659,194 @@ def _get_rag_context_for_question(question: str) -> str:
 @router.get("/chart-data")
 async def get_chart_data(
     request: Request,
-    x_axis: str,
-    y_axis: str,
+    x_axis: str = 'date',
+    y_axis: str = 'spend',
     aggregation: str = "sum",
     group_by: Optional[str] = None,
-    platforms: Optional[str] = Query(None, description="Comma-separated list of platforms to filter"),
-    channels: Optional[str] = Query(None, description="Comma-separated list of channels to filter"),
-    regions: Optional[str] = Query(None, description="Comma-separated list of regions to filter"),
-    devices: Optional[str] = Query(None, description="Comma-separated list of devices to filter"),
-    funnels: Optional[str] = Query(None, description="Comma-separated list of funnel stages to filter"),
-    year: Optional[int] = Query(None, description="Filter by year (e.g., 2025, 2024)"),
-    start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+    platforms: Optional[str] = Query(None, description="Comma-separated list of platforms"),
+    channels: Optional[str] = Query(None, description="Comma-separated list of channels"),
+    regions: Optional[str] = Query(None, description="Comma-separated list of regions"),
+    devices: Optional[str] = Query(None, description="Comma-separated list of devices"),
+    funnels: Optional[str] = Query(None, description="Comma-separated list of funnels"),
+    year: Optional[int] = Query(None, description="Filter by year"),
+    start_date: Optional[str] = Query(None, description="Start date YYYY-MM-DD"),
+    end_date: Optional[str] = Query(None, description="End date YYYY-MM-DD"),
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """
-    Get aggregated data for custom chart building using DuckDB.
+    Get aggregated data for charts with dynamic schema handling.
+    Automatically detects column names and date types.
     """
     try:
         duckdb_mgr = get_duckdb_manager()
-        
         if not duckdb_mgr.has_data():
             return {"data": []}
             
-        # Map frontend column names to Parquet/DuckDB column names if needed
-        # This mapping ensures compatibility with existing frontend charts
-        col_map = {
-            'platform': 'Platform',
-            'channel': 'Channel',
-            'campaign_name': 'Campaign_Name_Full',
-            'objective': 'Campaign_Objective',
-            'funnel_stage': 'Funnel',
-            'status': 'Platform',  # fallback since status doesn't exist
-            'spend': 'Total Spent',
-            'impressions': 'Impressions',
-            'clicks': 'Clicks',
-            'conversions': 'Site Visit',
-            'roas': 'ROAS',
-            'ctr': 'CTR',
-            'cpc': 'CPC',
-            'cpa': 'CPA'
-        }
-        
-        db_x = col_map.get(x_axis, x_axis)
-        db_y = col_map.get(y_axis, y_axis)
-        db_group = col_map.get(group_by, group_by) if group_by else None
-        
         with duckdb_mgr.connection() as conn:
+            # 1. INTROSPECTION: Get actual column names from Parquet
+            schema_df = conn.execute(f"DESCRIBE SELECT * FROM {duckdb_mgr.get_optimized_table()}").fetchdf()
+            cols = {row['column_name'].lower(): row['column_name'] for _, row in schema_df.iterrows()}
+            
+            # Helper to resolve actual DB column name
+            def resolve(key):
+                aliases = {
+                    'spend': ['total spent', 'spend', 'cost'],
+                    'impressions': ['impressions'],
+                    'clicks': ['clicks'],
+                    'conversions': ['site visit', 'conversions', 'leads'],
+                    'date': ['date', 'day'],
+                    'platform': ['platform', 'source', 'account'],
+                    'channel': ['channel', 'medium'],
+                    'region': ['geographic_region', 'region', 'country'],
+                    'device': ['device_type', 'device'],
+                    'funnel': ['funnel', 'funnel_stage'],
+                    'campaign': ['campaign', 'campaign_name']
+                }
+                for alias in aliases.get(key.lower(), []):
+                    if alias.lower() in cols:
+                        return f'"{cols[alias.lower()]}"'
+                if key.lower() in cols:
+                    return f'"{cols[key.lower()]}"'
+                return f'"{key}"'
+            
+            # Resolve columns
+            db_x = resolve(x_axis)
+            db_group = resolve(group_by) if group_by else None
+            col_spend = resolve('spend')
+            col_impressions = resolve('impressions')
+            col_clicks = resolve('clicks')
+            col_conversions = resolve('conversions')
+            col_date = resolve('date')
+            
+            # Check Date Type for proper filtering
+            date_col_name = col_date.strip('"').lower()
+            date_type_row = schema_df[schema_df['column_name'].str.lower() == date_col_name]
+            is_date_string = False
+            if not date_type_row.empty:
+                dtype = str(date_type_row.iloc[0]['column_type'])
+                if 'VARCHAR' in dtype or 'STRING' in dtype:
+                    is_date_string = True
+            
+            date_expr = col_date
+            if is_date_string:
+                date_expr = f"CAST({col_date} AS DATE)"
+            
+            # 2. Build WHERE clause
             where_clauses = ["1=1"]
             params = []
             
             if platforms:
                 p_list = [p.strip() for p in platforms.split(',')]
+                col_platform = resolve('platform')
                 placeholders = ', '.join(['?' for _ in p_list])
-                where_clauses.append(f'"Platform" IN ({placeholders})')
+                where_clauses.append(f'{col_platform} IN ({placeholders})')
                 params.extend(p_list)
             
             if channels:
                 c_list = [c.strip() for c in channels.split(',')]
+                col_channel = resolve('channel')
                 placeholders = ', '.join(['?' for _ in c_list])
-                where_clauses.append(f'"Channel" IN ({placeholders})')
+                where_clauses.append(f'{col_channel} IN ({placeholders})')
                 params.extend(c_list)
             
             if regions:
                 r_list = [r.strip() for r in regions.split(',')]
+                col_region = resolve('region')
                 placeholders = ', '.join(['?' for _ in r_list])
-                where_clauses.append(f'"Geographic_Region" IN ({placeholders})')
+                where_clauses.append(f'{col_region} IN ({placeholders})')
                 params.extend(r_list)
             
             if devices:
                 d_list = [d.strip() for d in devices.split(',')]
+                col_device = resolve('device')
                 placeholders = ', '.join(['?' for _ in d_list])
-                where_clauses.append(f'"Device_Type" IN ({placeholders})')
+                where_clauses.append(f'{col_device} IN ({placeholders})')
                 params.extend(d_list)
             
             if funnels:
                 f_list = [f.strip() for f in funnels.split(',')]
+                col_funnel = resolve('funnel')
                 placeholders = ', '.join(['?' for _ in f_list])
-                where_clauses.append(f'"Funnel" IN ({placeholders})')
+                where_clauses.append(f'{col_funnel} IN ({placeholders})')
                 params.extend(f_list)
             
-            # Year filter - extract year from DD/MM/YY format
-            # The Date column uses format like '16/04/25' for April 16, 2025
             if year:
-                # Convert 2025 -> '25', 2024 -> '24' etc.
-                year_suffix = str(year)[-2:]  # Get last 2 digits
-                # Use SUBSTR to extract last 2 chars from Date (which is in DD/MM/YY format)
-                where_clauses.append(f'SUBSTR("Date", 7, 2) = ?')
-                params.append(year_suffix)
-                
+                where_clauses.append(f"EXTRACT(YEAR FROM {date_expr}) = ?")
+                params.append(int(year))
+            
             if start_date:
-                # Convert DD/MM/YY to proper date for comparison
-                # API receives YYYY-MM-DD, parquet stores DD/MM/YY
-                where_clauses.append("strptime(\"Date\", '%d/%m/%y') >= strptime(?, '%Y-%m-%d')")
+                where_clauses.append(f"{date_expr} >= CAST(? AS DATE)")
                 params.append(start_date)
+            
             if end_date:
-                where_clauses.append("strptime(\"Date\", '%d/%m/%y') <= strptime(?, '%Y-%m-%d')")
+                where_clauses.append(f"{date_expr} <= CAST(? AS DATE)")
                 params.append(end_date)
-
             
             where_sql = " AND ".join(where_clauses)
             
-            agg_func = aggregation.upper()
-            if agg_func not in ["SUM", "AVG", "COUNT", "MAX", "MIN"]:
-                agg_func = "SUM"
+            # 3. Build metric expression
+            is_calculated = False
+            y_lower = y_axis.lower()
             
-            if agg_func == "AVG" and aggregation == "avg":
-                agg_func = "AVG" # standard SQL
-                
-            group_cols = [f'"{db_x}"']
+            if y_lower in ['spend', 'cost']:
+                y_col_sql = f'COALESCE({col_spend}, 0)'
+            elif y_lower == 'impressions':
+                y_col_sql = f'COALESCE({col_impressions}, 0)'
+            elif y_lower == 'clicks':
+                y_col_sql = f'COALESCE({col_clicks}, 0)'
+            elif y_lower == 'conversions':
+                y_col_sql = f'COALESCE({col_conversions}, 0)'
+            elif y_lower == 'ctr':
+                y_col_sql = f'CASE WHEN SUM(COALESCE({col_impressions}, 0)) > 0 THEN (SUM(COALESCE({col_clicks}, 0)) / SUM(COALESCE({col_impressions}, 0))) * 100 ELSE 0 END'
+                is_calculated = True
+            elif y_lower == 'cpc':
+                y_col_sql = f'CASE WHEN SUM(COALESCE({col_clicks}, 0)) > 0 THEN SUM(COALESCE({col_spend}, 0)) / SUM(COALESCE({col_clicks}, 0)) ELSE 0 END'
+                is_calculated = True
+            elif y_lower == 'cpa':
+                y_col_sql = f'CASE WHEN SUM(COALESCE({col_conversions}, 0)) > 0 THEN SUM(COALESCE({col_spend}, 0)) / SUM(COALESCE({col_conversions}, 0)) ELSE 0 END'
+                is_calculated = True
+            elif y_lower == 'roas':
+                y_col_sql = f'CASE WHEN SUM(COALESCE({col_spend}, 0)) > 0 THEN (SUM(COALESCE({col_conversions}, 0)) * 50) / SUM(COALESCE({col_spend}, 0)) ELSE 0 END'
+                is_calculated = True
+            else:
+                # Fallback to direct column
+                y_col_sql = f'COALESCE({resolve(y_axis)}, 0)'
+            
+            # 4. Build final query
+            agg_func = aggregation.upper() if aggregation.upper() in ["SUM", "AVG", "COUNT", "MAX", "MIN"] else "SUM"
+            select_y = y_col_sql if is_calculated else f"{agg_func}({y_col_sql})"
+            
+            group_cols = [db_x]
             if db_group:
-                group_cols.append(f'"{db_group}"')
-                
+                group_cols.append(db_group)
             group_sql = ", ".join(group_cols)
             
-            # Handle calculated vs raw metrics
-            # Note: col_map already maps to correct Parquet column names
-            y_col_sql = f'"{db_y}"'
-            is_calculated = False
+            query = f"""
+                SELECT 
+                    {db_x} as x,
+                    {f"{db_group} as group_col," if db_group else ""}
+                    {select_y} as y
+                FROM {duckdb_mgr.get_optimized_table()}
+                WHERE {where_sql}
+                GROUP BY {group_sql}
+                ORDER BY x ASC
+            """
             
-            # Raw metrics with COALESCE
-            if y_axis.lower() == 'spend':
-                y_col_sql = 'COALESCE("Total Spent", 0)'
-            elif y_axis.lower() == 'conversions':
-                y_col_sql = 'COALESCE("Site Visit", 0)'
-            elif y_axis.lower() == 'impressions':
-                y_col_sql = 'COALESCE("Impressions", 0)'
-            elif y_axis.lower() == 'clicks':
-                y_col_sql = 'COALESCE("Clicks", 0)'
-            # Calculated metrics - compute from raw metrics
-            elif y_axis.lower() == 'ctr':
-                # CTR = (Clicks / Impressions) * 100
-                y_col_sql = 'CASE WHEN SUM(COALESCE("Impressions", 0)) > 0 THEN (SUM(COALESCE("Clicks", 0)) / SUM(COALESCE("Impressions", 0))) * 100 ELSE 0 END'
-                is_calculated = True
-            elif y_axis.lower() == 'cpc':
-                # CPC = Total Spent / Clicks
-                y_col_sql = 'CASE WHEN SUM(COALESCE("Clicks", 0)) > 0 THEN SUM(COALESCE("Total Spent", 0)) / SUM(COALESCE("Clicks", 0)) ELSE 0 END'
-                is_calculated = True
-            elif y_axis.lower() == 'cpa':
-                # CPA = Total Spent / Conversions (Site Visit)
-                y_col_sql = 'CASE WHEN SUM(COALESCE("Site Visit", 0)) > 0 THEN SUM(COALESCE("Total Spent", 0)) / SUM(COALESCE("Site Visit", 0)) ELSE 0 END'
-                is_calculated = True
-            elif y_axis.lower() == 'roas':
-                # ROAS = (Conversions * avg_value) / Spend
-                y_col_sql = 'CASE WHEN SUM(COALESCE("Total Spent", 0)) > 0 THEN (SUM(COALESCE("Site Visit", 0)) * 50) / SUM(COALESCE("Total Spent", 0)) ELSE 0 END'
-                is_calculated = True
-            
-            # Build query - handle pre-aggregated vs need aggregation
-            if is_calculated:
-                # Already aggregated in y_col_sql (calculated metrics)
-                query = f"""
-                    SELECT 
-                        {group_sql},
-                        {y_col_sql} as value
-                    FROM '{CAMPAIGNS_PARQUET}'
-                    WHERE {where_sql}
-                    GROUP BY {group_sql}
-                    ORDER BY value DESC
-                    LIMIT 50
-                """
-            else:
-                query = f"""
-                    SELECT 
-                        {group_sql},
-                        {agg_func}({y_col_sql}) as value
-                    FROM '{CAMPAIGNS_PARQUET}'
-                    WHERE {where_sql}
-                    GROUP BY {group_sql}
-                    ORDER BY value DESC
-                    LIMIT 50
-                """
-
-            
-            df = conn.execute(query, params).df()
+            df = conn.execute(query, params).fetchdf()
             
             if df.empty:
                 return {"data": []}
-                
-            # Formatting for Recharts
-            result = []
-            for _, row in df.iterrows():
-                item = {
-                    'name': str(row[db_x]),
-                    'value': float(row['value'])
-                }
-                if db_group:
-                    item['group'] = str(row[db_group])
-                result.append(item)
-                
-            return {"data": result}
+            
+            # Convert date column to string for JSON
+            if 'x' in df.columns:
+                df['x'] = df['x'].astype(str)
+            
+            return {"data": df.fillna(0).to_dict(orient="records")}
             
     except Exception as e:
-        logger.error(f"Failed to get chart data: {e}")
+        logger.error(f"Chart data error: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         return {"data": [], "error": str(e)}
 
 @router.get("/regression")
@@ -2341,7 +2527,14 @@ async def analyze_global_campaigns(
         
         # 4. Run Analysis
         # Use analyze_all which handles parallel metrics, insights, and recommendations
-        analysis_result = reasoning_agent.analyze_all(df, use_parallel=True)
+        analysis_result = reasoning_agent.analyze_all(
+            df, 
+            use_parallel=True,
+            campaign_objective=analysis_req.campaign_objective,
+            conversion_definition=analysis_req.conversion_definition,
+            custom_time_period=analysis_req.time_period,
+            enrichment_context=analysis_req.enrichment_context
+        )
         
         # 5. Generate RAG-enhanced summary (Consistent with Reflex State logic)
         if use_rag and analysis_result:
@@ -2350,7 +2543,11 @@ async def analyze_global_campaigns(
                 rag_summary = reasoning_agent._generate_executive_summary_with_rag(
                     analysis_result.get('metrics', {}),
                     analysis_result.get('insights', []),
-                    analysis_result.get('recommendations', [])
+                    analysis_result.get('recommendations', []),
+                    campaign_objective=analysis_req.campaign_objective,
+                    conversion_definition=analysis_req.conversion_definition,
+                    custom_time_period=analysis_req.time_period,
+                    enrichment_context=analysis_req.enrichment_context
                 )
                 
                 if rag_summary:
